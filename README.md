@@ -1,4 +1,4 @@
-# Gopkgs: Extra/Util Go package
+# evmd-golib: Extra/Util Go package
 
 Third-party libraries used in this project
 

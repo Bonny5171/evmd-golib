@@ -5,7 +5,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 
-	"bitbucket.org/everymind/gopkgs/db/model"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
 type (

@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
-	"bitbucket.org/everymind/gopkgs/db/model"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
 func SaveSFObject(conn *sqlx.DB, obj model.SFObject) (id int, err error) {

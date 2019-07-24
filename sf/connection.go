@@ -4,14 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 
-	"bitbucket.org/everymind/gopkgs/logger"
+	"bitbucket.org/everymind/evmd-golib/logger"
 
 	force "bitbucket.org/everymind/gforce/lib"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
-	"bitbucket.org/everymind/gopkgs/db/dao"
-	"bitbucket.org/everymind/gopkgs/db/model"
+	"bitbucket.org/everymind/evmd-golib/db/dao"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
 func NewDummyForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (*force.Force, error) {

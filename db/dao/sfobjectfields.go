@@ -4,7 +4,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
-	"bitbucket.org/everymind/gopkgs/db/model"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
 func GetFieldsBase64(conn *sqlx.DB, tenantId int, objID int) (f []model.SFObjectField, err error) {

@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
-	"bitbucket.org/everymind/gopkgs/db/model"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
 func SaveSFIdentifyDocOrg(conn *sqlx.DB, iden model.SFIdentity) (id int, err error) {

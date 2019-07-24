@@ -3,7 +3,7 @@ package model
 import (
 	"database/sql"
 
-	m "bitbucket.org/everymind/gopkgs/modelbase"
+	m "bitbucket.org/everymind/evmd-golib/modelbase"
 	"github.com/lib/pq"
 )
 
