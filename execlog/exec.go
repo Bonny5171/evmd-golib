@@ -5,8 +5,8 @@ import (
 
 	"go.uber.org/multierr"
 
-	"bitbucket.org/everymind/gopkgs/db/dao"
-	"bitbucket.org/everymind/gopkgs/db/model"
+	"bitbucket.org/everymind/evmd-golib/db/dao"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )

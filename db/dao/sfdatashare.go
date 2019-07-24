@@ -6,7 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
-	"bitbucket.org/everymind/gopkgs/db/model"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
 func SaveSFDataShare(conn *sqlx.DB, data model.SFDataShare) (id int, err error) {
