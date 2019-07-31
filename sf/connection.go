@@ -42,8 +42,9 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 	refreshToken := p.ByName("SF_REFRESH_TOKEN")
 	username := p.ByName("SF_USERNAME")
 	password := fmt.Sprintf("%s%s", p.ByName("SF_PASSWORD"), p.ByName("SF_SECURITY_TOKEN"))
-
 	accessTokenLogin := p.ByName("SF_LOGIN_MODE") == "ACCESS-TOKEN"
+
+	force.CustomEndpoint = instanceURL
 
 	if accessTokenLogin {
 		creds = force.ForceSession{
@@ -117,7 +118,7 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 }
 
 func NewForceByUser(conn *sqlx.DB, tid int, orgID, clientID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
-	f, err = NewForceByUserNoSaveDB(tid, orgID, clientID, userID, accessToken, refreshToken, instanceURL)
+	f, err = NewForceByUserNoDB(orgID, clientID, userID, accessToken, refreshToken, instanceURL)
 	if err != nil {
 		return nil, err
 	}
@@ -132,33 +133,7 @@ func NewForceByUser(conn *sqlx.DB, tid int, orgID, clientID, userID, accessToken
 	return f, nil
 }
 
-func NewForceByUserNoSaveDB(tid int, orgID, clientID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
-	creds := force.ForceSession{
-		ClientId:      clientID,
-		AccessToken:   accessToken,
-		RefreshToken:  refreshToken,
-		InstanceUrl:   instanceURL,
-		ForceEndpoint: force.EndpointInstace,
-		UserInfo: &force.UserInfo{
-			OrgId:  orgID,
-			UserId: userID,
-		},
-		SessionOptions: &force.SessionOptions{
-			ApiVersion:    force.ApiVersion(),
-			RefreshMethod: force.RefreshOauth,
-		},
-	}
-
-	f = force.NewForce(&creds)
-
-	if _, err = f.GetResources(); err != nil {
-		return nil, err
-	}
-
-	return f, nil
-}
-
-func NewForceUser(orgID, clientID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
+func NewForceByUserNoDB(orgID, clientID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
 	creds := force.ForceSession{
 		ClientId:      clientID,
 		AccessToken:   accessToken,
