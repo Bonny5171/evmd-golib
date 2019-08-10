@@ -1,7 +1,5 @@
-bitbucket.org/everymind/gforce v1.1.7 h1:5+8tN/oFNkVWf9wd7/YS/jI6z0CsPpCJIE6oiC4Peks=
-bitbucket.org/everymind/gforce v1.1.7/go.mod h1:aEkW0tmDfHEHBNZedO4tszyBP5OZgPpeAaaP7VVuw/A=
-bitbucket.org/pkg/inflect v0.0.0-20130829110746-8961c3750a47 h1:XDrztcXGcx7jow3UUE2dpYtdSWVUigoyn8G+shykEtw=
-bitbucket.org/pkg/inflect v0.0.0-20130829110746-8961c3750a47/go.mod h1:8Rt8gHhG+tKz8P3SoEzL/ZNVl25fPhMFKItv5HLIdtY=
+bitbucket.org/everymind/gforce v1.2.0 h1:Fw36DACXYklQKlLV3V0b0r9g5Qt9RPlHWHC+0DQiJ9k=
+bitbucket.org/everymind/gforce v1.2.0/go.mod h1:Q5MafJnmFqcYI3fnlw/zs7O5zoVz84RQsHFKxPFPBME=
 github.com/contribsys/faktory_worker_go v0.0.0-20190428165239-86cdd9bae9d4 h1:h9wQZfqJep6F9YpKcWot8vw8c0dDVTV4DLZgqF+lIR0=
 github.com/contribsys/faktory_worker_go v0.0.0-20190428165239-86cdd9bae9d4/go.mod h1:/wSKgh9Jh6fnX+3gSwOErbuJLHCAjPxGnstV/EiFwrk=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
