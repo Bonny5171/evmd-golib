@@ -1,4 +1,4 @@
-package faktory
+package push
 
 import (
 	"time"
@@ -43,6 +43,16 @@ func PushCustom(jobName, queue string, retry int, at time.Time, params []interfa
 
 	if err = cl.Push(job); err != nil {
 		return errors.Wrap(err, "cl.Push()")
+	}
+
+	return nil
+}
+
+func RetryLater(jobName, queue, stack, dsn string, params []interface{}, after time.Duration) error {
+	at := time.Now().Add(after)
+
+	if err := Push(jobName, queue, stack, dsn, 1, at, params); err != nil {
+		return errors.Wrap(err, "faktory.Push()")
 	}
 
 	return nil
