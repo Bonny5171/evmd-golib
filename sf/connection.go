@@ -4,21 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 
-	"bitbucket.org/everymind/evmd-golib/logger"
-
 	force "bitbucket.org/everymind/gforce/lib"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
 	"bitbucket.org/everymind/evmd-golib/db/dao"
 	"bitbucket.org/everymind/evmd-golib/db/model"
+	"bitbucket.org/everymind/evmd-golib/logger"
 )
 
 func NewDummyForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (*force.Force, error) {
 	return new(force.Force), nil
 }
 
-// NewForce retorna uma nova instância do
 func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, err error) {
 	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil)
 	if err != nil {
@@ -31,18 +29,18 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 		return
 	}
 
-	var updateCredentials bool
-	var creds force.ForceSession
-
-	clientID := p.ByName("SF_CLIENT_ID")
-	endpoint := GetEndpoint(p.ByName("SF_ENVIRONMENT"))
-	userID := p.ByName("SF_USER_ID")
-	instanceURL := p.ByName("SF_INSTANCE_URL")
-	accessToken := p.ByName("SF_ACCESS_TOKEN")
-	refreshToken := p.ByName("SF_REFRESH_TOKEN")
-	username := p.ByName("SF_USERNAME")
-	password := fmt.Sprintf("%s%s", p.ByName("SF_PASSWORD"), p.ByName("SF_SECURITY_TOKEN"))
-	accessTokenLogin := p.ByName("SF_LOGIN_MODE") == "ACCESS-TOKEN"
+	var (
+		creds            force.ForceSession
+		clientID         = p.ByName("SF_CLIENT_ID")
+		endpoint         = GetEndpoint(p.ByName("SF_ENVIRONMENT"))
+		userID           = p.ByName("SF_USER_ID")
+		instanceURL      = p.ByName("SF_INSTANCE_URL")
+		accessToken      = p.ByName("SF_ACCESS_TOKEN")
+		refreshToken     = p.ByName("SF_REFRESH_TOKEN")
+		username         = p.ByName("SF_USERNAME")
+		password         = fmt.Sprintf("%s%s", p.ByName("SF_PASSWORD"), p.ByName("SF_SECURITY_TOKEN"))
+		accessTokenLogin = p.ByName("SF_LOGIN_MODE") == "ACCESS-TOKEN"
+	)
 
 	force.CustomEndpoint = instanceURL
 
@@ -69,7 +67,11 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 				err = errors.Wrap(err, "force.ForceSoapLogin()")
 				return
 			}
-			updateCredentials = true
+
+			if e := UpdateOrgCredentials(conn, tid, f.Credentials); e != nil {
+				e = errors.Wrap(e, "UpdateOrgCredentials()")
+				logger.Errorln(e)
+			}
 		} else {
 			creds = force.ForceSession{
 				ClientId:      clientID,
@@ -89,51 +91,10 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 
 	f = force.NewForce(&creds)
 
-	if _, err = f.GetResources(); err != nil {
-		if !accessTokenLogin && err == force.SessionExpiredError {
-			creds, err = force.ForceSoapLogin(endpoint, username, password)
-			if err != nil {
-				err = errors.Wrap(err, "force.ForceSoapLogin()")
-				return
-			}
-			f = force.NewForce(&creds)
-			updateCredentials = true
-		} else {
-			return nil, err
-		}
-	}
-
-	if f.Credentials.AccessToken != accessToken {
-		updateCredentials = true
-	}
-
-	if updateCredentials {
-		if e := UpdateOrgCredentials(conn, tid, f.Credentials); e != nil {
-			e = errors.Wrap(e, "dao.UpdateOrgCredentials()")
-			logger.Errorln(e)
-		}
-	}
-
 	return f, nil
 }
 
-func NewForceByUser(conn *sqlx.DB, tid int, orgID, clientID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
-	f, err = NewForceByUserNoDB(orgID, clientID, userID, accessToken, refreshToken, instanceURL)
-	if err != nil {
-		return nil, err
-	}
-
-	if f.Credentials.AccessToken != accessToken {
-		if e := dao.UpdateUserAccessToken(conn, tid, userID, f.Credentials.AccessToken); e != nil {
-			e = errors.Wrap(e, "dao.UpdateUserAccessToken()")
-			logger.Errorln(e)
-		}
-	}
-
-	return f, nil
-}
-
-func NewForceByUserNoDB(orgID, clientID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
+func NewForceByUser(orgID, clientID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
 	creds := force.ForceSession{
 		ClientId:      clientID,
 		AccessToken:   accessToken,
@@ -151,10 +112,6 @@ func NewForceByUserNoDB(orgID, clientID, userID, accessToken, refreshToken, inst
 	}
 
 	f = force.NewForce(&creds)
-
-	if _, err = f.GetResources(); err != nil {
-		return nil, err
-	}
 
 	return f, nil
 }
