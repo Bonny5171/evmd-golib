@@ -15,7 +15,17 @@ func ExecSFEtlData(conn *sqlx.DB, execID int64, tenantID int, objID int64, repro
 	return nil
 }
 
-func ExecSFEtlDataShare(conn *sqlx.DB, execID int64, tenantID int, userID string) error {
+func ExecSfEtlJsonData(conn *sqlx.DB, execID int64, tenantID, recordTypeID int) error {
+	query := "SELECT itgr.sf_etl_data_json($1, $2, $3);"
+
+	if _, err := conn.Exec(query, execID, tenantID, recordTypeID); err != nil {
+		return errors.Wrap(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFEtlShareData(conn *sqlx.DB, execID int64, tenantID int, userID string) error {
 	query := "SELECT itgr.sf_etl_data_share($1, $2, $3);"
 
 	if _, err := conn.Exec(query, execID, tenantID, userID); err != nil {
@@ -25,7 +35,7 @@ func ExecSFEtlDataShare(conn *sqlx.DB, execID int64, tenantID int, userID string
 	return nil
 }
 
-func ExecSFEtlDataSync(conn *sqlx.DB, execID int64, tenantID int, objID int64) error {
+func ExecSFEtlSyncData(conn *sqlx.DB, execID int64, tenantID int, objID int64) error {
 	query := "SELECT itgr.sf_etl_data_sync($1, $2, $3);"
 
 	if _, err := conn.Exec(query, execID, tenantID, objID); err != nil {

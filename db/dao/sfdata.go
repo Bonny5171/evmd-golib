@@ -12,11 +12,11 @@ import (
 func SaveSFData(conn *sqlx.DB, data model.SFData) (id int, err error) {
 	t := time.Now()
 
-	query := `INSERT INTO itgr.sf_data (tenant_id, execution_id, status_id, sf_object_name, sf_object_id, doc_id, doc_record, is_active, created_at, updated_at)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9)
+	query := `INSERT INTO itgr.sf_data (tenant_id, execution_id, record_type_id, status_id, sf_object_name, sf_object_id, doc_id, doc_record, is_active, created_at, updated_at)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, $9, $10)
 			  RETURNING id;`
 
-	err = conn.QueryRowx(query, data.TenantID, data.ExecutionID, data.StatusID, data.ObjectName, data.ObjectID, data.DocID, data.DocRecord, t, t).Scan(&id)
+	err = conn.QueryRowx(query, data.TenantID, data.ExecutionID, data.RecordTypeID, data.StatusID, data.ObjectName, data.ObjectID, data.DocID, data.DocRecord, t, t).Scan(&id)
 	if err != nil {
 		return 0, errors.Wrap(err, "conn.QueryRowx()")
 	}

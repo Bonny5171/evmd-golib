@@ -1,6 +1,8 @@
 package functions
 
 import (
+	"encoding/json"
+
 	"github.com/pkg/errors"
 )
 
@@ -12,6 +14,7 @@ type Payload struct {
 	AllowsConcurrency bool
 	AllowsSchedule    bool
 	ScheduleTime      int
+	Parameters        map[string]interface{}
 }
 
 func ParsePayload(args ...interface{}) (p Payload, err error) {
@@ -65,6 +68,18 @@ func ParsePayload(args ...interface{}) (p Payload, err error) {
 		return p, errors.Wrapf(err, "parameter %d of job payload isn't a number", 7)
 	}
 	p.ScheduleTime = int(fSchTime)
+
+	if len(args) > 7 {
+		// parameter is int
+		fParams, ok := args[7].(string)
+		if !ok {
+			return p, errors.Wrapf(err, "parameter %d of job payload isn't a json", 8)
+		}
+
+		if e := json.Unmarshal([]byte(fParams), &p.Parameters); e != nil {
+			return p, errors.Wrap(e, "json.Unmarshal()")
+		}
+	}
 
 	return p, nil
 }
