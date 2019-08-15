@@ -5,6 +5,7 @@ import (
 
 	faktory "github.com/contribsys/faktory/client"
 	worker "github.com/contribsys/faktory_worker_go"
+	"github.com/spf13/cast"
 )
 
 // SetStackNameOnCtx add Queue name on context
@@ -12,7 +13,7 @@ func SetStackNameOnCtx(perform worker.Handler) worker.Handler {
 	return func(ctx worker.Context, job *faktory.Job) (err error) {
 		var stack string
 		if s, ok := job.Custom["stack"]; ok {
-			stack = s.(string)
+			stack = cast.ToString(s)
 		} else {
 			stack = "default"
 		}

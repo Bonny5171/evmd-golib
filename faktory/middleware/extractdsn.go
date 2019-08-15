@@ -7,6 +7,7 @@ import (
 
 	faktory "github.com/contribsys/faktory/client"
 	worker "github.com/contribsys/faktory_worker_go"
+	"github.com/spf13/cast"
 
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/logger"
@@ -43,7 +44,7 @@ func ExtractDSN(perform worker.Handler) worker.Handler {
 		if dsn, ok := job.Custom["dsn"]; ok {
 			if _, exists := db.Connections.List[job.Queue]; !exists {
 				pgDB := db.PostgresDB{
-					ConnectionStr: dsn.(string),
+					ConnectionStr: cast.ToString(dsn),
 					MaxOpenConns:  dbMaxOpenConns,
 					MaxIdleConns:  dbMaxIdleConns,
 					MaxLifetime:   dbMaxLifeTime,
@@ -51,7 +52,7 @@ func ExtractDSN(perform worker.Handler) worker.Handler {
 
 				var stack string
 				if s, ok := job.Custom["stack"]; ok {
-					stack = s.(string)
+					stack = cast.ToString(s)
 				} else {
 					stack = "default"
 				}

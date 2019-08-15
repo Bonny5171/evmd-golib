@@ -14,6 +14,7 @@ import (
 	worker "github.com/contribsys/faktory_worker_go"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+	"github.com/spf13/cast"
 )
 
 // A map of registered matchers for searching.
@@ -41,7 +42,7 @@ func Run(fnName string, fn func(conn, connCfg *sqlx.DB, payload Payload, execID 
 	logger.Tracef("Executing '%s' job function...\n", fnName)
 
 	// Get stack name from context
-	stack := ctx.Value("Stack").(string)
+	stack := cast.ToString(ctx.Value("Stack"))
 
 	// Parse payload that come of Faktory
 	payload, err := ParsePayload(args...)
@@ -86,7 +87,7 @@ func Run(fnName string, fn func(conn, connCfg *sqlx.DB, payload Payload, execID 
 
 			if payload.AllowsSchedule {
 				// Get DSN from context
-				dsn := ctx.Value("DSN").(string)
+				dsn := cast.ToString(ctx.Value("DSN"))
 
 				// push this job as a scheduled job on faktory
 				if err := push.RetryLater(ctx.JobType(), queue, stack, dsn, args, 5*time.Minute); err != nil {
@@ -109,7 +110,7 @@ func Run(fnName string, fn func(conn, connCfg *sqlx.DB, payload Payload, execID 
 	exec.LogExecution(dao.EnumStatusExecProcessing)
 
 	if e := fn(conn, connCfg, payload, exec.ID); e != nil {
-		return exec.LogError(errorHandler(e, "runLolaRun()"))
+		return exec.LogError(errorHandler(e, "fn(conn, connCfg, payload, exec.ID)"))
 	}
 
 	// Log success on itgr.execution table
