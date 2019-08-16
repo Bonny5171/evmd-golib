@@ -24,6 +24,8 @@ type Function interface {
 	Handler(ctx worker.Context, args ...interface{}) error
 }
 
+type innerFunc = func(conn, connCfg *sqlx.DB, ctx worker.Context, payload Payload, execID int64) error
+
 func Get() map[string]Function {
 	return funcs
 }
@@ -38,7 +40,7 @@ func Register(functionName string, function Function) {
 	funcs[functionName] = function
 }
 
-func Run(fnName string, fn func(conn, connCfg *sqlx.DB, ctx worker.Context, payload Payload, execID int64) error, ctx worker.Context, args ...interface{}) error {
+func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) error {
 	logger.Tracef("Executing '%s' job function...\n", fnName)
 
 	// Get stack name from context
@@ -51,10 +53,13 @@ func Run(fnName string, fn func(conn, connCfg *sqlx.DB, ctx worker.Context, payl
 	}
 
 	// Get connection with Config DB
-	logger.Traceln("Get connection with Config DB")
-	connCfg, err := db.GetConnection("CONFIG")
-	if err != nil {
-		return errorHandler(err, "db.GetConnection('CONFIG')")
+	var connCfg *sqlx.DB
+	if _, exists := db.Connections.List["CONFIG"]; exists {
+		logger.Traceln("Get connection with Config DB")
+		connCfg, err = db.GetConnection("CONFIG")
+		if err != nil {
+			return errorHandler(err, "db.GetConnection('CONFIG')")
+		}
 	}
 
 	// Get connection with Data DB
