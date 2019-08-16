@@ -38,7 +38,7 @@ func Register(functionName string, function Function) {
 	funcs[functionName] = function
 }
 
-func Run(fnName string, fn func(conn, connCfg *sqlx.DB, payload Payload, execID int64) error, ctx worker.Context, args ...interface{}) error {
+func Run(fnName string, fn func(conn, connCfg *sqlx.DB, ctx worker.Context, payload Payload, execID int64) error, ctx worker.Context, args ...interface{}) error {
 	logger.Tracef("Executing '%s' job function...\n", fnName)
 
 	// Get stack name from context
@@ -109,7 +109,7 @@ func Run(fnName string, fn func(conn, connCfg *sqlx.DB, payload Payload, execID 
 	logger.Traceln("Start log execution on itgr.execution table")
 	exec.LogExecution(dao.EnumStatusExecProcessing)
 
-	if e := fn(conn, connCfg, payload, exec.ID); e != nil {
+	if e := fn(conn, connCfg, ctx, payload, exec.ID); e != nil {
 		return exec.LogError(errorHandler(e, "fn(conn, connCfg, payload, exec.ID)"))
 	}
 
