@@ -52,7 +52,7 @@ func PurgeAllDataETLSuccess(conn *sqlx.DB, tid int) (err error) {
 func PurgeAllPublicSFData(conn *sqlx.DB, tid int) (err error) {
 	query := `DELETE FROM public.sf_data
 			   WHERE tenant_id = $1
-				 AND record_type_id IN (SELECT id FROM public.record_type.is_system_type = FALSE) 
+			     AND record_type_id IN (SELECT id FROM public.record_type WHERE is_system_type = FALSE)
 				 AND is_deleted = TRUE;`
 
 	_, err = conn.Exec(query, tid)
