@@ -15,11 +15,10 @@ func GetRecordType(conn *sqlx.DB, tid int, devRef string) (s model.RecordType, e
 		 WHERE tenant_id = $1 AND is_active = TRUE AND is_deleted = FALSE AND developer_ref = $2 
 		 LIMIT 1;`
 
-	err = conn.QueryRowx(query, tid, devRef).StructScan(&s)
-	if err != nil {
-		err = errors.Wrap(err, "dbq.(*sqlx.DB).QueryRowx()")
+	if err = conn.Get(&s, query, tid, devRef); err != nil {
+		err = errors.Wrap(err, "conn.Get()")
 		return
 	}
 
-	return s, nil
+	return
 }
