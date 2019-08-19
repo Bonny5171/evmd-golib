@@ -52,7 +52,7 @@ func (j *Job) Run() {
 	}
 
 	// Starting config DB connection
-	if _, ok := db.Connections.List["CONFIG"]; ok {
+	if len(j.DB.ConfigDSN) > 0 {
 		if err := db.Connections.Connect("CONFIG", &configDB); err != nil {
 			logger.Infof("DSN: %s\n", j.DB.ConfigDSN)
 			logger.Errorln(err)
