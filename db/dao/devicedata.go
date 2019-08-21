@@ -62,7 +62,8 @@ func GetDeviceDataIDs(conn *sqlx.DB, tid int, device string, execID int64) (d []
 }
 
 func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
-	query := `SELECT d.id, d.tenant_id, d.schema_name, d.table_name, o.id AS sf_object_id, o.sf_object_name, d.user_id, d.pk, d.sf_id, to_jsonb(d.json_data::jsonb) AS json_data, d.app_id, d.device_id, d.device_created_at
+	query := `SELECT d.id, d.tenant_id, d.schema_name, d.table_name, o.id AS sf_object_id, o.sf_object_name, d.user_id, d.pk, d.sf_id, 
+	                 to_jsonb(regexp_replace(d.json_data, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g')::jsonb) AS json_data, d.app_id, d.device_id, d.device_created_at
 			    FROM public.device_data d
 			   INNER JOIN itgr.sf_object o ON d.tenant_id = o.tenant_id AND d.table_name = 'sf_'::text || fn_snake_case(o.sf_object_name)
 			   WHERE d.id = $1
