@@ -3,8 +3,8 @@ package dao
 import (
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -35,7 +35,7 @@ func GetSchemaObjects(conn *sqlx.DB, tenantID, schemaObjectID int) (s model.Sche
 
 	err = conn.Select(&s, query, tenantID, schemaObjectID)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return s, nil
@@ -58,7 +58,7 @@ func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID, schemaObjectID int, sche
 
 	err = conn.Select(&s, query, tenantID, schemaObjectID, schemaType.String())
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return s, nil
@@ -78,7 +78,7 @@ func GetSchemaShareObjectsToProcess(conn *sqlx.DB, tenantID int) (o model.SFObje
 
 	err = conn.Select(&o, query, tenantID)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return o, nil
@@ -93,7 +93,7 @@ func UpdateSfObjectIDs(conn *sqlx.DB) error {
 					  AND so.sf_object_id IS NULL;`
 
 	if _, err := conn.Exec(query); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -105,7 +105,7 @@ func UpdateLastModifiedDate(conn *sqlx.DB, schemaObjectID int, lastModifiedDate 
 					WHERE id = $2;`
 
 	if _, err := conn.Exec(query, lastModifiedDate, schemaObjectID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil

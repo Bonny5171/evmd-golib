@@ -2,8 +2,8 @@ package dao
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -13,7 +13,7 @@ func GetSchemas(conn *sqlx.DB, tid, sid int) (s model.Schemas, err error) {
 
 	err = conn.QueryRowx(query, tid, sid).StructScan(&s)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.QueryRowx()")
+		return nil, db.WrapError(err, "conn.QueryRowx()")
 	}
 
 	return s, nil

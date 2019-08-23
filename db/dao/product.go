@@ -1,8 +1,8 @@
 package dao
 
 import (
+	"bitbucket.org/everymind/evmd-golib/db"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 func CheckProduct(conn *sqlx.DB, tid int, ref1, ref2 string) (exists bool, err error) {
@@ -10,7 +10,7 @@ func CheckProduct(conn *sqlx.DB, tid int, ref1, ref2 string) (exists bool, err e
 
 	if err = conn.Get(&exists, query, tid, ref1, ref2); err != nil {
 		if err.Error() != "sql no results" {
-			return false, errors.Wrap(err, "conn.Get()")
+			return false, db.WrapError(err, "conn.Get()")
 		}
 	}
 

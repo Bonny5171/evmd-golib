@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -18,7 +19,7 @@ func SaveSFDataShare(conn *sqlx.DB, data model.SFDataShare) (id int, err error) 
 
 	err = conn.QueryRowx(query, data.TenantID, data.ExecutionID, data.StatusID, data.ObjectID, data.ObjectName, data.UserID, data.DocOriginalID, t, t).Scan(&id)
 	if err != nil {
-		return 0, errors.Wrap(err, "conn.QueryRowx()")
+		return 0, db.WrapError(err, "conn.QueryRowx()")
 	}
 
 	if id <= 0 {
@@ -43,7 +44,7 @@ func PurgeAllDataShareETLSuccess(conn *sqlx.DB, tid int) (err error) {
 
 	_, err = conn.Exec(query, tid, statusEtlSuccess)
 	if err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil

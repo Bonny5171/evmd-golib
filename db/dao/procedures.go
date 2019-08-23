@@ -1,15 +1,15 @@
 package dao
 
 import (
+	"bitbucket.org/everymind/evmd-golib/db"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 func ExecSFEtlData(conn *sqlx.DB, execID int64, tenantID int, objID int64, reprocessAll bool) error {
 	query := "SELECT itgr.sf_etl_data($1, $2, $3, $4);"
 
 	if _, err := conn.Exec(query, execID, tenantID, objID, reprocessAll); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -19,7 +19,7 @@ func ExecSfEtlJsonData(conn *sqlx.DB, execID int64, tenantID, recordTypeID int) 
 	query := "SELECT itgr.sf_etl_data_json($1, $2, $3);"
 
 	if _, err := conn.Exec(query, execID, tenantID, recordTypeID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -29,7 +29,7 @@ func ExecSFEtlShareData(conn *sqlx.DB, execID int64, tenantID int, userID string
 	query := "SELECT itgr.sf_etl_data_share($1, $2, $3);"
 
 	if _, err := conn.Exec(query, execID, tenantID, userID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -39,7 +39,7 @@ func ExecSFEtlSyncData(conn *sqlx.DB, execID int64, tenantID int, objID int64) e
 	query := "SELECT itgr.sf_etl_data_sync($1, $2, $3);"
 
 	if _, err := conn.Exec(query, execID, tenantID, objID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -49,7 +49,7 @@ func ExecSFCreateAllTables(conn *sqlx.DB) error {
 	query := "DO $$ BEGIN PERFORM itgr.sf_create_all_tables(); END $$;"
 
 	if _, err := conn.Exec(query); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -59,7 +59,7 @@ func ExecSFPurgePublicSFTables(conn *sqlx.DB, tenantID int) error {
 	query := "SELECT itgr.sf_purge_sf_tables($1);"
 
 	if _, err := conn.Exec(query, tenantID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -69,7 +69,7 @@ func ExecSFPurgePublicSFShare(conn *sqlx.DB, tenantID int) error {
 	query := "SELECT itgr.sf_purge_sf_share($1);"
 
 	if _, err := conn.Exec(query, tenantID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -81,7 +81,7 @@ func ExecSFCheckJobsExection(conn *sqlx.DB, tenantID int, jobName, statusName st
 	row := conn.QueryRow(query, tenantID, jobName, statusName)
 
 	if err := row.Scan(&result); err != nil {
-		return false, errors.Wrap(err, "row.Scan()")
+		return false, db.WrapError(err, "row.Scan()")
 	}
 
 	return result, nil
@@ -91,7 +91,7 @@ func ExecSFAfterEtl(conn *sqlx.DB, tenantID int) error {
 	query := "SELECT itgr.fn_exec_etls($1);"
 
 	if _, err := conn.Exec(query, tenantID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil

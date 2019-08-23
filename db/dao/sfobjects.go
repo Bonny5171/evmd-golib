@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -17,7 +18,7 @@ func SaveSFObject(conn *sqlx.DB, obj model.SFObject) (id int, err error) {
 	err = row.Scan(&id)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			return 0, errors.Wrap(err, "row.Scan()")
+			return 0, db.WrapError(err, "row.Scan()")
 		}
 	}
 
@@ -32,7 +33,7 @@ func SaveSFObject(conn *sqlx.DB, obj model.SFObject) (id int, err error) {
 
 		err = conn.QueryRowx(query, obj.TenantID, obj.ExecutionID, obj.Name, obj.DocDescribe, obj.DocMetaData, t, t).Scan(&id)
 		if err != nil {
-			return 0, errors.Wrap(err, "conn.QueryRowx()")
+			return 0, db.WrapError(err, "conn.QueryRowx()")
 		}
 
 		if id <= 0 {
@@ -45,7 +46,7 @@ func SaveSFObject(conn *sqlx.DB, obj model.SFObject) (id int, err error) {
 			      WHERE id = $8;`
 
 		if _, err := conn.Exec(query, obj.TenantID, obj.ExecutionID, obj.Name, obj.DocDescribe, obj.DocMetaData, t, t, id); err != nil {
-			return 0, errors.Wrap(err, "conn.Exec()")
+			return 0, db.WrapError(err, "conn.Exec()")
 		}
 	}
 

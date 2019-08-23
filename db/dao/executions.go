@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -19,7 +20,7 @@ func InsertExecution(conn *sqlx.DB, obj model.Execution) (r int64, err error) {
 
 	err = conn.QueryRowx(query, obj.JobFaktoryID, obj.JobSchedulerID, obj.TenantID, obj.SchemaID, obj.StatusID, obj.DocMetaData, t, t).Scan(&r)
 	if err != nil {
-		return 0, errors.Wrap(err, "conn.QueryRowx()")
+		return 0, db.WrapError(err, "conn.QueryRowx()")
 	}
 
 	if r <= 0 {
@@ -38,7 +39,7 @@ func UpdateExecution(conn *sqlx.DB, obj model.Execution) error {
 			  WHERE id = $4;`
 
 	if _, err := conn.Exec(query, obj.StatusID, obj.DocMetaData, t, obj.ID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil

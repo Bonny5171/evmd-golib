@@ -1,8 +1,8 @@
 package dao
 
 import (
+	"bitbucket.org/everymind/evmd-golib/db"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 func GetTenant(conn *sqlx.DB, orgID string) (tid int, err error) {
@@ -15,7 +15,7 @@ func GetTenant(conn *sqlx.DB, orgID string) (tid int, err error) {
 	row := conn.QueryRow(query, orgID)
 
 	if e := row.Scan(&tid); e != nil {
-		err = errors.Wrap(e, "row.Scan()")
+		err = db.WrapError(e, "row.Scan()")
 		return
 	}
 

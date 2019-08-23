@@ -3,9 +3,9 @@ package dao
 import (
 	"time"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 func GetUser(conn *sqlx.DB, tid int, uid string) (u model.User, err error) {
@@ -18,7 +18,7 @@ func GetUser(conn *sqlx.DB, tid int, uid string) (u model.User, err error) {
 
 	err = conn.QueryRowx(query, tid, uid).StructScan(&u)
 	if err != nil {
-		err = errors.Wrap(err, "conn.QueryRowx()")
+		err = db.WrapError(err, "conn.QueryRowx()")
 		return
 	}
 
@@ -35,7 +35,7 @@ func GetUsersToProcess(conn *sqlx.DB, tid int) (u model.Users, err error) {
 
 	err = conn.Select(&u, query, tid)
 	if err != nil {
-		err = errors.Wrap(err, "conn.Select()")
+		err = db.WrapError(err, "conn.Select()")
 		return
 	}
 
@@ -53,7 +53,7 @@ func UpdateUserAccessToken(conn *sqlx.DB, tid int, userID, accessToken string) (
 		   AND user_id = $2;`
 
 	if _, err = conn.Exec(query, tid, userID, accessToken, t); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -76,7 +76,7 @@ func SaveUser(conn *sqlx.DB, tid int, user model.User) (err error) {
 		       updated_at     = now();`
 
 	if _, err = conn.Exec(query, tid, user.UserID, user.UserName, user.Name, user.FirstName, user.LastName, user.Email, user.FullPhotoURL, user.AccessToken, user.RefreshToken, user.InstanceURL); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil

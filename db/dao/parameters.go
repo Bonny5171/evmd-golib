@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -48,7 +49,7 @@ func GetParameters(conn *sqlx.DB, tenantId int, pType ParameterType) (p model.Pa
 
 	err = conn.Select(&p, sb.String(), a...)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return p, nil
@@ -68,7 +69,7 @@ func GetParameter(conn *sqlx.DB, tenantId int, paramName string) (p model.Parame
 
 	err = conn.Get(&p, query, tenantId, paramName)
 	if err != nil {
-		return p, errors.Wrap(err, "conn.Get()")
+		return p, db.WrapError(err, "conn.Get()")
 	}
 
 	return p, nil
@@ -86,7 +87,7 @@ func GetParametersByOrgID(conn *sqlx.DB, orgID string) (p model.Parameters, err 
 
 	err = conn.Select(&p, query, orgID)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return p, nil
@@ -106,7 +107,7 @@ func GetParameterByOrgID(conn *sqlx.DB, orgID, paramName string) (p model.Parame
 
 	err = conn.Get(&p, query, orgID, paramName)
 	if err != nil {
-		return p, errors.Wrap(err, "conn.Get()")
+		return p, db.WrapError(err, "conn.Get()")
 	}
 
 	return p, nil
@@ -123,7 +124,7 @@ func UpdateParameter(conn *sqlx.DB, param model.Parameter) error {
 		  updated_at = now();`
 
 	if _, err := conn.Exec(query, param.TenantID, param.Name, param.Type, param.Value, param.Description); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -145,12 +146,12 @@ func UpdateParameters(conn *sqlx.DB, params []model.Parameter) error {
 
 	stmt, err := conn.Preparex(query)
 	if err != nil {
-		return errors.Wrap(err, "conn.Preparex()")
+		return db.WrapError(err, "conn.Preparex()")
 	}
 
 	for _, p := range params {
 		if _, err := stmt.Exec(p.TenantID, p.Name, p.Type, p.Value, p.Description); err != nil {
-			return errors.Wrap(err, "stmt.Exec()")
+			return db.WrapError(err, "stmt.Exec()")
 		}
 	}
 

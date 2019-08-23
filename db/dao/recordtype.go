@@ -2,8 +2,8 @@ package dao
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -16,7 +16,7 @@ func GetRecordType(conn *sqlx.DB, tid int, devRef string) (s model.RecordType, e
 		 LIMIT 1;`
 
 	if err = conn.Get(&s, query, tid, devRef); err != nil {
-		err = errors.Wrap(err, "conn.Get()")
+		err = db.WrapError(err, "conn.Get()")
 		return
 	}
 
