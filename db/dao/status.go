@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -64,7 +64,7 @@ func GetStatuses(conn *sqlx.DB, tenantId int, sType StatusType) (s model.Statuse
 
 	err = conn.Select(&s, qb.String(), args...)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return s, nil

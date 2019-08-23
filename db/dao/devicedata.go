@@ -1,9 +1,9 @@
 package dao
 
 import (
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 func GetDevices(conn *sqlx.DB, tid int, execID int64) (d []model.Device, err error) {
@@ -16,7 +16,7 @@ func GetDevices(conn *sqlx.DB, tid int, execID int64) (d []model.Device, err err
 
 	err = conn.Select(&d, query, tid, execID)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return d, nil
@@ -38,7 +38,7 @@ func GetDeviceDataTables(conn *sqlx.DB, tid int, execID int64) (t []*model.Devic
 
 	err = conn.Select(&t, query, tid, execID)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return t, nil
@@ -55,7 +55,7 @@ func GetDeviceDataIDs(conn *sqlx.DB, tid int, device string, execID int64) (d []
 
 	err = conn.Select(&d, query, tid, device, execID)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return d, nil
@@ -70,7 +70,7 @@ func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
 			   LIMIT 1;`
 
 	if err = conn.Get(&d, query, id); err != nil {
-		err = errors.Wrap(err, "conn.Get()")
+		err = db.WrapError(err, "conn.Get()")
 	}
 
 	return
@@ -83,7 +83,7 @@ func SetDeviceDatasToExecution(conn *sqlx.DB, tid int, execID int64) error {
 			     AND is_deleted = FALSE;`
 
 	if _, err := conn.Exec(query, execID, tid); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -95,7 +95,7 @@ func SetDeviceDataToDelete(conn *sqlx.DB, id string) error {
 			  WHERE id = $1;`
 
 	if _, err := conn.Exec(query, id); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -107,7 +107,7 @@ func InsertDeviceDataLogError(conn *sqlx.DB, obj model.DeviceData, execID int64,
 
 	_, e := conn.Exec(query, obj.ID, obj.TenantID, obj.DeviceCreatedAt, obj.SchemaName, obj.TableName, obj.PK, obj.DeviceID, obj.UserID, obj.SfID, obj.JSONData, obj.BrewedJSONData, obj.AppID, execID, err.Error())
 	if e != nil {
-		return errors.Wrap(e, "conn.Exec()")
+		return db.WrapError(e, "conn.Exec()")
 	}
 
 	return nil
@@ -120,7 +120,7 @@ func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 
 	_, err = conn.Exec(query, tid)
 	if err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil

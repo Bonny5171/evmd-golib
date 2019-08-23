@@ -3,9 +3,9 @@ package dao
 import (
 	"fmt"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 func GetCommunity(conn *sqlx.DB, tid int, cid string) (c model.Community, err error) {
@@ -19,7 +19,7 @@ func GetCommunity(conn *sqlx.DB, tid int, cid string) (c model.Community, err er
 		 LIMIT 1;`
 
 	if e := conn.QueryRowx(query, tid, cid).StructScan(&c); e != nil {
-		err = errors.Wrap(e, "conn.QueryRowx()")
+		err = db.WrapError(e, "conn.QueryRowx()")
 		return
 	}
 
@@ -36,7 +36,7 @@ func GetCommunities(conn *sqlx.DB, tid int) (c model.Communities, err error) {
 
 	err = conn.Select(&c, query, tid)
 	if err != nil {
-		err = errors.Wrap(err, "conn.Select()")
+		err = db.WrapError(err, "conn.Select()")
 		return
 	}
 
@@ -56,7 +56,7 @@ func SaveCommunity(conn *sqlx.DB, community model.Community) (err error) {
 		    updated_at  = now();`
 
 	if _, err = conn.Exec(query, community.ID, community.TenantID, community.Name, community.Description, community.LoginURL, community.SiteURL, community.PathPrefix); err != nil {
-		err = errors.Wrap(err, "conn.Exec()")
+		err = db.WrapError(err, "conn.Exec()")
 		return
 	}
 
@@ -86,12 +86,12 @@ func SaveCommunities(conn *sqlx.DB, communities model.Communities) (err error) {
 
 	stmt, e := conn.Prepare(query)
 	if e != nil {
-		err = errors.Wrap(e, "conn.Prepare()")
+		err = db.WrapError(e, "conn.Prepare()")
 		return
 	}
 
 	if _, e := stmt.Exec(vals...); e != nil {
-		err = errors.Wrap(e, "stmt.Exec()")
+		err = db.WrapError(e, "stmt.Exec()")
 		return
 	}
 

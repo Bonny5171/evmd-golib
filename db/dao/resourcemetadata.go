@@ -1,9 +1,9 @@
 package dao
 
 import (
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 func GetResourceMetadataToProcess(conn *sqlx.DB, tenantId int) (d []model.ResourceMetadata, err error) {
@@ -28,7 +28,7 @@ func GetResourceMetadataToProcess(conn *sqlx.DB, tenantId int) (d []model.Resour
 
 	err = conn.Select(&d, query, tenantId)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return
@@ -56,7 +56,7 @@ func GetProductsWithoutResources(conn *sqlx.DB, tenantId int) (d []string, err e
 
 	err = conn.Select(&d, query, tenantId)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return
@@ -79,7 +79,7 @@ func SaveResourceMetadata(conn *sqlx.DB, data *model.ResourceMetadata) (err erro
 
 	_, err = conn.Exec(query, data.TenantID, data.OriginalFileName, data.OriginalFileExtension, data.ContentType, data.Size, data.PreviewBontentB64, data.FullContentB64, data.SfContentDocumentID, data.SfContentVersionID)
 	if err != nil {
-		err = errors.Wrap(err, "conn.Exec()")
+		err = db.WrapError(err, "conn.Exec()")
 		return
 	}
 
@@ -103,13 +103,13 @@ func SaveResourceMetadataWithRefs(conn *sqlx.DB, data *model.ResourceMetadata) (
 
 	result, err := conn.Exec(query, data.TenantID, data.OriginalFileName, data.OriginalFileExtension, data.ContentType, data.Size, data.Ref1, data.Ref2, data.Sequence, data.SizeType, data.FullContentB64)
 	if err != nil {
-		err = errors.Wrap(err, "conn.Exec()")
+		err = db.WrapError(err, "conn.Exec()")
 		return
 	}
 
 	rows, err = result.RowsAffected()
 	if err != nil {
-		err = errors.Wrap(err, "result.RowsAffected()")
+		err = db.WrapError(err, "result.RowsAffected()")
 		return
 	}
 
@@ -134,7 +134,7 @@ func SoftDeleteImages(conn *sqlx.DB, tenantId int) error {
 		   AND p.tenant_id IS NULL;`
 
 	if _, err := conn.Exec(query, tenantId); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil

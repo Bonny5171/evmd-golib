@@ -2,8 +2,8 @@ package dao
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -18,7 +18,7 @@ func GetSchedules(conn *sqlx.DB, tenantID int) (s []model.JobScheduler, err erro
 
 	err = conn.Select(&s, query, tenantID)
 	if err != nil {
-		return nil, errors.Wrap(err, "db.Conn.Select()")
+		return nil, db.WrapError(err, "db.Conn.Select()")
 	}
 
 	return s, nil
@@ -35,7 +35,7 @@ func GetSchedulesByOrg(conn *sqlx.DB, orgID string) (s []model.JobScheduler, err
 
 	err = conn.Select(&s, query, orgID)
 	if err != nil {
-		return nil, errors.Wrap(err, "db.Conn.Select()")
+		return nil, db.WrapError(err, "db.Conn.Select()")
 	}
 
 	return s, nil
@@ -53,7 +53,7 @@ func GetJob(conn *sqlx.DB, tenantID int, name string) (s model.JobScheduler, err
 
 	err = conn.Get(&s, query, tenantID, name)
 	if err != nil {
-		return s, errors.Wrap(err, "conn.Get()")
+		return s, db.WrapError(err, "conn.Get()")
 	}
 
 	return s, nil
@@ -70,7 +70,7 @@ func GetJobByID(conn *sqlx.DB, jobID int64) (s model.JobScheduler, err error) {
 
 	err = conn.Get(&s, query, jobID)
 	if err != nil {
-		return s, errors.Wrap(err, "conn.Get()")
+		return s, db.WrapError(err, "conn.Get()")
 	}
 
 	return s, nil
@@ -80,7 +80,7 @@ func SetCronJobSchedule(conn *sqlx.DB, jobID int64, cronexpr string) error {
 	query := `UPDATE itgr.job_scheduler SET cron = $1 WHERE id = $2;`
 
 	if _, err := conn.Exec(query, cronexpr, jobID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -90,7 +90,7 @@ func ActiveJobSchedule(conn *sqlx.DB, jobID int64, active bool) error {
 	query := `UPDATE itgr.job_scheduler SET is_active = $1 WHERE id = $2;`
 
 	if _, err := conn.Exec(query, active, jobID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil

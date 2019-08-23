@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -17,7 +18,7 @@ func SaveSFIdentifyDocOrg(conn *sqlx.DB, iden model.SFIdentity) (id int, err err
 	err = row.Scan(&id)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			return 0, errors.Wrap(err, "row.Scan()")
+			return 0, db.WrapError(err, "row.Scan()")
 		}
 	}
 
@@ -28,7 +29,7 @@ func SaveSFIdentifyDocOrg(conn *sqlx.DB, iden model.SFIdentity) (id int, err err
 
 		err = conn.QueryRowx(query, iden.TenantID, iden.ExecutionID, iden.Name, iden.DocOrg, iden.DocObjects, iden.DocMetaData, t, t).Scan(&id)
 		if err != nil {
-			return 0, errors.Wrap(err, "conn.QueryRowx()")
+			return 0, db.WrapError(err, "conn.QueryRowx()")
 		}
 
 		if id <= 0 {
@@ -41,7 +42,7 @@ func SaveSFIdentifyDocOrg(conn *sqlx.DB, iden model.SFIdentity) (id int, err err
 			      WHERE id = $8;`
 
 		if _, err := conn.Exec(query, iden.TenantID, iden.ExecutionID, iden.Name, iden.DocOrg, iden.DocObjects, iden.DocMetaData, t, id); err != nil {
-			return 0, errors.Wrap(err, "conn.Exec()")
+			return 0, db.WrapError(err, "conn.Exec()")
 		}
 	}
 
@@ -56,7 +57,7 @@ func UpdateSFIdentifyDocObjects(conn *sqlx.DB, iden model.SFIdentity) error {
 			   WHERE id = $3;`
 
 	if _, err := conn.Exec(query, iden.DocObjects, t, iden.ID); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil

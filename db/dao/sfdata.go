@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -18,7 +19,7 @@ func SaveSFData(conn *sqlx.DB, data model.SFData) (id int, err error) {
 
 	err = conn.QueryRowx(query, data.TenantID, data.ExecutionID, data.RecordTypeID, data.StatusID, data.ObjectName, data.ObjectID, data.DocID, data.DocRecord, t, t).Scan(&id)
 	if err != nil {
-		return 0, errors.Wrap(err, "conn.QueryRowx()")
+		return 0, db.WrapError(err, "conn.QueryRowx()")
 	}
 
 	if id <= 0 {
@@ -43,7 +44,7 @@ func PurgeAllDataETLSuccess(conn *sqlx.DB, tid int) (err error) {
 
 	_, err = conn.Exec(query, tid, statusEtlSuccess)
 	if err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -57,7 +58,7 @@ func PurgeAllPublicSFData(conn *sqlx.DB, tid int) (err error) {
 
 	_, err = conn.Exec(query, tid)
 	if err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
@@ -75,7 +76,7 @@ func GetSfData(conn *sqlx.DB, tenantID int, execID int64, objID int) (d []model.
 
 	err = conn.Select(&d, query, tenantID, execID, objID)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return
@@ -93,7 +94,7 @@ func UpdateStatusSfData(conn *sqlx.DB, tenantID int, execID, objectID int64, sta
 	query := `UPDATE itgr.sf_data SET status_id = $5, updated_at = NOW() WHERE tenant_id = $1 AND execution_id = $2 AND sf_object_id = $3 AND status_id = $4;`
 
 	if _, err := conn.Exec(query, tenantID, execID, objectID, statusFrom, statusTo); err != nil {
-		return errors.Wrap(err, "conn.Exec()")
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return

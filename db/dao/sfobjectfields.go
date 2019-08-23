@@ -2,8 +2,8 @@ package dao
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 
+	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
@@ -17,7 +17,7 @@ func GetFieldsBase64(conn *sqlx.DB, tenantId int, objID int) (f []model.SFObject
 
 	err = conn.Select(&f, query, tenantId, objID)
 	if err != nil {
-		return nil, errors.Wrap(err, "conn.Select()")
+		return nil, db.WrapError(err, "conn.Select()")
 	}
 
 	return
