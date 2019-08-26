@@ -51,7 +51,7 @@ func GetDeviceDataIDs(conn *sqlx.DB, tid int, device string, execID int64) (d []
 			     AND d.device_id = $2
 			     AND d.is_deleted = FALSE
 			     AND d.execution_id = $3
-			   ORDER BY d.device_created_at, d.created_at, d.updated_at;`
+			   ORDER BY d.sequential ASC;`
 
 	err = conn.Select(&d, query, tid, device, execID)
 	if err != nil {
