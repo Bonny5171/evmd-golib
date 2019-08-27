@@ -96,8 +96,9 @@ func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, device_id, group_id strin
 }
 
 func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
-	query := `SELECT d.id, d.tenant_id, d.schema_name, d.table_name, o.id AS sf_object_id, o.sf_object_name, d.user_id, d.pk, d.sf_id, 
-	                 to_jsonb(regexp_replace(d.json_data, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g')::jsonb) AS json_data, d.app_id, d.device_id, d.device_created_at
+	query := `SELECT d.id, d.tenant_id, d.schema_name, d.table_name, o.id AS sf_object_id, o.sf_object_name, d.user_id, d.pk, d.external_id, d.sf_id, d.action_type,
+					 to_jsonb(regexp_replace(d.json_data, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g')::jsonb) AS json_data, 
+					 d.app_id, d.device_id, d.device_created_at, d.group_id
 			    FROM public.device_data d
 			   INNER JOIN itgr.sf_object o ON d.tenant_id = o.tenant_id AND d.table_name = 'sf_'::text || fn_snake_case(o.sf_object_name)
 			   WHERE d.id = $1
@@ -136,10 +137,10 @@ func SetDeviceDataToDelete(conn *sqlx.DB, id string) error {
 }
 
 func InsertDeviceDataLogError(conn *sqlx.DB, obj model.DeviceData, execID int64, err error) error {
-	query := `INSERT INTO itgr.device_data_log_error (original_id, tenant_id, device_created_at, schema_name, table_name, pk, device_id, user_id, sf_id, original_json_data, brewed_json_data, app_id, execution_id, error_description, created_at, updated_at) 
-	          VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW());`
+	query := `INSERT INTO itgr.device_data_log_error (original_id, tenant_id, device_created_at, schema_name, table_name, pk, device_id, user_id, sf_id, original_json_data, brewed_json_data, app_id, execution_id, error_description, external_id, group_id, created_at, updated_at) 
+	          VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW());`
 
-	_, e := conn.Exec(query, obj.ID, obj.TenantID, obj.DeviceCreatedAt, obj.SchemaName, obj.TableName, obj.PK, obj.DeviceID, obj.UserID, obj.SfID, obj.JSONData, obj.BrewedJSONData, obj.AppID, execID, err.Error())
+	_, e := conn.Exec(query, obj.ID, obj.TenantID, obj.DeviceCreatedAt, obj.SchemaName, obj.TableName, obj.PK, obj.DeviceID, obj.UserID, obj.SfID, obj.JSONData, obj.BrewedJSONData, obj.AppID, execID, err.Error(), obj.ObjectID, obj.GroupID)
 	if e != nil {
 		return db.WrapError(e, "conn.Exec()")
 	}

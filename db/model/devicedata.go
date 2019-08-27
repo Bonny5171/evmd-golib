@@ -32,10 +32,13 @@ type DeviceData struct {
 	ObjectName      string         `db:"sf_object_name"`
 	UserID          sql.NullString `db:"user_id"`
 	PK              sql.NullString `db:"pk"`
+	ExternalID      sql.NullString `db:"external_id"`
 	SfID            sql.NullString `db:"sf_id"`
+	ActionType      sql.NullString `db:"action_type"`
 	JSONData        m.JSONB        `db:"json_data"`
 	BrewedJSONData  m.JSONB
 	AppID           sql.NullString `db:"app_id"`
 	DeviceID        sql.NullString `db:"device_id"`
 	DeviceCreatedAt time.Time      `db:"device_created_at"`
+	GroupID         sql.NullString `db:"group_id"`
 }
