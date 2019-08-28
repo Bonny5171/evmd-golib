@@ -40,6 +40,23 @@ func GetDevicesByGroupAndTables(conn *sqlx.DB, tid int, execID int64) (d []model
 	return d, nil
 }
 
+func GetDeviceByIdGroupedByGroupAndTables(conn *sqlx.DB, tid int, execID int64, deviceID string) (d []model.Device, err error) {
+	query := `SELECT d.device_id, d.group_id, d.table_name, count(*) AS qty
+			    FROM public.device_data d
+			   WHERE d.tenant_id = $1
+			     AND d.is_deleted = false
+				 AND d.execution_id = $2
+				 AND d.device_id = $3
+			   GROUP BY d.device_id, d.group_id, d.table_name;`
+
+	err = conn.Select(&d, query, tid, execID, deviceID)
+	if err != nil {
+		return nil, db.WrapError(err, "conn.Select()")
+	}
+
+	return d, nil
+}
+
 func GetDeviceDataTables(conn *sqlx.DB, tid int, execID int64) (t []*model.DeviceTableField, err error) {
 	query := `SELECT o.id AS sf_object_id, 
 			         o.sf_object_name, 
