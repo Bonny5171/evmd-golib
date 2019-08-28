@@ -5,6 +5,7 @@ import (
 
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
+	m "bitbucket.org/everymind/evmd-golib/modelbase"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -171,9 +172,9 @@ func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, statusID int16) (id int64, err error) {
 	query := `INSERT INTO itgr.device_data_log (
 					 original_id, tenant_id, device_created_at, schema_name, table_name, pk, device_id, user_id, 
-					 sf_id, original_json_data, brewed_json_data, app_id, execution_id, status_id, external_id, 
+					 sf_id, original_json_data, app_id, execution_id, status_id, external_id, 
 					 group_id, created_at, updated_at) 
-			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW())
+			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
 			  RETURNING id;`
 
 	params := make([]interface{}, 0)
@@ -187,12 +188,11 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 	params = append(params, obj.UserID)          // 8
 	params = append(params, obj.SfID)            // 9
 	params = append(params, obj.JSONData)        // 10
-	params = append(params, obj.BrewedJSONData)  // 11
-	params = append(params, obj.AppID)           // 12
-	params = append(params, execID)              // 13
-	params = append(params, statusID)            // 14
-	params = append(params, obj.ObjectID)        // 15
-	params = append(params, obj.GroupID)         // 16
+	params = append(params, obj.AppID)           // 11
+	params = append(params, execID)              // 12
+	params = append(params, statusID)            // 13
+	params = append(params, obj.ObjectID)        // 14
+	params = append(params, obj.GroupID)         // 15
 
 	row := conn.QueryRowx(query, params...)
 
@@ -204,15 +204,16 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 
 	return id, nil
 }
-func UpdateDeviceDataLog(conn *sqlx.DB, logID int64, statusID int16, err error) error {
+func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusID int16, err error) error {
 	params := make([]interface{}, 0)
 	params = append(params, logID)
 	params = append(params, statusID)
+	params = append(params, brewedJSON)
 
 	sb := strings.Builder{}
-	sb.WriteString("UPDATE itgr.device_data_log SET status_id = $2, ")
+	sb.WriteString("UPDATE itgr.device_data_log SET status_id = $2, brewed_json_data = $3, ")
 	if err != nil {
-		sb.WriteString("error = $3, ")
+		sb.WriteString("error = $4, ")
 		params = append(params, err.Error())
 	}
 	sb.WriteString("updated_at = NOW() WHERE id = $1;")
