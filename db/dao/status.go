@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -66,8 +65,6 @@ func GetStatuses(conn *sqlx.DB, tenantId int, sType StatusType) (s model.Statuse
 		qb.WriteString(" AND type = $2")
 		args = append(args, sType.String())
 	}
-
-	fmt.Printf("%v | %v\n", qb.String(), args)
 
 	err = conn.Select(&s, qb.String(), args...)
 	if err != nil {
