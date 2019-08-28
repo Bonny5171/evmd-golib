@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -25,25 +26,29 @@ const (
 	EnumStatusEtlSuccess
 	EnumStatusEtlPending
 	EnumStatusEtlWarning
+	EnumStatusUpsertPending
+	EnumStatusUpsertSuccess
+	EnumStatusUpsertError
 )
 
 const (
 	EnumTypeStatusNil StatusType = iota
 	EnumTypeStatusETL
 	EnumTypeStatusExec
+	EnumTypeStatusUpsert
 )
 
 func (t Status) String() string {
-	n := [...]string{"processing", "error", "success", "scheduled", "overrided", "processing", "error", "success", "pending", "warning"}
-	if t < EnumStatusExecProcessing || t > EnumStatusEtlWarning {
+	n := [...]string{"processing", "error", "success", "scheduled", "overrided", "processing", "error", "success", "pending", "warning", "pending", "success", "error"}
+	if t < EnumStatusExecProcessing || t > EnumStatusUpsertError {
 		return ""
 	}
 	return n[t]
 }
 
 func (t StatusType) String() string {
-	n := [...]string{"", "etl", "exec"}
-	if t < EnumTypeStatusNil || t > EnumTypeStatusExec {
+	n := [...]string{"", "etl", "exec", "upsert"}
+	if t < EnumTypeStatusNil || t > EnumTypeStatusUpsert {
 		return ""
 	}
 	return n[t]
@@ -61,6 +66,8 @@ func GetStatuses(conn *sqlx.DB, tenantId int, sType StatusType) (s model.Statuse
 		qb.WriteString(" AND type = $2")
 		args = append(args, sType.String())
 	}
+
+	fmt.Printf("%v | %v\n", qb.String(), args)
 
 	err = conn.Select(&s, qb.String(), args...)
 	if err != nil {

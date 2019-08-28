@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"strings"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"github.com/jmoiron/sqlx"
 )
@@ -88,9 +90,22 @@ func ExecSFCheckJobsExection(conn *sqlx.DB, tenantID int, jobName, statusName st
 }
 
 func ExecSFAfterEtl(conn *sqlx.DB, tenantID int) error {
-	query := "SELECT itgr.fn_exec_etls($1);"
+	return ExecSFAExecEtls(conn, tenantID, "")
+}
 
-	if _, err := conn.Exec(query, tenantID); err != nil {
+func ExecSFAExecEtls(conn *sqlx.DB, tenantID int, tableName string) error {
+	params := make([]interface{}, 0)
+	params = append(params, tenantID)
+
+	sb := strings.Builder{}
+	sb.WriteString("SELECT itgr.fn_exec_etls($1")
+	if len(tableName) > 0 {
+		sb.WriteString(", $2")
+		params = append(params, tableName)
+	}
+	sb.WriteString(");")
+
+	if _, err := conn.Exec(sb.String(), params...); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 

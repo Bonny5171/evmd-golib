@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"strings"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 	"github.com/jmoiron/sqlx"
@@ -136,18 +138,6 @@ func SetDeviceDataToDelete(conn *sqlx.DB, id string) error {
 	return nil
 }
 
-func InsertDeviceDataLogError(conn *sqlx.DB, obj model.DeviceData, execID int64, err error) error {
-	query := `INSERT INTO itgr.device_data_log_error (original_id, tenant_id, device_created_at, schema_name, table_name, pk, device_id, user_id, sf_id, original_json_data, brewed_json_data, app_id, execution_id, error_description, external_id, group_id, created_at, updated_at) 
-	          VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW());`
-
-	_, e := conn.Exec(query, obj.ID, obj.TenantID, obj.DeviceCreatedAt, obj.SchemaName, obj.TableName, obj.PK, obj.DeviceID, obj.UserID, obj.SfID, obj.JSONData, obj.BrewedJSONData, obj.AppID, execID, err.Error(), obj.ObjectID, obj.GroupID)
-	if e != nil {
-		return db.WrapError(e, "conn.Exec()")
-	}
-
-	return nil
-}
-
 func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 	query := `DELETE FROM public.device_data
 			   WHERE tenant_id = $1
@@ -155,6 +145,62 @@ func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 
 	_, err = conn.Exec(query, tid)
 	if err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, statusID int16) (id int64, err error) {
+	query := `INSERT INTO itgr.device_data_log (
+					 original_id, tenant_id, device_created_at, schema_name, table_name, pk, device_id, user_id, 
+					 sf_id, original_json_data, brewed_json_data, app_id, execution_id, status_id, external_id, 
+					 group_id, created_at, updated_at) 
+			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW())
+			  RETURNING id;`
+
+	params := make([]interface{}, 0)
+	params = append(params, obj.ID)              // 1
+	params = append(params, obj.TenantID)        // 2
+	params = append(params, obj.DeviceCreatedAt) // 3
+	params = append(params, obj.SchemaName)      // 4
+	params = append(params, obj.TableName)       // 5
+	params = append(params, obj.PK)              // 6
+	params = append(params, obj.DeviceID)        // 7
+	params = append(params, obj.UserID)          // 8
+	params = append(params, obj.SfID)            // 9
+	params = append(params, obj.JSONData)        // 10
+	params = append(params, obj.BrewedJSONData)  // 11
+	params = append(params, obj.AppID)           // 12
+	params = append(params, execID)              // 13
+	params = append(params, statusID)            // 14
+	params = append(params, obj.ObjectID)        // 15
+	params = append(params, obj.GroupID)         // 16
+
+	row := conn.QueryRowx(query, params...)
+
+	e := row.Scan(&id)
+	if e != nil {
+		err = db.WrapError(e, "row.Scan()")
+		return
+	}
+
+	return id, nil
+}
+func UpdateDeviceDataLog(conn *sqlx.DB, logID int64, statusID int16, err error) error {
+	params := make([]interface{}, 0)
+	params = append(params, logID)
+	params = append(params, statusID)
+
+	sb := strings.Builder{}
+	sb.WriteString("UPDATE itgr.device_data_log SET status_id = $2, ")
+	if err != nil {
+		sb.WriteString("error = $3, ")
+		params = append(params, err.Error())
+	}
+	sb.WriteString("updated_at = NOW() WHERE id = $1;")
+
+	if _, err := conn.Exec(sb.String(), params...); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
