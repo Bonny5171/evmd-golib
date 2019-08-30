@@ -170,10 +170,7 @@ func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 }
 
 func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, statusID int16) (id int64, err error) {
-	query := `INSERT INTO itgr.device_data_log (
-					 original_id, tenant_id, device_created_at, schema_name, table_name, pk, device_id, user_id, 
-					 sf_id, original_json_data, app_id, execution_id, status_id, external_id, 
-					 group_id, created_at, updated_at) 
+	query := `INSERT INTO itgr.device_data_log (original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,sf_id,original_json_data,app_id,execution_id,status_id,external_id,group_id,created_at,updated_at) 
 			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
 			  RETURNING id;`
 
@@ -191,7 +188,7 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 	params = append(params, obj.AppID)           // 11
 	params = append(params, execID)              // 12
 	params = append(params, statusID)            // 13
-	params = append(params, obj.ObjectID)        // 14
+	params = append(params, obj.ExternalID)      // 14
 	params = append(params, obj.GroupID)         // 15
 
 	row := conn.QueryRowx(query, params...)
