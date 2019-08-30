@@ -1,30 +1,24 @@
 package dao
 
 import (
+	"fmt"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 	"github.com/jmoiron/sqlx"
 )
 
 func GetResourceMetadataToProcess(conn *sqlx.DB, tenantId int) (d []model.ResourceMetadata, err error) {
-	query := `
+	query := fmt.Sprintf(`
 		WITH a AS (
-			SELECT tenant_id, sf_id AS sf_account_id, sf_photo1__c AS sf_content_document_id
-			  FROM public.sf_account
-			 WHERE tenant_id = $1 AND sf_photo1__c IS NOT NULL 
-			 UNION
-			SELECT tenant_id, sf_id AS sf_account_id, sf_photo2__c AS sf_content_document_id  
-			  FROM public.sf_account
-			 WHERE tenant_id = $1 AND sf_photo2__c IS NOT NULL 
-			 UNION
-			SELECT tenant_id, sf_id AS sf_account_id, sf_photo3__c AS sf_content_document_id 
-			  FROM public.sf_account
-			 WHERE tenant_id = $1 AND sf_photo3__c IS NOT NULL
+			SELECT tenant_id, sf_id AS sf_account_id, sf_evcpg_customer_logo__c AS sf_content_document_id
+			  FROM tn_%03d.sf_account
+			 WHERE tenant_id = $1 AND sf_evcpg_customer_logo__c IS NOT NULL 
 		)
 		SELECT DISTINCT a.tenant_id, a.sf_content_document_id, r.sf_content_version_id
 		  FROM a
 		  LEFT JOIN public.resource_metadata r ON r.tenant_id = $1 AND a.sf_content_document_id = r.sf_content_document_id
-		 ORDER BY a.sf_content_document_id;`
+		 ORDER BY a.sf_content_document_id;`, tenantId)
 
 	err = conn.Select(&d, query, tenantId)
 	if err != nil {
