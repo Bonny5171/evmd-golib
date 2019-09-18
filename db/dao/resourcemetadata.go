@@ -13,7 +13,7 @@ func GetResourceMetadataToProcess(conn *sqlx.DB, tenantId int) (d []model.Resour
 		WITH a AS (
 			SELECT tenant_id, sf_id AS sf_account_id, sf_evcpg_customer_logo__c AS sf_content_document_id
 			  FROM tn_%03d.sf_account
-			 WHERE tenant_id = $1 AND sf_evcpg_customer_logo__c IS NOT NULL 
+			 WHERE tenant_id = $1 AND is_deleted = FALSE AND sf_evcpg_customer_logo__c IS NOT NULL 
 		)
 		SELECT DISTINCT a.tenant_id, a.sf_content_document_id, r.sf_content_version_id
 		  FROM a
