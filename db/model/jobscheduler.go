@@ -6,20 +6,20 @@ import (
 
 type JobScheduler struct {
 	ID                int64          `db:"id"`
-	Name              string         `db:"name"`
+	OrgID             string         `db:"org_id"`
 	TenantID          int            `db:"tenant_id"`
 	TenantName        string         `db:"tenant_name"`
-	OrgID             string         `db:"org_id"`
-	Queue             string         `db:"queue"`
+	MiddlewareID      int            `db:"middleware_id"`
 	JobName           string         `db:"job_name"`
-	Description       sql.NullString `db:"description"`
-	Parameters        sql.NullString `db:"parameters"`
+	FunctionName      string         `db:"function_name"`
+	Queue             string         `db:"queue"`
 	Cron              string         `db:"cron"`
+	Parameters        sql.NullString `db:"parameters"`
 	Retry             int16          `db:"retry"`
 	AllowsConcurrency bool           `db:"allows_concurrency"`
 	AllowsSchedule    bool           `db:"allows_schedule"`
 	ScheduleTime      int16          `db:"schedule_time"`
-	DocMetaData       sql.NullString `db:"doc_meta_data"` // In DB is JSONB
+	Description       sql.NullString `db:"description"`
 	IsActive          bool           `db:"is_active"`
 	IsDeleted         bool           `db:"is_deleted"`
 }
