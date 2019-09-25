@@ -8,10 +8,10 @@ import (
 )
 
 type Device struct {
-	ID        string `db:"device_id"`
-	GroupID   string `db:"group_id"`
-	TableName string `db:"table_name"`
-	Qty       int    `db:"qty"`
+	ID        string       `db:"device_id"`
+	GroupID   m.NullString `db:"group_id"`
+	TableName string       `db:"table_name"`
+	Qty       int          `db:"qty"`
 }
 
 type DeviceTableField struct {
