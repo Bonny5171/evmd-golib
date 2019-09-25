@@ -6,10 +6,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func GetMiddleware(conn *sqlx.DB, stack, key string) (mid model.Middleware, err error) {
+func GetStacks(conn *sqlx.DB, stack, key string) (mid model.Stack, err error) {
 	const query = `
 		SELECT id, "name", convert_from(decrypt(dsn::bytea,$1,'bf'),'SQL_ASCII') dsn
-		  FROM public.middleware 
+		  FROM public.stack 
 		 WHERE lower("name") = $2
 		   AND is_active = TRUE
 		   AND is_deleted = FALSE

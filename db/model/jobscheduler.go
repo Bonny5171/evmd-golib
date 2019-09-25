@@ -9,7 +9,7 @@ type JobScheduler struct {
 	OrgID             string         `db:"org_id"`
 	TenantID          int            `db:"tenant_id"`
 	TenantName        string         `db:"tenant_name"`
-	MiddlewareID      int            `db:"middleware_id"`
+	StackID           int            `db:"stack_id"`
 	JobName           string         `db:"job_name"`
 	FunctionName      string         `db:"function_name"`
 	Queue             string         `db:"queue"`
