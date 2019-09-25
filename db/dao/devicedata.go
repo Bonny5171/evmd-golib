@@ -97,17 +97,22 @@ func GetDeviceDataIDs(conn *sqlx.DB, tid int, device string, execID int64) (d []
 	return d, nil
 }
 
-func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, device_id, group_id string, execID int64) (d []string, err error) {
-	query := `SELECT d.id
-			    FROM public.device_data d
-			   WHERE d.tenant_id    = $1
-				 AND d.device_id    = $2
-				 AND d.group_id     = $3
-				 AND d.execution_id = $4
-			     AND d.is_deleted   = FALSE
-			   ORDER BY d.sequential ASC;`
+func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, device_id string, group_id m.NullString, execID int64) (d []string, err error) {
+	var (
+		query  = strings.Builder{}
+		params = []interface{}{tid, device_id, execID}
+	)
 
-	err = conn.Select(&d, query, tid, device_id, group_id, execID)
+	query.WriteString("SELECT d.id FROM public.device_data d WHERE d.tenant_id = $1 AND d.device_id = $2 AND d.execution_id = $3 ")
+	if group_id.Valid {
+		query.WriteString("AND d.group_id = $4 ")
+		params = append(params, group_id.String)
+	} else {
+		query.WriteString("AND d.group_id = NULL ")
+	}
+	query.WriteString("AND d.is_deleted = FALSE ORDER BY d.sequential ASC;")
+
+	err = conn.Select(&d, query.String(), params...)
 	if err != nil {
 		return nil, db.WrapError(err, "conn.Select()")
 	}
