@@ -77,10 +77,10 @@ func ExecSFPurgePublicSFShare(conn *sqlx.DB, tenantID int) error {
 	return nil
 }
 
-func ExecSFCheckJobsExection(conn *sqlx.DB, tenantID int, jobName, statusName string) (result bool, err error) {
+func ExecSFCheckJobsExection(conn *sqlx.DB, tenantID int, jobID int64, statusName string) (result bool, err error) {
 	query := "SELECT itgr.fn_check_jobs($1, $2, $3);"
 
-	row := conn.QueryRow(query, tenantID, jobName, statusName)
+	row := conn.QueryRow(query, tenantID, jobID, statusName)
 
 	if err := row.Scan(&result); err != nil {
 		return false, db.WrapError(err, "row.Scan()")

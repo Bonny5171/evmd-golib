@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"strings"
+
 	"github.com/jmoiron/sqlx"
 
 	"bitbucket.org/everymind/evmd-golib/db"
@@ -55,6 +57,27 @@ func GetJob(conn *sqlx.DB, tenantID, stackID int, name string) (s model.JobSched
 	   LIMIT 1;`
 
 	err = conn.Get(&s, query, tenantID, stackID, name)
+	if err != nil {
+		return s, db.WrapError(err, "conn.Get()")
+	}
+
+	return s, nil
+}
+
+// GetJob retorna os dados de um 'job'
+func GetJobByFuncQueue(conn *sqlx.DB, tenantID int, stackName, funcName, queue string) (s model.JobScheduler, err error) {
+	const query = `
+	  SELECT j.id, t.org_id, j.tenant_id, t."name" AS tenant_name, j.stack_id, j.job_name, j.function_name, j.queue, j.cron, j.parameters, j.retry, j.allows_concurrency, j.allows_schedule, j.schedule_time, j.description, j.is_active, j.is_deleted 
+	    FROM public.job_scheduler j
+	   INNER JOIN public.tenant   t ON j.tenant_id = t.id
+	   INNER JOIN public.stack    s ON j.stack_id = s.id
+	   WHERE j.tenant_id = $1
+	     AND lower(s."name") = $2
+		 AND lower(j.function_name) = $3
+		 AND lower(j.queue) = $4
+	   LIMIT 1;`
+
+	err = conn.Get(&s, query, tenantID, strings.ToLower(stackName), strings.ToLower(funcName), strings.ToLower(queue))
 	if err != nil {
 		return s, db.WrapError(err, "conn.Get()")
 	}

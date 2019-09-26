@@ -41,10 +41,13 @@ func Register(functionName string, function Function) {
 }
 
 func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) error {
-	logger.Tracef("Executing '%s' job function...\n", fnName)
+	logger.Tracef("Executing job function '%s'...\n", fnName)
 
-	// Get stack name from context
-	stack := cast.ToString(ctx.Value("Stack"))
+	// Queue
+	queue := os.Getenv("GOWORKER_QUEUE_NAME")
+	if len(queue) == 0 {
+		queue = "default"
+	}
 
 	// Parse payload that come of Faktory
 	payload, err := ParsePayload(args...)
@@ -64,9 +67,9 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 
 	// Get connection with Data DB
 	logger.Traceln("Get connection with Data DB")
-	conn, err := db.GetConnection(stack)
+	conn, err := db.GetConnection(payload.StackName)
 	if err != nil {
-		return errorHandler(err, fmt.Sprintf("db.GetConnection('%s')", stack))
+		return errorHandler(err, fmt.Sprintf("db.GetConnection('%s')", payload.StackName))
 	}
 
 	// Create log execution on itgr.execution table
@@ -76,26 +79,26 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 		return errorHandler(err, "execlog.NewExec()")
 	}
 
+	jobInfo, err := dao.GetJobByFuncQueue(connCfg, payload.TenantID, payload.StackName, fnName, queue)
+	if err != nil {
+		return errorHandler(err, "dao.GetJobByFuncQueue()")
+	}
+
 	// Verifying concurrency
 	if !payload.AllowsConcurrency {
 		//Checking if this job is executing
-		notok, err := dao.ExecSFCheckJobsExection(conn, payload.TenantID, fnName, "processing")
+		notok, err := dao.ExecSFCheckJobsExection(conn, payload.TenantID, jobInfo.ID, "processing")
 		if err != nil {
 			return exec.LogError(errorHandler(err, "dao.ExecSFCheckJobsExection()"))
 		}
 
 		if notok {
-			queue := os.Getenv("GOWORKER_QUEUE_NAME")
-			if len(queue) == 0 {
-				queue = "default"
-			}
-
 			if payload.AllowsSchedule {
 				// Get DSN from context
 				dsn := cast.ToString(ctx.Value("DSN"))
 
 				// push this job as a scheduled job on faktory
-				if err := push.RetryLater(ctx.JobType(), queue, stack, dsn, args, 5*time.Minute); err != nil {
+				if err := push.RetryLater(ctx.JobType(), queue, payload.StackName, dsn, args, 5*time.Minute); err != nil {
 					return exec.LogError(errorHandler(err, "retryLater()"))
 				}
 
