@@ -13,6 +13,7 @@ func GetDevices(conn *sqlx.DB, tid int, execID int64) (d []model.Device, err err
 	query := `SELECT d.device_id, count(*) AS qty
 			    FROM public.device_data d
 			   WHERE d.tenant_id = $1
+			     AND d.is_active = TRUE
 			     AND d.is_deleted = false
 			     AND d.execution_id = $2
 			   GROUP BY d.device_id;`
@@ -29,6 +30,7 @@ func GetDevicesByGroupAndTables(conn *sqlx.DB, tid int, execID int64) (d []model
 	query := `SELECT d.device_id, d.group_id, d.table_name, count(*) AS qty
 			    FROM public.device_data d
 			   WHERE d.tenant_id = $1
+			     AND d.is_active = TRUE
 			     AND d.is_deleted = false
 			     AND d.execution_id = $2
 			   GROUP BY d.device_id, d.group_id, d.table_name;`
@@ -45,9 +47,10 @@ func GetDeviceByIdGroupedByGroupAndTables(conn *sqlx.DB, tid int, execID int64, 
 	query := `SELECT d.device_id, d.group_id, d.table_name, count(*) AS qty
 			    FROM public.device_data d
 			   WHERE d.tenant_id = $1
+			     AND d.is_active = TRUE
 			     AND d.is_deleted = false
-				 AND d.execution_id = $2
-				 AND d.device_id = $3
+			     AND d.execution_id = $2
+			     AND d.device_id = $3
 			   GROUP BY d.device_id, d.group_id, d.table_name;`
 
 	err = conn.Select(&d, query, tid, execID, deviceID)
@@ -70,7 +73,7 @@ func GetDeviceDataTables(conn *sqlx.DB, tid int, execID int64) (t []*model.Devic
 			   INNER JOIN itgr.sf_object_field pk ON o.tenant_id = pk.tenant_id AND o.id = pk.sf_object_id AND  sf_type = 'id'
 			    LEFT JOIN itgr.sf_object_field e ON o.tenant_id = e.tenant_id AND o.id = e.sf_object_id AND e.sf_external_id = TRUE AND e.sfa_external_id = TRUE
 			   WHERE 'sf_'||fn_snake_case(o.sf_object_name) 
-			      IN (SELECT DISTINCT table_name FROM public.device_data WHERE tenant_id = $1 AND execution_id = $2);`
+			      IN (SELECT DISTINCT table_name FROM public.device_data WHERE tenant_id = $1 AND is_active = TRUE AND execution_id = $2);`
 
 	err = conn.Select(&t, query, tid, execID)
 	if err != nil {
@@ -84,7 +87,8 @@ func GetDeviceDataIDs(conn *sqlx.DB, tid int, device string, execID int64) (d []
 	query := `SELECT d.id
 			    FROM public.device_data d
 			   WHERE d.tenant_id = $1
-			     AND d.device_id = $2
+				 AND d.device_id = $2
+				 AND d.is_active = TRUE
 			     AND d.is_deleted = FALSE
 			     AND d.execution_id = $3
 			   ORDER BY d.sequential ASC;`
@@ -103,7 +107,7 @@ func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, device_id string, group_i
 		params = []interface{}{tid, device_id, execID}
 	)
 
-	query.WriteString("SELECT d.id FROM public.device_data d WHERE d.tenant_id = $1 AND d.device_id = $2 AND d.execution_id = $3 ")
+	query.WriteString("SELECT d.id FROM public.device_data d WHERE d.tenant_id = $1 AND d.is_active = TRUE AND d.device_id = $2 AND d.execution_id = $3 ")
 	if group_id.Valid {
 		query.WriteString("AND d.group_id = $4 ")
 		params = append(params, group_id.String)
@@ -123,7 +127,7 @@ func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, device_id string, group_i
 func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
 	query := `SELECT d.id, d.tenant_id, d.schema_name, d.table_name, o.id AS sf_object_id, o.sf_object_name, d.user_id, d.pk, d.external_id, d.sf_id, d.action_type,
 					 to_jsonb(regexp_replace(d.json_data, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g')::jsonb) AS json_data, 
-					 d.app_id, d.device_id, d.device_created_at, d.group_id
+					 d.app_id, d.device_id, d.device_created_at, d.group_id, d.try, d.is_active, d.is_deleted
 			    FROM public.device_data d
 			   INNER JOIN itgr.sf_object o ON d.tenant_id = o.tenant_id AND d.table_name = 'sf_'::text || fn_snake_case(o.sf_object_name)
 			   WHERE d.id = $1
@@ -136,13 +140,36 @@ func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
 	return
 }
 
-func SetDeviceDatasToExecution(conn *sqlx.DB, tid int, execID int64) error {
-	query := `UPDATE public.device_data
-			     SET execution_id = $1
-			   WHERE tenant_id = $2 
-			     AND is_deleted = FALSE;`
+func GetDeviceDataUsersToProcess(conn *sqlx.DB, tid int, execID int64) (d []string, err error) {
+	query := `SELECT DISTINCT user_id FROM public.device_data
+			   WHERE tenant_id = $1 AND execution_id = $2 AND is_active = TRUE AND is_deleted = FALSE;`
 
-	if _, err := conn.Exec(query, execID, tid); err != nil {
+	err = conn.Select(&d, query, tid, execID)
+	if err != nil {
+		return nil, db.WrapError(err, "conn.Select()")
+	}
+
+	return d, nil
+}
+
+func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int) error {
+	query := `UPDATE public.device_data
+	             SET execution_id = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN $2 ELSE execution_id END,
+	                 try = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN try + 1 ELSE try END
+  	           WHERE tenant_id = $3 AND is_active = TRUE AND is_deleted = FALSE;`
+
+	if _, err := conn.Exec(query, retry, execID, tid); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func DeactivateDeviceDataRows(conn *sqlx.DB, tid int, retry int) error {
+	query := `UPDATE public.device_data SET is_active = public.fn_check_retry(try,$1)
+  	           WHERE tenant_id = $2 AND is_active = TRUE AND is_deleted = FALSE;`
+
+	if _, err := conn.Exec(query, retry, tid); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
@@ -175,8 +202,8 @@ func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 }
 
 func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, statusID int16) (id int64, err error) {
-	query := `INSERT INTO itgr.device_data_log (original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,sf_id,original_json_data,app_id,execution_id,status_id,external_id,group_id,created_at,updated_at) 
-			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+	query := `INSERT INTO itgr.device_data_log (original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,action_type,sf_id,original_json_data,app_id,execution_id,status_id,external_id,group_id,try,created_at,updated_at) 
+			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW())
 			  RETURNING id;`
 
 	params := make([]interface{}, 0)
@@ -188,13 +215,15 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 	params = append(params, obj.PK)              // 6
 	params = append(params, obj.DeviceID)        // 7
 	params = append(params, obj.UserID)          // 8
-	params = append(params, obj.SfID)            // 9
-	params = append(params, obj.JSONData)        // 10
-	params = append(params, obj.AppID)           // 11
-	params = append(params, execID)              // 12
-	params = append(params, statusID)            // 13
-	params = append(params, obj.ExternalID)      // 14
-	params = append(params, obj.GroupID)         // 15
+	params = append(params, obj.ActionType)      // 9
+	params = append(params, obj.SfID)            // 10
+	params = append(params, obj.JSONData)        // 11
+	params = append(params, obj.AppID)           // 12
+	params = append(params, execID)              // 13
+	params = append(params, statusID)            // 14
+	params = append(params, obj.ExternalID)      // 15
+	params = append(params, obj.GroupID)         // 16
+	params = append(params, obj.Try)             // 17
 
 	row := conn.QueryRowx(query, params...)
 
@@ -206,6 +235,7 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 
 	return id, nil
 }
+
 func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusID int16, err error) error {
 	params := make([]interface{}, 0)
 	params = append(params, logID)
