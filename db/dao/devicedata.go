@@ -128,10 +128,10 @@ func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
 	query := `SELECT d.id, d.tenant_id, d.schema_name, d.table_name, o.id AS sf_object_id, o.sf_object_name, d.user_id, d.pk, d.external_id, d.sf_id, d.action_type,
 					 to_jsonb(regexp_replace(d.json_data, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g')::jsonb) AS json_data, 
 					 d.app_id, d.device_id, d.device_created_at, d.group_id, d.try, d.is_active, d.is_deleted
-			    FROM public.device_data d
-			   INNER JOIN itgr.sf_object o ON d.tenant_id = o.tenant_id AND d.table_name = 'sf_'::text || fn_snake_case(o.sf_object_name)
-			   WHERE d.id = $1
-			   LIMIT 1;`
+			  FROM public.device_data d
+			  INNER JOIN itgr.sf_object o ON d.tenant_id = o.tenant_id AND d.table_name = 'sf_'::text || fn_snake_case(o.sf_object_name)
+			  WHERE d.id = $1
+			  LIMIT 1;`
 
 	if err = conn.Get(&d, query, id); err != nil {
 		err = db.WrapError(err, "conn.Get()")
@@ -142,7 +142,7 @@ func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
 
 func GetDeviceDataUsersToProcess(conn *sqlx.DB, tid int, execID int64) (d []string, err error) {
 	query := `SELECT DISTINCT user_id FROM public.device_data
-			   WHERE tenant_id = $1 AND execution_id = $2 AND is_active = TRUE AND is_deleted = FALSE;`
+			  WHERE tenant_id = $1 AND execution_id = $2 AND is_active = TRUE AND is_deleted = FALSE;`
 
 	err = conn.Select(&d, query, tid, execID)
 	if err != nil {
@@ -154,9 +154,8 @@ func GetDeviceDataUsersToProcess(conn *sqlx.DB, tid int, execID int64) (d []stri
 
 func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int) error {
 	query := `UPDATE public.device_data
-	             SET execution_id = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN $2 ELSE execution_id END,
-	                 try = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN try + 1 ELSE try END
-  	           WHERE tenant_id = $3 AND is_active = TRUE AND is_deleted = FALSE;`
+	          SET execution_id = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN $2 ELSE execution_id END
+  	          WHERE tenant_id = $3 AND is_active = TRUE AND is_deleted = FALSE;`
 
 	if _, err := conn.Exec(query, retry, execID, tid); err != nil {
 		return db.WrapError(err, "conn.Exec()")
@@ -167,13 +166,31 @@ func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int) e
 
 func DeactivateDeviceDataRows(conn *sqlx.DB, tid int, retry int) error {
 	query := `UPDATE public.device_data SET is_active = public.fn_check_retry(try,$1)
-  	           WHERE tenant_id = $2 AND is_active = TRUE AND is_deleted = FALSE;`
+  	          WHERE tenant_id = $2 AND is_active = TRUE AND is_deleted = FALSE;`
 
 	if _, err := conn.Exec(query, retry, tid); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
+}
+
+func SetTryDeviceDataRows(conn *sqlx.DB, id string, retry int) (try int, err error) {
+	query := `UPDATE public.device_data 
+			  SET try = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN try + 1 ELSE try END
+			  WHERE id = $2 
+			  RETURNING try;`
+
+	// if _, err := conn.Exec(query, retry, id); err != nil {
+	// 	return db.WrapError(err, "conn.Exec()")
+	// }
+
+	if e := conn.QueryRowx(query, retry, id).Scan(&try); e != nil {
+		err = db.WrapError(e, "conn.QueryRowx(query, retry, id).Scan(&try)")
+		return
+	}
+
+	return try, nil
 }
 
 func SetDeviceDataToDelete(conn *sqlx.DB, id string) error {
@@ -190,8 +207,7 @@ func SetDeviceDataToDelete(conn *sqlx.DB, id string) error {
 
 func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 	query := `DELETE FROM public.device_data
-			   WHERE tenant_id = $1
-			     AND is_deleted = TRUE;`
+			  WHERE tenant_id = $1 AND is_deleted = TRUE;`
 
 	_, err = conn.Exec(query, tid)
 	if err != nil {
@@ -225,27 +241,25 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 	params = append(params, obj.GroupID)         // 16
 	params = append(params, obj.Try)             // 17
 
-	row := conn.QueryRowx(query, params...)
-
-	e := row.Scan(&id)
-	if e != nil {
-		err = db.WrapError(e, "row.Scan()")
+	if e := conn.QueryRowx(query, params...).Scan(&id); e != nil {
+		err = db.WrapError(e, "conn.QueryRowx(query, params...).Scan(&id)")
 		return
 	}
 
 	return id, nil
 }
 
-func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusID int16, err error) error {
+func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusID int16, try int, err error) error {
 	params := make([]interface{}, 0)
 	params = append(params, logID)
 	params = append(params, statusID)
 	params = append(params, brewedJSON)
+	params = append(params, try)
 
 	sb := strings.Builder{}
-	sb.WriteString("UPDATE itgr.device_data_log SET status_id = $2, brewed_json_data = $3, ")
+	sb.WriteString("UPDATE itgr.device_data_log SET status_id = $2, brewed_json_data = $3, try = $4 ")
 	if err != nil {
-		sb.WriteString("error = $4, ")
+		sb.WriteString("error = $5, ")
 		params = append(params, err.Error())
 	}
 	sb.WriteString("updated_at = NOW() WHERE id = $1;")
