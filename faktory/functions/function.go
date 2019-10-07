@@ -67,14 +67,14 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 
 	// Get connection with Data DB
 	logger.Traceln("Get connection with Data DB")
-	conn, err := db.GetConnection(payload.StackName)
+	connData, err := db.GetConnection(payload.StackName)
 	if err != nil {
 		return errorHandler(err, fmt.Sprintf("db.GetConnection('%s')", payload.StackName))
 	}
 
 	// Create log execution on itgr.execution table
 	logger.Traceln("Create log execution on itgr.execution table")
-	exec, err := execlog.NewExec(conn, ctx.Jid(), payload.ID, payload.TenantID, 0, dao.EnumTypeStatusExec)
+	exec, err := execlog.NewExec(connData, ctx.Jid(), payload.ID, payload.TenantID, 0, dao.EnumTypeStatusExec)
 	if err != nil {
 		return errorHandler(err, "execlog.NewExec()")
 	}
@@ -85,14 +85,14 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	}
 
 	// Verifying concurrency
-	if !payload.AllowsConcurrency {
+	if payload.AllowsConcurrency == false {
 		//Checking if this job is executing
-		notok, err := dao.ExecSFCheckJobsExection(conn, payload.TenantID, jobInfo.ID, "processing")
+		executing, err := dao.ExecSFCheckJobsExection(connData, payload.TenantID, jobInfo.ID, "processing")
 		if err != nil {
 			return exec.LogError(errorHandler(err, "dao.ExecSFCheckJobsExection()"))
 		}
 
-		if notok {
+		if executing {
 			if payload.AllowsSchedule {
 				// Get DSN from context
 				dsn := cast.ToString(ctx.Value("DSN"))
@@ -117,7 +117,7 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	logger.Traceln("Start log execution on itgr.execution table")
 	exec.LogExecution(dao.EnumStatusExecProcessing)
 
-	if e := fn(conn, connCfg, ctx, payload, exec.ID); e != nil {
+	if e := fn(connData, connCfg, ctx, payload, exec.ID); e != nil {
 		return exec.LogError(errorHandler(e, "fn(conn, connCfg, payload, exec.ID)"))
 	}
 
