@@ -48,7 +48,7 @@ func ExecSFEtlSyncData(conn *sqlx.DB, execID int64, tenantID int, objID int64) e
 }
 
 func ExecSFCreateAllTables(conn *sqlx.DB, tenantID int) error {
-	query := "DO $$ BEGIN PERFORM itgr.sf_create_all_tables(NULL, $1, NULL); END $$;"
+	query := "DO $$ BEGIN PERFORM itgr.sf_create_all_tables($1); END $$;"
 
 	if _, err := conn.Exec(query, tenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
