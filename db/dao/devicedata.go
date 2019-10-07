@@ -181,10 +181,6 @@ func SetTryDeviceDataRows(conn *sqlx.DB, id string, retry int) (try int, err err
 			  WHERE id = $2 
 			  RETURNING try;`
 
-	// if _, err := conn.Exec(query, retry, id); err != nil {
-	// 	return db.WrapError(err, "conn.Exec()")
-	// }
-
 	if e := conn.QueryRowx(query, retry, id).Scan(&try); e != nil {
 		err = db.WrapError(e, "conn.QueryRowx(query, retry, id).Scan(&try)")
 		return
@@ -256,15 +252,15 @@ func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusI
 	params = append(params, brewedJSON)
 	params = append(params, try)
 
-	sb := strings.Builder{}
-	sb.WriteString("UPDATE itgr.device_data_log SET status_id = $2, brewed_json_data = $3, try = $4 ")
+	query := strings.Builder{}
+	query.WriteString("UPDATE itgr.device_data_log SET status_id = $2, brewed_json_data = $3, try = $4, ")
 	if err != nil {
-		sb.WriteString("error = $5, ")
+		query.WriteString("error = $5, ")
 		params = append(params, err.Error())
 	}
-	sb.WriteString("updated_at = NOW() WHERE id = $1;")
+	query.WriteString("updated_at = NOW() WHERE id = $1;")
 
-	if _, err := conn.Exec(sb.String(), params...); err != nil {
+	if _, err := conn.Exec(query.String(), params...); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
