@@ -1,5 +1,7 @@
 bitbucket.org/everymind/gforce v1.3.0 h1:hjeOjrRF/QhuRx3UPW003E/xcSRT6eSYy5KwfEPv5r8=
 bitbucket.org/everymind/gforce v1.3.0/go.mod h1:H5dXtjuxpVQpKUXMym9UUpWOI7mBC5DnVjSEeaOC+z8=
+bitbucket.org/everymind/gforce v1.3.1 h1:b6LfpHBJhIqvO10q6n+GKIsTBQ/w78/WLT+zaIGWP4E=
+bitbucket.org/everymind/gforce v1.3.1/go.mod h1:H5dXtjuxpVQpKUXMym9UUpWOI7mBC5DnVjSEeaOC+z8=
 github.com/contribsys/faktory_worker_go v0.0.0-20190428165239-86cdd9bae9d4 h1:h9wQZfqJep6F9YpKcWot8vw8c0dDVTV4DLZgqF+lIR0=
 github.com/contribsys/faktory_worker_go v0.0.0-20190428165239-86cdd9bae9d4/go.mod h1:/wSKgh9Jh6fnX+3gSwOErbuJLHCAjPxGnstV/EiFwrk=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
