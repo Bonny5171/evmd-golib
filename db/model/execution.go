@@ -11,6 +11,7 @@ import (
 type Execution struct {
 	ID                 int64          `db:"id"`
 	JobSchedulerID     int64          `db:"job_scheduler_id"`
+	JobSchedulerName   string         `db:"job_scheduler_name"`
 	TenantID           int            `db:"tenant_id"`
 	SchemaID           sql.NullInt64  `db:"schema_id"`
 	StatusID           int16          `db:"status_id"`

@@ -12,19 +12,21 @@ import (
 )
 
 type Exec struct {
-	ID             int64
-	JFID           string
-	JobSchedulerID int64
-	TenantID       int
-	SchemaID       int
-	StatusID       int16
-	Connection     *sqlx.DB
-	StatusList     model.Statuses
+	ID               int64
+	JFID             string
+	JobSchedulerID   int64
+	JobSchedulerName string
+	TenantID         int
+	SchemaID         int
+	StatusID         int16
+	Connection       *sqlx.DB
+	StatusList       model.Statuses
 }
 
-func NewExec(conn *sqlx.DB, jfid string, jsid int64, tid, sid int, st dao.StatusType) (exe Exec, err error) {
+func NewExec(conn *sqlx.DB, jfid string, jsid int64, jsname string, tid, sid int, st dao.StatusType) (exe Exec, err error) {
 	exe.JFID = jfid
 	exe.JobSchedulerID = jsid
+	exe.JobSchedulerName = jsname
 	exe.TenantID = tid
 	exe.SchemaID = sid
 	exe.Connection = conn
@@ -44,16 +46,12 @@ func (e *Exec) LogError(err error) error {
 	return err
 }
 
-func (e *Exec) LogStackErrors(errs []error) error {
+func (e *Exec) LogStackErrors(errs []error) (err error) {
 	e.logStack(dao.EnumStatusExecError, errs)
-
-	var err error
-
 	for _, e := range errs {
 		err = multierr.Append(err, e)
 	}
-
-	return err
+	return
 }
 
 func (e *Exec) log(s dao.Status, r error) error {
@@ -61,10 +59,11 @@ func (e *Exec) log(s dao.Status, r error) error {
 	e.StatusID = e.StatusList.GetId(sn)
 
 	obj := model.Execution{
-		ID:             e.ID,
-		JobSchedulerID: e.JobSchedulerID,
-		TenantID:       e.TenantID,
-		StatusID:       e.StatusID,
+		ID:               e.ID,
+		JobSchedulerID:   e.JobSchedulerID,
+		JobSchedulerName: e.JobSchedulerName,
+		TenantID:         e.TenantID,
+		StatusID:         e.StatusID,
 	}
 
 	if len(e.JFID) > 0 {
@@ -114,10 +113,11 @@ func (e *Exec) logStack(s dao.Status, r []error) error {
 	e.StatusID = e.StatusList.GetId(sn)
 
 	obj := model.Execution{
-		ID:             e.ID,
-		JobSchedulerID: e.JobSchedulerID,
-		TenantID:       e.TenantID,
-		StatusID:       e.StatusID,
+		ID:               e.ID,
+		JobSchedulerID:   e.JobSchedulerID,
+		JobSchedulerName: e.JobSchedulerName,
+		TenantID:         e.TenantID,
+		StatusID:         e.StatusID,
 	}
 
 	if len(e.JFID) > 0 {

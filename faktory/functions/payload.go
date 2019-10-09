@@ -7,7 +7,8 @@ import (
 )
 
 type Payload struct {
-	ID                int64
+	JobID             int64
+	JobName           string
 	TenantID          int
 	TenantName        string
 	StackName         string
@@ -29,51 +30,57 @@ func ParsePayload(args ...interface{}) (p Payload, err error) {
 	if !ok {
 		return p, errors.Wrapf(err, "parameter %d of job payload isn't a number", 1)
 	}
-	p.ID = int64(fID)
+	p.JobID = int64(fID)
+
+	// parameter is string
+	p.JobName, ok = args[1].(string)
+	if !ok {
+		return p, errors.Wrapf(err, "parameter %d of job payload isn't a string", 2)
+	}
 
 	// parameter is int
-	fTeID, ok := args[1].(float64)
+	fTeID, ok := args[2].(float64)
 	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a number", 2)
+		return p, errors.Wrapf(err, "parameter %d of job payload isn't a number", 3)
 	}
 	p.TenantID = int(fTeID)
 
 	// parameter is string
-	p.TenantName, ok = args[2].(string)
-	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a string", 3)
-	}
-
-	// parameter is string
-	p.StackName, ok = args[3].(string)
+	p.TenantName, ok = args[3].(string)
 	if !ok {
 		return p, errors.Wrapf(err, "parameter %d of job payload isn't a string", 4)
 	}
 
-	// parameter is bool
-	p.AllowsConcurrency, ok = args[4].(bool)
+	// parameter is string
+	p.StackName, ok = args[4].(string)
 	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a boolean", 5)
+		return p, errors.Wrapf(err, "parameter %d of job payload isn't a string", 5)
 	}
 
 	// parameter is bool
-	p.AllowsSchedule, ok = args[5].(bool)
+	p.AllowsConcurrency, ok = args[5].(bool)
 	if !ok {
 		return p, errors.Wrapf(err, "parameter %d of job payload isn't a boolean", 6)
 	}
 
-	// parameter is int
-	fSchTime, ok := args[6].(float64)
+	// parameter is bool
+	p.AllowsSchedule, ok = args[6].(bool)
 	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a number", 7)
+		return p, errors.Wrapf(err, "parameter %d of job payload isn't a boolean", 7)
+	}
+
+	// parameter is int
+	fSchTime, ok := args[7].(float64)
+	if !ok {
+		return p, errors.Wrapf(err, "parameter %d of job payload isn't a number", 8)
 	}
 	p.ScheduleTime = int(fSchTime)
 
-	if len(args) > 7 {
+	if len(args) > 8 {
 		// parameter is int
-		fParams, ok := args[7].(string)
+		fParams, ok := args[8].(string)
 		if !ok {
-			return p, errors.Wrapf(err, "parameter %d of job payload isn't a json", 8)
+			return p, errors.Wrapf(err, "parameter %d of job payload isn't a json", 9)
 		}
 
 		if e := json.Unmarshal([]byte(fParams), &p.Parameters); e != nil {
