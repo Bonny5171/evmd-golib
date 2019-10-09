@@ -14,11 +14,11 @@ import (
 func InsertExecution(conn *sqlx.DB, obj model.Execution) (r int64, err error) {
 	t := time.Now()
 
-	query := `INSERT INTO itgr.execution (job_faktory_id, job_scheduler_id, tenant_id, schema_id, status_id, doc_meta_data, is_active, created_at, updated_at, is_deleted)
-			  VALUES($1, $2, $3, $4, $5, $6, true, $7, $8, false)
+	query := `INSERT INTO itgr.execution (job_faktory_id, job_scheduler_id, job_scheduler_name, tenant_id, schema_id, status_id, doc_meta_data, is_active, created_at, updated_at, is_deleted)
+			  VALUES($1, $2, $3, $4, $5, $6, $7, true, $8, $9, false)
 			  RETURNING id;`
 
-	err = conn.QueryRowx(query, obj.JobFaktoryID, obj.JobSchedulerID, obj.TenantID, obj.SchemaID, obj.StatusID, obj.DocMetaData, t, t).Scan(&r)
+	err = conn.QueryRowx(query, obj.JobFaktoryID, obj.JobSchedulerID, obj.JobSchedulerName, obj.TenantID, obj.SchemaID, obj.StatusID, obj.DocMetaData, t, t).Scan(&r)
 	if err != nil {
 		return 0, db.WrapError(err, "conn.QueryRowx()")
 	}

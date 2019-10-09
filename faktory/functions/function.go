@@ -74,7 +74,7 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 
 	// Create log execution on itgr.execution table
 	logger.Traceln("Create log execution on itgr.execution table")
-	exec, err := execlog.NewExec(connData, ctx.Jid(), payload.ID, payload.TenantID, 0, dao.EnumTypeStatusExec)
+	exec, err := execlog.NewExec(connData, ctx.Jid(), payload.JobID, payload.JobName, payload.TenantID, 0, dao.EnumTypeStatusExec)
 	if err != nil {
 		return errorHandler(err, "execlog.NewExec()")
 	}
