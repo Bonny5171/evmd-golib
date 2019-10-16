@@ -116,14 +116,14 @@ func GetParameterByOrgID(conn *sqlx.DB, orgID, paramName string) (p model.Parame
 // UpdateParameter atualiza o parametro de uma determinada org (tenant_id)
 func UpdateParameter(conn *sqlx.DB, param model.Parameter) error {
 	query := `
-		INSERT INTO public."parameter" (tenant_id, "name", "type", value, description) 
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO public."parameter" (tenant_id, "name", value) 
+		VALUES ($1, $2, $3)
 		ON CONFLICT (tenant_id, "name")
 		DO UPDATE SET 
 		  value = EXCLUDED.value,
 		  updated_at = now();`
 
-	if _, err := conn.Exec(query, param.TenantID, param.Name, param.Type, param.Value, param.Description); err != nil {
+	if _, err := conn.Exec(query, param.TenantID, param.Name, param.Value); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
@@ -137,8 +137,8 @@ func UpdateParameters(conn *sqlx.DB, params []model.Parameter) error {
 	}
 
 	query := `
-		INSERT INTO public."parameter" (tenant_id, "name", "type", value, description) 
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO public."parameter" (tenant_id, "name", value) 
+		VALUES ($1, $2, $3)
 		ON CONFLICT (tenant_id, "name")
 		DO UPDATE SET 
 		  value = EXCLUDED.value,
@@ -150,7 +150,7 @@ func UpdateParameters(conn *sqlx.DB, params []model.Parameter) error {
 	}
 
 	for _, p := range params {
-		if _, err := stmt.Exec(p.TenantID, p.Name, p.Type, p.Value, p.Description); err != nil {
+		if _, err := stmt.Exec(p.TenantID, p.Name, p.Value); err != nil {
 			return db.WrapError(err, "stmt.Exec()")
 		}
 	}

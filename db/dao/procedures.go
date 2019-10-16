@@ -111,3 +111,23 @@ func ExecSFAExecEtls(conn *sqlx.DB, tenantID int, tableName string) error {
 
 	return nil
 }
+
+func ExecSFCreateJobScheduler(conn *sqlx.DB, tenantID int) error {
+	query := "SELECT public.fn_create_job_scheduler($1);"
+
+	if _, err := conn.Exec(query, tenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFSchemaCreate(conn *sqlx.DB, tenantID, templateTenantID int, name, orgID string) error {
+	query := "SELECT public.fn_schema_create($1, $2, $3, $4);"
+
+	if _, err := conn.Exec(query, name, orgID, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
