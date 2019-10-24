@@ -122,10 +122,90 @@ func ExecSFCreateJobScheduler(conn *sqlx.DB, tenantID int) error {
 	return nil
 }
 
-func ExecSFSchemaCreate(conn *sqlx.DB, tenantID, templateTenantID int, name, orgID string) error {
+func ExecSFCreateJobSchedulerTx(conn *sqlx.Tx, tenantID int) error {
+	query := "SELECT public.fn_create_job_scheduler($1);"
+
+	if _, err := conn.Exec(query, tenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFSchemaBuild(conn *sqlx.DB, tenantID int) error {
+	query := "SELECT public.fn_schema_build($1);"
+
+	if _, err := conn.Exec(query, tenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFSchemaBuildTx(conn *sqlx.Tx, tenantID int) error {
+	query := "SELECT public.fn_schema_build($1);"
+
+	if _, err := conn.Exec(query, tenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFSchemaCreate(conn *sqlx.DB, tenantID, templateTenantID int, tenantName, orgID string) error {
 	query := "SELECT public.fn_schema_create($1, $2, $3, $4);"
 
-	if _, err := conn.Exec(query, name, orgID, tenantID, templateTenantID); err != nil {
+	if _, err := conn.Exec(query, tenantName, orgID, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFSchemaCreateTx(conn *sqlx.Tx, tenantID, templateTenantID int, tenantName, orgID string) error {
+	query := "SELECT public.fn_schema_create($1, $2, $3, $4);"
+
+	if _, err := conn.Exec(query, tenantName, orgID, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFSchemaRemove(conn *sqlx.DB, tenantID int) error {
+	query := "SELECT public.fn_schema_remove($1);"
+
+	if _, err := conn.Exec(query, tenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFSchemaRemoveTx(conn *sqlx.Tx, tenantID int) error {
+	query := "SELECT public.fn_schema_remove($1);"
+
+	if _, err := conn.Exec(query, tenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFDataCreateFromTemplates(conn *sqlx.DB, tenantID int) error {
+	query := "SELECT public.fn_data_create_from_templates($1);"
+
+	if _, err := conn.Exec(query, tenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+func ExecSFDataCreateFromTemplatesTx(conn *sqlx.Tx, tenantID int) error {
+	query := "SELECT public.fn_data_create_from_templates($1);"
+
+	if _, err := conn.Exec(query, tenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 

@@ -6,6 +6,7 @@ type Parameter struct {
 	OrgID    string `db:"org_id"`
 	Name     string `db:"name"`
 	Value    string `db:"value"`
+	Type     string `db:"type"`
 }
 
 type Parameters []Parameter

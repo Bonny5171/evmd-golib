@@ -33,7 +33,7 @@ func GetParameters(conn *sqlx.DB, tenantId int, pType ParameterType) (p model.Pa
 	var a []interface{}
 
 	sb.WriteString(`
-		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value, p.description 
+		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value 
 		  FROM public."parameter" p
 		  JOIN public.tenant      t ON p.tenant_id = t.id
 		 WHERE p.tenant_id = $1 
@@ -58,7 +58,7 @@ func GetParameters(conn *sqlx.DB, tenantId int, pType ParameterType) (p model.Pa
 // GetParameter retorna o parametro informado (paramName) de uma determinada org (tenant_id) do Salesforce
 func GetParameter(conn *sqlx.DB, tenantId int, paramName string) (p model.Parameter, err error) {
 	query := `
-		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value, p.description 
+		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value 
 		  FROM public."parameter" p
 		  JOIN public.tenant      t ON p.tenant_id = t.id
 		 WHERE p.tenant_id = $1 
@@ -78,7 +78,7 @@ func GetParameter(conn *sqlx.DB, tenantId int, paramName string) (p model.Parame
 // GetParametersByOrgID retorna os parametros de uma determinada org (orgID) do Salesforce
 func GetParametersByOrgID(conn *sqlx.DB, orgID string) (p model.Parameters, err error) {
 	query := `
-		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value, p.description 
+		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value 
 		  FROM public."parameter" p 
 		  JOIN public.tenant      t ON p.tenant_id = t.id
 		 WHERE t.org_id = $1
@@ -96,7 +96,7 @@ func GetParametersByOrgID(conn *sqlx.DB, orgID string) (p model.Parameters, err 
 // GetParameterByOrgID retorna o parametro informado (paramName) de uma determinada org (orgID) do Salesforce
 func GetParameterByOrgID(conn *sqlx.DB, orgID, paramName string) (p model.Parameter, err error) {
 	query := `
-		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value, p.description 
+		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value 
 		  FROM public."parameter" p 
 		  JOIN public.tenant      t ON p.tenant_id = t.id
 		 WHERE t.org_id = $1
@@ -132,6 +132,34 @@ func UpdateParameter(conn *sqlx.DB, param model.Parameter) error {
 
 // UpdateParameters atualiza o parametro de uma determinada org (tenant_id)
 func UpdateParameters(conn *sqlx.DB, params []model.Parameter) error {
+	if len(params) == 0 {
+		return errors.New("no parameters to save")
+	}
+
+	query := `
+		INSERT INTO public."parameter" (tenant_id, "name", value) 
+		VALUES ($1, $2, $3)
+		ON CONFLICT (tenant_id, "name")
+		DO UPDATE SET 
+		  value = EXCLUDED.value,
+		  updated_at = now();`
+
+	stmt, err := conn.Preparex(query)
+	if err != nil {
+		return db.WrapError(err, "conn.Preparex()")
+	}
+
+	for _, p := range params {
+		if _, err := stmt.Exec(p.TenantID, p.Name, p.Value); err != nil {
+			return db.WrapError(err, "stmt.Exec()")
+		}
+	}
+
+	return nil
+}
+
+// UpdateParametersTx atualiza o parametro de uma determinada org (tenant_id)
+func UpdateParametersTx(conn *sqlx.Tx, params []model.Parameter) error {
 	if len(params) == 0 {
 		return errors.New("no parameters to save")
 	}
