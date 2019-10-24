@@ -1,17 +1,12 @@
 package model
 
-import (
-	"database/sql"
-)
-
 type Parameter struct {
-	ID          int            `db:"id"`
-	TenantID    int            `db:"tenant_id"`
-	OrgID       string         `db:"org_id"`
-	Name        string         `db:"name"`
-	Value       string         `db:"value"`
-	Type        string         `db:"type"`
-	Description sql.NullString `db:"description"`
+	ID       int    `db:"id"`
+	TenantID int    `db:"tenant_id"`
+	OrgID    string `db:"org_id"`
+	Name     string `db:"name"`
+	Value    string `db:"value"`
+	Type     string `db:"type"`
 }
 
 type Parameters []Parameter

@@ -1,8 +1,7 @@
 package sf
 
 import (
-	"database/sql"
-	"fmt"
+	"os"
 
 	force "bitbucket.org/everymind/gforce/lib"
 	"github.com/jmoiron/sqlx"
@@ -10,12 +9,7 @@ import (
 
 	"bitbucket.org/everymind/evmd-golib/db/dao"
 	"bitbucket.org/everymind/evmd-golib/db/model"
-	"bitbucket.org/everymind/evmd-golib/logger"
 )
-
-func NewDummyForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (*force.Force, error) {
-	return new(force.Force), nil
-}
 
 func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, err error) {
 	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil)
@@ -30,63 +24,33 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 	}
 
 	var (
-		creds            force.ForceSession
-		clientID         = p.ByName("SF_CLIENT_ID")
-		endpoint         = GetEndpoint(p.ByName("SF_ENVIRONMENT"))
-		userID           = p.ByName("SF_USER_ID")
-		instanceURL      = p.ByName("SF_INSTANCE_URL")
-		accessToken      = p.ByName("SF_ACCESS_TOKEN")
-		refreshToken     = p.ByName("SF_REFRESH_TOKEN")
-		username         = p.ByName("SF_USERNAME")
-		password         = fmt.Sprintf("%s%s", p.ByName("SF_PASSWORD"), p.ByName("SF_SECURITY_TOKEN"))
-		accessTokenLogin = p.ByName("SF_LOGIN_MODE") == "ACCESS-TOKEN"
+		creds        force.ForceSession
+		endpoint     = GetEndpoint(p.ByName("SF_ENVIRONMENT"))
+		userID       = p.ByName("SF_USER_ID")
+		instanceURL  = p.ByName("SF_INSTANCE_URL")
+		accessToken  = p.ByName("SF_ACCESS_TOKEN")
+		refreshToken = p.ByName("SF_REFRESH_TOKEN")
 	)
 
 	force.CustomEndpoint = instanceURL
 
-	if accessTokenLogin {
-		creds = force.ForceSession{
-			ClientId:      clientID,
-			AccessToken:   accessToken,
-			RefreshToken:  refreshToken,
-			InstanceUrl:   instanceURL,
-			ForceEndpoint: endpoint,
-			UserInfo: &force.UserInfo{
-				OrgId:  p[0].OrgID,
-				UserId: userID,
-			},
-			SessionOptions: &force.SessionOptions{
-				ApiVersion:    force.ApiVersion(),
-				RefreshMethod: force.RefreshOauth,
-			},
-		}
-	} else {
-		if accessToken == "" {
-			creds, err = force.ForceSoapLogin(endpoint, username, password)
-			if err != nil {
-				err = errors.Wrap(err, "force.ForceSoapLogin()")
-				return
-			}
+	creds = force.ForceSession{
+		AccessToken:   accessToken,
+		RefreshToken:  refreshToken,
+		InstanceUrl:   instanceURL,
+		ForceEndpoint: endpoint,
+		UserInfo: &force.UserInfo{
+			OrgId:  p[0].OrgID,
+			UserId: userID,
+		},
+		SessionOptions: &force.SessionOptions{
+			ApiVersion:    force.ApiVersion(),
+			RefreshMethod: force.RefreshOauth,
+		},
+	}
 
-			if e := UpdateOrgCredentials(conn, tid, f.Credentials); e != nil {
-				e = errors.Wrap(e, "UpdateOrgCredentials()")
-				logger.Errorln(e)
-			}
-		} else {
-			creds = force.ForceSession{
-				ClientId:      clientID,
-				AccessToken:   accessToken,
-				InstanceUrl:   instanceURL,
-				ForceEndpoint: endpoint,
-				UserInfo: &force.UserInfo{
-					OrgId:  p[0].OrgID,
-					UserId: userID,
-				},
-				SessionOptions: &force.SessionOptions{
-					ApiVersion: force.ApiVersion(),
-				},
-			}
-		}
+	if len(os.Getenv("SF_CLIENT_ID")) > 0 {
+		creds.ClientId = os.Getenv("SF_CLIENT_ID")
 	}
 
 	f = force.NewForce(&creds)
@@ -94,9 +58,8 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 	return f, nil
 }
 
-func NewForceByUser(orgID, clientID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
+func NewForceByUser(orgID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
 	creds := force.ForceSession{
-		ClientId:      clientID,
 		AccessToken:   accessToken,
 		RefreshToken:  refreshToken,
 		InstanceUrl:   instanceURL,
@@ -109,6 +72,10 @@ func NewForceByUser(orgID, clientID, userID, accessToken, refreshToken, instance
 			ApiVersion:    force.ApiVersion(),
 			RefreshMethod: force.RefreshOauth,
 		},
+	}
+
+	if len(os.Getenv("SF_CLIENT_ID")) > 0 {
+		creds.ClientId = os.Getenv("SF_CLIENT_ID")
 	}
 
 	f = force.NewForce(&creds)
@@ -124,24 +91,14 @@ func UpdateOrgCredentials(conn *sqlx.DB, tid int, f *force.ForceSession) error {
 		TenantID: tid,
 		Name:     "SF_ACCESS_TOKEN",
 		Value:    f.AccessToken,
-		Description: sql.NullString{
-			Valid:  true,
-			String: "Salesforce access token",
-		},
-		Type: "s",
 	}
 	params = append(params, accessToken)
 
-	// orgID
+	// refresh token
 	orgID := model.Parameter{
 		TenantID: tid,
-		Name:     "SF_ORG_ID",
-		Value:    f.UserInfo.OrgId,
-		Description: sql.NullString{
-			Valid:  true,
-			String: "Salesforce Org ID",
-		},
-		Type: "s",
+		Name:     "SF_REFRESH_TOKEN",
+		Value:    f.RefreshToken,
 	}
 	params = append(params, orgID)
 
@@ -150,11 +107,6 @@ func UpdateOrgCredentials(conn *sqlx.DB, tid int, f *force.ForceSession) error {
 		TenantID: tid,
 		Name:     "SF_USER_ID",
 		Value:    f.UserInfo.UserId,
-		Description: sql.NullString{
-			Valid:  true,
-			String: "Salesforce User ID",
-		},
-		Type: "s",
 	}
 	params = append(params, userID)
 
@@ -163,11 +115,6 @@ func UpdateOrgCredentials(conn *sqlx.DB, tid int, f *force.ForceSession) error {
 		TenantID: tid,
 		Name:     "SF_INSTANCE_URL",
 		Value:    f.InstanceUrl,
-		Description: sql.NullString{
-			Valid:  true,
-			String: "Salesforce Instance URL",
-		},
-		Type: "s",
 	}
 	params = append(params, instanceURL)
 

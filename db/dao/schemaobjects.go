@@ -41,14 +41,14 @@ func GetSchemaObjects(conn *sqlx.DB, tenantID, schemaObjectID int) (s model.Sche
 	return s, nil
 }
 
-func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID, schemaObjectID int, schemaType SchemaType) (s model.SchemaObjectToProcesses, err error) {
+func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, schemaObjectName string, schemaType SchemaType) (s model.SchemaObjectToProcesses, err error) {
 	const query = `
 		SELECT v.id, v.schema_id, v.schema_name, v.tenant_id, t."name" AS tenant_name, v."type", v.sf_object_id, v.sf_object_name, v.doc_fields, 
 		       v."sequence", v.filter, v.raw_command, v.sf_last_modified_date, v.layoutable, v.compactlayoutable, v.listviewable
 		  FROM itgr.vw_schemas_objects v
 		 INNER JOIN public.tenant t ON v.tenant_id = t.id
 		 WHERE v.tenant_id = $1 
-		   AND v.schema_id = $2 
+		   AND v.schema_name = $2 
 		   AND v."type" = $3 
 		   AND v.is_active = TRUE
 		   AND v.is_deleted = FALSE
@@ -56,7 +56,7 @@ func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID, schemaObjectID int, sche
 		   AND (v.sf_object_id IS NOT NULL AND v.raw_command IS NULL) OR (v.sf_object_id IS NULL AND v.raw_command IS NOT NULL)
 		 ORDER BY v."sequence", v.sf_object_id;`
 
-	err = conn.Select(&s, query, tenantID, schemaObjectID, schemaType.String())
+	err = conn.Select(&s, query, tenantID, schemaObjectName, schemaType.String())
 	if err != nil {
 		return nil, db.WrapError(err, "conn.Select()")
 	}

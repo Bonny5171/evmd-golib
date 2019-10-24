@@ -11,7 +11,7 @@ func GetEndpoint(e string) force.ForceEndpoint {
 	switch strings.ToLower(e) {
 	case "prerelease":
 		return force.EndpointPrerelease
-	case "test", "qa":
+	case "test", "qa", "sandbox":
 		return force.EndpointTest
 	case "mobile":
 		return force.EndpointMobile1
