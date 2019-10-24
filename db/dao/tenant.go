@@ -34,7 +34,8 @@ func GetTenant(conn *sqlx.DB, orgID string) (tenant model.Tenant, err error) {
 	const query = `
 		SELECT id, company_id, name, org_id, organization_type, custom_domain, is_sandbox, is_active, is_deleted
 		FROM public.tenant
-		WHERE LEFT(org_id, 15) = LEFT($1, 15)
+		WHERE LOWER(LEFT(org_id, 15)) = LOWER(LEFT($1, 15)) AND is_deleted = FALSE
+		ORDER BY id DESC
 		LIMIT 1;`
 
 	if e := conn.QueryRowx(query, orgID).StructScan(&tenant); e != nil {
@@ -80,8 +81,6 @@ func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceUrl, orga
 	const query = `
 		INSERT INTO public.tenant (id, "name", company_id, org_id, custom_domain, organization_type, is_sandbox, last_modified_by_id, is_active) 
 		VALUES(fn_next_tenant_id(), $1, $2, $3, $4, $5, $6, $7, true) 
-		ON CONFLICT (org_id, is_active) DO 
-		UPDATE SET "name" = EXCLUDED."name", custom_domain = EXCLUDED.custom_domain, organization_type = EXCLUDED.organization_type, is_sandbox = EXCLUDED.is_sandbox, updated_at = NOW()
 		RETURNING id;`
 
 	var customDomain string
@@ -137,10 +136,10 @@ func SaveBusinessTenantTx(conn *sqlx.Tx, tenantID int, name, orgID, userID strin
 	return nil
 }
 
-func CheckTenantAvailability(conn *sqlx.DB, orgID string) (ok bool, err error) {
-	query := `SELECT CASE WHEN count(*) = 0 THEN true ELSE false END AS in_use FROM public.tenant WHERE org_id = $1 AND is_active = TRUE AND is_deleted = FALSE;`
+func CheckTenantAvailability(conn *sqlx.DB, orgID string) (inUse bool, err error) {
+	query := `SELECT CASE WHEN count(*) > 0 THEN true ELSE false END AS in_use FROM public.tenant WHERE LOWER(LEFT(org_id, 15)) = LOWER(LEFT($1, 15)) AND is_deleted = FALSE;`
 
-	if e := conn.QueryRow(query, orgID).Scan(&ok); e != nil {
+	if e := conn.QueryRow(query, orgID).Scan(&inUse); e != nil {
 		err = db.WrapError(e, "row.Scan()")
 		return
 	}
