@@ -19,7 +19,7 @@ type Payload struct {
 }
 
 func ParsePayload(args ...interface{}) (p Payload, err error) {
-	if len(args) <= 8 {
+	if len(args) < 8 {
 		return p, errors.Wrap(err, "wrong number of args")
 	}
 
