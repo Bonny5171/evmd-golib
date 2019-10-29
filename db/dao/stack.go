@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"strings"
 
 	"bitbucket.org/everymind/evmd-golib/db"
@@ -9,20 +8,35 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func GetStack(conn *sqlx.DB, stack, key string, debug bool) (mid model.Stack, err error) {
-	query := strings.Builder{}
-	query.WriteString("SELECT id, \"name\", convert_from(decrypt(dsn::bytea,$1,'bf'),'SQL_ASCII') dsn FROM public.stack WHERE is_deleted = FALSE")
+type TenantType int
 
-	if debug {
-		query.WriteString(fmt.Sprintf(" AND is_active = FALSE AND lower(\"name\") LIKE ('debug:%s%%')", stack))
-	} else {
-		query.WriteString(fmt.Sprintf(" AND is_active = TRUE AND lower(\"name\") = '%s')", stack))
+const (
+	EnumTenentJob TenantType = iota
+	EnumTenentAPI
+	EnumTenentDebug
+)
+
+func GetStack(conn *sqlx.DB, stack string, tenantType TenantType) (mid model.Stack, err error) {
+	query := strings.Builder{}
+	query.WriteString(`
+		SELECT s.id, s."name", d.string AS dsn 
+		  FROM public.stack   s
+		 INNER JOIN public.dsn d ON s.id = d.stack_id
+		 WHERE s.is_active = TRUE 
+		   AND s.is_deleted = FALSE`)
+
+	switch tenantType {
+	case EnumTenentJob:
+		query.WriteString(` AND upper(d."type") = 'JOB'`)
+	case EnumTenentAPI:
+		query.WriteString(` AND upper(d."type") = 'API'`)
+	case EnumTenentDebug:
+		query.WriteString(` AND upper(d."type") = 'DEBUG'`)
 	}
 
-	query.WriteString(" LIMIT 1;")
+	query.WriteString(` AND upper(s."name") = $1 LIMIT 1;`)
 
-	q := query.String()
-	err = conn.Get(&mid, q, key)
+	err = conn.Get(&mid, query.String(), strings.ToUpper(stack))
 	if err != nil {
 		return mid, db.WrapError(err, "conn.Get()")
 	}
@@ -30,17 +44,25 @@ func GetStack(conn *sqlx.DB, stack, key string, debug bool) (mid model.Stack, er
 	return mid, nil
 }
 
-func GetAllStacks(conn *sqlx.DB, key string, debug bool) (mid []model.Stack, err error) {
+func GetAllStacks(conn *sqlx.DB, tenantType TenantType) (mid []model.Stack, err error) {
 	query := strings.Builder{}
-	query.WriteString(`SELECT id, "name", convert_from(decrypt(dsn::bytea,$1,'bf'),'SQL_ASCII') dsn FROM public.stack WHERE is_deleted = FALSE`)
+	query.WriteString(`
+		SELECT s.id, s."name", d.string AS dsn 
+		  FROM public.stack   s
+		 INNER JOIN public.dsn d ON s.id = d.stack_id
+		 WHERE s.is_active = TRUE 
+		   AND s.is_deleted = FALSE`)
 
-	if debug {
-		query.WriteString(` AND is_active = FALSE AND lower("name") LIKE ('debug:%');`)
-	} else {
-		query.WriteString(` AND is_active = TRUE;`)
+	switch tenantType {
+	case EnumTenentJob:
+		query.WriteString(` AND upper(d."type") = 'JOB'`)
+	case EnumTenentAPI:
+		query.WriteString(` AND upper(d."type") = 'API'`)
+	case EnumTenentDebug:
+		query.WriteString(` AND upper(d."type") = 'DEBUG'`)
 	}
 
-	if err = conn.Select(&mid, query.String(), key); err != nil {
+	if err = conn.Select(&mid, query.String()); err != nil {
 		return mid, db.WrapError(err, "conn.Select()")
 	}
 

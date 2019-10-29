@@ -19,7 +19,7 @@ func GetSchedules(conn *sqlx.DB, tenantID, stackID int) (s []model.JobScheduler,
 	   INNER JOIN public.tenant   t ON j.tenant_id = t.id
 	   WHERE j.tenant_id = $1
 		 AND j.stack_id = $2
-		 AND t.is_active = TRUE
+		 AND t.is_deleted = FALSE
 	   ORDER BY j.id;`
 
 	err = conn.Select(&s, query, tenantID, stackID)
@@ -40,7 +40,7 @@ func GetSchedulesByOrg(conn *sqlx.DB, orgID string, stackID int) (s []model.JobS
 	   INNER JOIN public.tenant   t ON j.tenant_id = t.id
 	   WHERE t.org_id = $1
 		 AND j.stack_id = $2
-		 AND t.is_active = TRUE
+		 AND t.is_deleted = FALSE
 	   ORDER BY j.id;`
 
 	err = conn.Select(&s, query, orgID, stackID)
