@@ -11,6 +11,22 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
+// GetSFObject
+func GetSFObject(conn *sqlx.DB, tid int, objectName string) (o model.SFObject, err error) {
+	const query = `
+		SELECT id, tenant_id, sf_object_name, doc_describe, doc_meta_data
+		  FROM itgr.sf_object 
+		 WHERE tenant_id = $1 AND is_active = TRUE AND is_deleted = FALSE AND sf_object_name = $2 
+		 LIMIT 1;`
+
+	if err = conn.Get(&o, query, tid, objectName); err != nil {
+		err = db.WrapError(err, "conn.Get()")
+		return
+	}
+
+	return
+}
+
 func SaveSFObject(conn *sqlx.DB, obj model.SFObject) (id int, err error) {
 	t := time.Now()
 
