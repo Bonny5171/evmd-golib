@@ -154,7 +154,7 @@ func GetDeviceDataUsersToProcess(conn *sqlx.DB, tid int, execID int64) (d []stri
 
 func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int) error {
 	query := `UPDATE public.device_data
-	          SET execution_id = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN $2 ELSE execution_id END
+	          SET execution_id = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN $2 ELSE execution_id END, updated_at = now()
   	          WHERE tenant_id = $3 AND is_active = TRUE AND is_deleted = FALSE;`
 
 	if _, err := conn.Exec(query, retry, execID, tid); err != nil {
@@ -165,8 +165,23 @@ func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int) e
 }
 
 func DeactivateDeviceDataRows(conn *sqlx.DB, tid int, retry int) error {
-	query := `UPDATE public.device_data SET is_active = public.fn_check_retry(try,$1)
-  	          WHERE tenant_id = $2 AND is_active = TRUE AND is_deleted = FALSE;`
+	query := `
+		WITH b AS (
+			WITH a AS (
+				SELECT id,group_id,public.fn_check_retry(try,$1) AS retry
+				FROM public.device_data
+				WHERE tenant_id = $2
+				AND is_active = TRUE
+				AND is_deleted = FALSE
+			)
+			SELECT DISTINCT a.group_id
+			FROM a
+			WHERE a.retry = FALSE
+		)
+		UPDATE public.device_data d
+		SET is_active = FALSE 
+		FROM b
+		WHERE b.group_id = d.group_id;`
 
 	if _, err := conn.Exec(query, retry, tid); err != nil {
 		return db.WrapError(err, "conn.Exec()")
@@ -177,7 +192,7 @@ func DeactivateDeviceDataRows(conn *sqlx.DB, tid int, retry int) error {
 
 func SetTryDeviceDataRows(conn *sqlx.DB, id string, retry int) (try int, err error) {
 	query := `UPDATE public.device_data 
-			  SET try = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN try + 1 ELSE try END
+			  SET try = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN try + 1 ELSE try END, updated_at = now()
 			  WHERE id = $2 
 			  RETURNING try;`
 
@@ -214,8 +229,8 @@ func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 }
 
 func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, statusID int16) (id int64, err error) {
-	query := `INSERT INTO itgr.device_data_log (original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,action_type,sf_id,original_json_data,app_id,execution_id,status_id,external_id,group_id,try,created_at,updated_at) 
-			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW())
+	query := `INSERT INTO itgr.device_data_log (original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,action_type,sf_id,original_json_data,app_id,execution_id,status_id,external_id,group_id,sequential,try,created_at,updated_at) 
+			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW())
 			  RETURNING id;`
 
 	params := make([]interface{}, 0)
@@ -235,7 +250,8 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 	params = append(params, statusID)            // 14
 	params = append(params, obj.ExternalID)      // 15
 	params = append(params, obj.GroupID)         // 16
-	params = append(params, obj.Try)             // 17
+	params = append(params, obj.Sequential)      // 17
+	params = append(params, obj.Try)             // 18
 
 	if e := conn.QueryRowx(query, params...).Scan(&id); e != nil {
 		err = db.WrapError(e, "conn.QueryRowx(query, params...).Scan(&id)")
