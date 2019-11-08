@@ -41,6 +41,7 @@ type DeviceData struct {
 	DeviceID        sql.NullString `db:"device_id"`
 	DeviceCreatedAt time.Time      `db:"device_created_at"`
 	GroupID         sql.NullString `db:"group_id"`
+	Sequential      sql.NullInt64  `db:"sequential"`
 	Try             int            `db:"try"`
 	IsActive        bool           `db:"is_active"`
 	IsDeleted       bool           `db:"is_deleted"`

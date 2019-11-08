@@ -87,9 +87,9 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	// Verifying concurrency
 	if payload.AllowsConcurrency == false {
 		//Checking if this job is executing
-		executing, err := dao.ExecSFCheckJobsExection(connData, payload.TenantID, jobInfo.ID, "processing")
+		executing, err := dao.ExecSFCheckJobsExecution(connData, payload.TenantID, jobInfo.ID, "processing")
 		if err != nil {
-			return exec.LogError(errorHandler(err, "dao.ExecSFCheckJobsExection()"))
+			return exec.LogError(errorHandler(err, "dao.ExecSFCheckJobsExecution()"))
 		}
 
 		if executing {
