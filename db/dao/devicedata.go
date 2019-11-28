@@ -14,7 +14,7 @@ func GetDevices(conn *sqlx.DB, tid int, execID int64) (d []model.Device, err err
 			    FROM public.device_data d
 			   WHERE d.tenant_id = $1
 			     AND d.is_active = TRUE
-			     AND d.is_deleted = false
+			     AND d.is_deleted = FALSE
 			     AND d.execution_id = $2
 			   GROUP BY d.device_id;`
 
@@ -31,7 +31,7 @@ func GetDevicesByGroupAndTables(conn *sqlx.DB, tid int, execID int64) (d []model
 			    FROM public.device_data d
 			   WHERE d.tenant_id = $1
 			     AND d.is_active = TRUE
-			     AND d.is_deleted = false
+			     AND d.is_deleted = FALSE
 			     AND d.execution_id = $2
 			   GROUP BY d.device_id, d.group_id, d.table_name;`
 
@@ -48,7 +48,7 @@ func GetDeviceByIdGroupedByGroupAndTables(conn *sqlx.DB, tid int, execID int64, 
 			    FROM public.device_data d
 			   WHERE d.tenant_id = $1
 			     AND d.is_active = TRUE
-			     AND d.is_deleted = false
+			     AND d.is_deleted = FALSE
 			     AND d.execution_id = $2
 			     AND d.device_id = $3
 			   GROUP BY d.device_id, d.group_id, d.table_name;`
@@ -64,7 +64,7 @@ func GetDeviceByIdGroupedByGroupAndTables(conn *sqlx.DB, tid int, execID int64, 
 func GetDeviceDataTables(conn *sqlx.DB, tid int, execID int64) (t []*model.DeviceTableField, err error) {
 	query := `SELECT o.id AS sf_object_id, 
 			         o.sf_object_name, 
-			         'sf_'::text || fn_snake_case(o.sf_object_name) AS sfa_table_name, 
+			         o.sfa_name AS sfa_table_name, 
 			         f.from_to_fields, 
 			         pk.sf_field_name AS primary_key, 
 			         e.sf_field_name AS external_id
@@ -72,8 +72,7 @@ func GetDeviceDataTables(conn *sqlx.DB, tid int, execID int64) (t []*model.Devic
 			   INNER JOIN itgr.vw_sf_object_fields_from_to f ON o.tenant_id = f.tenant_id AND o.id = f.sf_object_id
 			   INNER JOIN itgr.sf_object_field pk ON o.tenant_id = pk.tenant_id AND o.id = pk.sf_object_id AND  sf_type = 'id'
 			    LEFT JOIN itgr.sf_object_field e ON o.tenant_id = e.tenant_id AND o.id = e.sf_object_id AND e.sf_external_id = TRUE AND e.sfa_external_id = TRUE
-			   WHERE 'sf_'||fn_snake_case(o.sf_object_name) 
-			      IN (SELECT DISTINCT table_name FROM public.device_data WHERE tenant_id = $1 AND is_active = TRUE AND execution_id = $2);`
+			   WHERE o.sfa_name IN (SELECT DISTINCT table_name FROM public.device_data WHERE tenant_id = $1 AND is_active = TRUE AND execution_id = $2);`
 
 	err = conn.Select(&t, query, tid, execID)
 	if err != nil {
@@ -129,7 +128,7 @@ func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
 					 to_jsonb(regexp_replace(d.json_data, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g')::jsonb) AS json_data, 
 					 d.app_id, d.device_id, d.device_created_at, d.group_id, d.try, d.is_active, d.is_deleted
 			  FROM public.device_data d
-			  INNER JOIN itgr.sf_object o ON d.tenant_id = o.tenant_id AND d.table_name = 'sf_'::text || fn_snake_case(o.sf_object_name)
+			  INNER JOIN itgr.sf_object o ON d.tenant_id = o.tenant_id AND d.table_name = o.sfa_name
 			  WHERE d.id = $1
 			  LIMIT 1;`
 
