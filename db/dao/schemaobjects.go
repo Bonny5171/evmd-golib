@@ -30,7 +30,9 @@ func GetSchemaObjects(conn *sqlx.DB, tenantID, schemaObjectID int) (s model.Sche
 	const query = `SELECT id, schema_id, sf_object_id, sf_object_name, sequence, raw_command 
 				     FROM itgr.schema_object 
 				    WHERE tenant_id = $1 
-				      AND schema_id = $2
+					  AND schema_id = $2
+					  AND is_active = TRUE
+					  AND is_deleted = FALSE
 				    ORDER BY "sequence", id;`
 
 	err = conn.Select(&s, query, tenantID, schemaObjectID)

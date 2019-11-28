@@ -28,7 +28,7 @@ func (t ParameterType) String() string {
 }
 
 // GetParameters retorna os parametros de uma determinada org (tenant_id) do Salesforce
-func GetParameters(conn *sqlx.DB, tenantId int, pType ParameterType) (p model.Parameters, err error) {
+func GetParameters(conn *sqlx.DB, tenantID int, pType ParameterType) (p model.Parameters, err error) {
 	sb := strings.Builder{}
 	var a []interface{}
 
@@ -40,7 +40,7 @@ func GetParameters(conn *sqlx.DB, tenantId int, pType ParameterType) (p model.Pa
 		   AND p.is_active = true 
 		   AND p.is_deleted = false`)
 
-	a = append(a, tenantId)
+	a = append(a, tenantID)
 
 	if pType != EnumParamNil {
 		sb.WriteString(" AND type = $2")
@@ -48,44 +48,6 @@ func GetParameters(conn *sqlx.DB, tenantId int, pType ParameterType) (p model.Pa
 	}
 
 	err = conn.Select(&p, sb.String(), a...)
-	if err != nil {
-		return nil, db.WrapError(err, "conn.Select()")
-	}
-
-	return p, nil
-}
-
-// GetParameter retorna o parametro informado (paramName) de uma determinada org (tenant_id) do Salesforce
-func GetParameter(conn *sqlx.DB, tenantId int, paramName string) (p model.Parameter, err error) {
-	query := `
-		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value 
-		  FROM public."parameter" p
-		  JOIN public.tenant      t ON p.tenant_id = t.id
-		 WHERE p.tenant_id = $1 
-		   AND p."name" = $2
-		   AND p.is_active = true 
-		   AND p.is_deleted = false
-		 LIMIT 1;`
-
-	err = conn.Get(&p, query, tenantId, paramName)
-	if err != nil {
-		return p, db.WrapError(err, "conn.Get()")
-	}
-
-	return p, nil
-}
-
-// GetParametersByOrgID retorna os parametros de uma determinada org (orgID) do Salesforce
-func GetParametersByOrgID(conn *sqlx.DB, orgID string) (p model.Parameters, err error) {
-	query := `
-		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value 
-		  FROM public."parameter" p 
-		  JOIN public.tenant      t ON p.tenant_id = t.id
-		 WHERE t.org_id = $1
-		   AND p.is_active = true 
-		   AND p.is_deleted = false;`
-
-	err = conn.Select(&p, query, orgID)
 	if err != nil {
 		return nil, db.WrapError(err, "conn.Select()")
 	}
@@ -181,6 +143,23 @@ func UpdateParametersTx(conn *sqlx.Tx, params []model.Parameter) error {
 		if _, err := stmt.Exec(p.TenantID, p.Name, p.Value); err != nil {
 			return db.WrapError(err, "stmt.Exec()")
 		}
+	}
+
+	return nil
+}
+
+// UpdateStackParameterTx atualiza o parametro de uma determinada org (tenant_id)
+func UpdateStackParameterTx(conn *sqlx.Tx, param model.Parameter) error {
+	query := `
+		INSERT INTO public."parameter" (id, tenant_id, value, "type") 
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (id, tenant_id, app_id, record_type_id)
+		DO UPDATE SET 
+		  value = EXCLUDED.value,
+		  updated_at = now();`
+
+	if _, err := conn.Exec(query, param.Name, param.TenantID, param.Value, param.Type); err != nil {
+		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
