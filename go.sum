@@ -1,5 +1,5 @@
-bitbucket.org/everymind/gforce v1.3.3 h1:Z46kjhhZNuTcS/QSCOZ673hAuEBL328zt2+WGaJjaF0=
-bitbucket.org/everymind/gforce v1.3.3/go.mod h1:H5dXtjuxpVQpKUXMym9UUpWOI7mBC5DnVjSEeaOC+z8=
+bitbucket.org/everymind/gforce v1.3.4 h1:BE4NSJgKo2JoxKCBn5+DrIV+sJOwSyJBoY3X5TSU7vo=
+bitbucket.org/everymind/gforce v1.3.4/go.mod h1:H5dXtjuxpVQpKUXMym9UUpWOI7mBC5DnVjSEeaOC+z8=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/apex/log v1.1.0/go.mod h1:yA770aXIDQrhVOIGurT/pVdfCpSq1GQV/auzMN5fzvY=
 github.com/benbjohnson/ego v0.3.0/go.mod h1:6Qzj43pKX58WdlHDZKZS4Q/XXYwz6toIqXqNjzt4mNA=
