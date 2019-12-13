@@ -3,7 +3,7 @@ module bitbucket.org/everymind/evmd-golib
 go 1.12
 
 require (
-	bitbucket.org/everymind/gforce v1.3.4
+	bitbucket.org/everymind/gforce v1.3.5
 	github.com/contribsys/faktory v1.1.0-2
 	github.com/contribsys/faktory_worker_go v0.8.0
 	github.com/go-chi/chi v4.0.2+incompatible // indirect
