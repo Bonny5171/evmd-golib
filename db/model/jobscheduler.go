@@ -22,4 +22,5 @@ type JobScheduler struct {
 	Description       sql.NullString `db:"description"`
 	IsActive          bool           `db:"is_active"`
 	IsDeleted         bool           `db:"is_deleted"`
+	AppEngineName     string         `db:"appengine_name"`
 }

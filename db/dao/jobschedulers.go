@@ -14,7 +14,7 @@ func GetSchedules(conn *sqlx.DB, tenantID, stackID int) (s []model.JobScheduler,
 	query := `
 	  SELECT j.id, t.org_id, j.tenant_id, t."name" AS tenant_name, j.stack_id, j.job_name, j.function_name, j.queue, 
 			 j.cron, j.parameters, j.retry, j.allows_concurrency, j.allows_schedule, j.schedule_time, j.description, 
-			 j.is_active, j.is_deleted 
+			 j.is_active, j.is_deleted, j.appengine_name
 	    FROM public.job_scheduler j
 	   INNER JOIN public.tenant   t ON j.tenant_id = t.id
 	   WHERE j.tenant_id = $1
@@ -35,7 +35,7 @@ func GetSchedulesByOrg(conn *sqlx.DB, orgID string, stackID int) (s []model.JobS
 	query := `
 	  SELECT j.id, t.org_id, j.tenant_id, t."name" AS tenant_name, j.stack_id, j.job_name, j.function_name, j.queue, 
 			 j.cron, j.parameters, j.retry, j.allows_concurrency, j.allows_schedule, j.schedule_time, j.description, 
-			 j.is_active, j.is_deleted 
+			 j.is_active, j.is_deleted, j.appengine_name
 	    FROM public.job_scheduler j
 	   INNER JOIN public.tenant   t ON j.tenant_id = t.id
 	   WHERE t.org_id = $1
@@ -56,7 +56,7 @@ func GetJob(conn *sqlx.DB, tenantID, stackID int, name string) (s model.JobSched
 	query := `
 	  SELECT j.id, t.org_id, j.tenant_id, t."name" AS tenant_name, j.stack_id, j.job_name, j.function_name, j.queue, 
 			 j.cron, j.parameters, j.retry, j.allows_concurrency, j.allows_schedule, j.schedule_time, j.description, 
-			 j.is_active, j.is_deleted 
+			 j.is_active, j.is_deleted, j.appengine_name
 	    FROM public.job_scheduler j
 	   INNER JOIN public.tenant   t ON j.tenant_id = t.id
 	   WHERE j.tenant_id = $1
@@ -78,7 +78,7 @@ func GetJobByFuncQueue(conn *sqlx.DB, tenantID int, stackName, funcName, queue s
 	query := `
 	  SELECT j.id, t.org_id, j.tenant_id, t."name" AS tenant_name, j.stack_id, j.job_name, j.function_name, j.queue, 
 			 j.cron, j.parameters, j.retry, j.allows_concurrency, j.allows_schedule, j.schedule_time, j.description, 
-			 j.is_active, j.is_deleted 
+			 j.is_active, j.is_deleted, j.appengine_name
 	    FROM public.job_scheduler j
 	   INNER JOIN public.tenant   t ON j.tenant_id = t.id
 	   INNER JOIN public.stack    s ON j.stack_id = s.id
@@ -102,7 +102,7 @@ func GetJobByID(conn *sqlx.DB, jobID int64) (s model.JobScheduler, err error) {
 	query := `
 	  SELECT j.id, t.org_id, j.tenant_id, t."name" AS tenant_name, j.stack_id, j.job_name, j.function_name, j.queue, 
 	         j.cron, j.parameters, j.retry, j.allows_concurrency, j.allows_schedule, j.schedule_time, j.description, 
-	         j.is_active, j.is_deleted 
+	         j.is_active, j.is_deleted, j.appengine_name
 	    FROM public.job_scheduler j
 	   INNER JOIN public.tenant   t ON j.tenant_id = t.id
 	   WHERE j.id = $1
