@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"bitbucket.org/everymind/evmd-golib/db"
@@ -19,6 +20,7 @@ import (
 
 // A map of registered matchers for searching.
 var funcs = make(map[string]Function)
+var wg *sync.WaitGroup
 
 type Function interface {
 	Handler(ctx worker.Context, args ...interface{}) error
@@ -30,8 +32,12 @@ func Get() map[string]Function {
 	return funcs
 }
 
+func SetWG(waitgroup *sync.WaitGroup) {
+	wg = waitgroup
+}
+
 // Register is called to register a function for use by the program.
-func Register(functionName string, function Function) {
+func Add(functionName string, function Function) {
 	if _, exists := funcs[functionName]; exists {
 		log.Fatalln(functionName, "Function already registered")
 	}
@@ -42,6 +48,8 @@ func Register(functionName string, function Function) {
 
 func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) error {
 	logger.Tracef("Executing job function '%s'...\n", fnName)
+
+	wg.Add(1)
 
 	// Queue
 	queue := os.Getenv("GOWORKER_QUEUE_NAME")
@@ -126,6 +134,8 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	exec.LogExecution(dao.EnumStatusExecSuccess)
 
 	logger.Tracef("'%s' job function done!\n", fnName)
+
+	wg.Done()
 
 	return nil
 }
