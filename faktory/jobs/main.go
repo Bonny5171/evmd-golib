@@ -57,7 +57,7 @@ func (j *Job) Run() {
 	go func() {
 		sig := <-gracefulStop
 		wg.Wait()
-		logger.Warningf("Signal '%s' sended, graceful shutdown... ", sig.String())
+		logger.Warningf("Signal '%s' received, graceful shutdown... ", sig.String())
 	}()
 
 	fn.SetWG(&wg)
