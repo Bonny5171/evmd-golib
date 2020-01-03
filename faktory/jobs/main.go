@@ -29,7 +29,7 @@ type Job struct {
 	Concurrency int
 	DB          DBVars
 	Labels      []string
-	ProcessWID  string
+	WIDPrefix   string
 	Queues      []string
 }
 
@@ -57,7 +57,7 @@ func (j *Job) Run() {
 	go func() {
 		sig := <-gracefulStop
 		wg.Wait()
-		logger.Warningf("Signal %s sended, graceful shutdown." + sig.String())
+		logger.Warningf("Signal %s sended, graceful shutdown..." + sig.String())
 	}()
 
 	fn.SetWG(&wg)
@@ -117,10 +117,12 @@ func (j *Job) Run() {
 	// use up to N goroutines to execute jobs
 	mgr.Concurrency = j.Concurrency
 
-	if len(j.ProcessWID) > 0 {
-		j.Labels = append(j.Labels, j.ProcessWID)
+	if len(j.WIDPrefix) > 0 {
+		// WID
 		rand.Seed(time.Now().UnixNano())
-		mgr.ProcessWID = j.ProcessWID + "-" + strconv.FormatInt(rand.Int63(), 32)
+		mgr.ProcessWID = j.WIDPrefix + "-" + strconv.FormatInt(rand.Int63(), 32)
+		// Label
+		j.Labels = append(j.Labels, j.WIDPrefix)
 	}
 
 	// Labels to be displayed in the UI
@@ -145,26 +147,36 @@ func startWebServer() {
 		router := mux.NewRouter().StrictSlash(true)
 
 		router.HandleFunc("/_ah/health", func(w http.ResponseWriter, r *http.Request) {
-			logger.Infoln("health check done")
+			logger.Infoln("health check received")
 			w.WriteHeader(200)
+			w.Write([]byte("ok"))
 		}).Methods("GET")
 
 		router.HandleFunc("/_ah/warmup", func(w http.ResponseWriter, r *http.Request) {
-			logger.Infoln("warmup done")
+			logger.Infoln("warmup received")
 			w.WriteHeader(200)
+			w.Write([]byte("ok"))
 		}).Methods("GET")
 
 		router.HandleFunc("/_ah/start", func(w http.ResponseWriter, r *http.Request) {
-			logger.Infoln("start done")
+			logger.Infoln("start received")
 			w.WriteHeader(200)
+			w.Write([]byte("ok"))
 		}).Methods("GET")
 
 		router.HandleFunc("/_ah/stop", func(w http.ResponseWriter, r *http.Request) {
+			logger.Infoln("stop signal received")
 			w.WriteHeader(200)
+			w.Write([]byte("ok"))
 		}).Methods("GET")
 
+		port := os.Getenv("PORT")
+		if len(port) == 0 {
+			port = "80"
+		}
+
 		logger.Traceln("Starting HTTP server...")
-		if err := http.ListenAndServe(":8080", router); err != nil {
+		if err := http.ListenAndServe(":"+port, router); err != nil {
 			logger.Errorln(err)
 		}
 	}()
