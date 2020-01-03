@@ -13,7 +13,7 @@ type JobScheduler struct {
 	JobName           string         `db:"job_name"`
 	FunctionName      string         `db:"function_name"`
 	Queue             string         `db:"queue"`
-	Cron              string         `db:"cron"`
+	Cron              sql.NullString `db:"cron"`
 	Parameters        sql.NullString `db:"parameters"`
 	Retry             int16          `db:"retry"`
 	AllowsConcurrency bool           `db:"allows_concurrency"`

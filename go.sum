@@ -3,12 +3,10 @@ bitbucket.org/everymind/gforce v1.3.7/go.mod h1:H5dXtjuxpVQpKUXMym9UUpWOI7mBC5Dn
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/apex/log v1.1.0/go.mod h1:yA770aXIDQrhVOIGurT/pVdfCpSq1GQV/auzMN5fzvY=
 github.com/benbjohnson/ego v0.3.0/go.mod h1:6Qzj43pKX58WdlHDZKZS4Q/XXYwz6toIqXqNjzt4mNA=
-github.com/contribsys/faktory v1.0.1-1 h1:4kNQojQ2Z9wDX0DmvXj6H/qDOTdXn3xFuub1cpWgQhA=
-github.com/contribsys/faktory v1.0.1-1/go.mod h1:f7QV8TCzZB3O4BToF6WMuhGACIDgneOA4HprJQO75bc=
-github.com/contribsys/faktory v1.1.0-2 h1:lVre/p2HAE9Y6n21oZhQXpFLEG5zWmfbLzkN3SkSpt4=
-github.com/contribsys/faktory v1.1.0-2/go.mod h1:w43gt/7tIXBGnp4BE4LbN8E1vhtjnbI9p+/R91uG2eU=
-github.com/contribsys/faktory_worker_go v0.8.0 h1:4O8mKPMjVj0UFWO/5DBUG5z+MnARlyN90Oi5nu8cLCQ=
-github.com/contribsys/faktory_worker_go v0.8.0/go.mod h1:eYn03mwUJ4p4FHijzHp1+7/DE+WBVD/z2Yv5L6bmEN8=
+github.com/contribsys/faktory v1.2.0-1 h1:lKRKsnuneYrB3JgZDtE6cKUjUI1oTiFDYcl1FMJLkRI=
+github.com/contribsys/faktory v1.2.0-1/go.mod h1:w43gt/7tIXBGnp4BE4LbN8E1vhtjnbI9p+/R91uG2eU=
+github.com/contribsys/faktory_worker_go v1.0.0 h1:pr+3v3c/hRmWlDU+41FKTJoJRujGpX//l6UPBPwWxec=
+github.com/contribsys/faktory_worker_go v1.0.0/go.mod h1:XZMLIoJv7jXuIgmlI8p57/drlgFiqjD7ukl/JOaQ/Vk=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
@@ -25,6 +23,8 @@ github.com/go-redis/redis v0.0.0-20181009075230-daf101bd7905/go.mod h1:NAIEuMOZ/
 github.com/go-sql-driver/mysql v1.4.0 h1:7LxgVwFb2hIQtMm87NdgAVfXjnt4OePseqT1tKx+opk=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
 github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
+github.com/gorilla/mux v1.7.3 h1:gnP5JzjVOuiZD07fKKToCAOjS0yOpj/qPETTXCCS6hw=
+github.com/gorilla/mux v1.7.3/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
 github.com/jmoiron/sqlx v1.2.1-0.20190826204134-d7d95172beb5 h1:lrdPtrORjGv1HbbEvKWDUAy97mPpFm4B8hp77tcCUJY=
 github.com/jmoiron/sqlx v1.2.1-0.20190826204134-d7d95172beb5/go.mod h1:1FEQNm3xlJgrMD+FBdI9+xvCksHtbpVBBw5dYhBSsks=
 github.com/jteeuwen/go-bindata v3.0.7+incompatible/go.mod h1:JVvhzYOiGBnFSYRyV00iY8q7/0PThjIYav1p9h5dmKs=
