@@ -57,7 +57,7 @@ func (j *Job) Run() {
 	go func() {
 		sig := <-gracefulStop
 		wg.Wait()
-		logger.Warningf("Signal %s sended, graceful shutdown..." + sig.String())
+		logger.Warningf("Signal '%s' sended, graceful shutdown... ", sig.String())
 	}()
 
 	fn.SetWG(&wg)
@@ -101,11 +101,6 @@ func (j *Job) Run() {
 	// Do anything when this job is quite
 	mgr.On(worker.Quiet, func() {
 		mgr.Terminate()
-	})
-
-	// Do anything when this job is shutdown
-	mgr.On(worker.Shutdown, func() {
-		logger.Warningln("This JOB is shutting down!")
 	})
 
 	// register job types and the function to execute them
