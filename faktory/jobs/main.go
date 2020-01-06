@@ -141,6 +141,11 @@ func startWebServer() {
 	go func() {
 		router := mux.NewRouter().StrictSlash(true)
 
+		router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			w.Write([]byte("ok"))
+		}).Methods("GET")
+
 		router.HandleFunc("/_ah/health", func(w http.ResponseWriter, r *http.Request) {
 			logger.Infoln("health check received")
 			w.WriteHeader(200)
