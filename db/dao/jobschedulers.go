@@ -73,7 +73,7 @@ func GetJob(conn *sqlx.DB, tenantID, stackID int, name string) (s model.JobSched
 	return s, nil
 }
 
-// GetJob retorna os dados de um 'job'
+// GetJobByFuncQueue retorna os dados de um 'job' por function name e queue
 func GetJobByFuncQueue(conn *sqlx.DB, tenantID int, stackName, funcName, queue string) (s model.JobScheduler, err error) {
 	query := `
 	  SELECT j.id, t.org_id, j.tenant_id, t."name" AS tenant_name, j.stack_id, j.job_name, j.function_name, j.queue, 

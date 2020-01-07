@@ -31,6 +31,7 @@ func InsertExecution(conn *sqlx.DB, obj model.Execution) (r int64, err error) {
 	return r, nil
 }
 
+// UpdateExecution
 func UpdateExecution(conn *sqlx.DB, obj model.Execution) error {
 	t := time.Now()
 
@@ -43,4 +44,21 @@ func UpdateExecution(conn *sqlx.DB, obj model.Execution) error {
 	}
 
 	return nil
+}
+
+// GetLastExecutionByJobID
+func GetLastExecutionByJobID(conn *sqlx.DB, tenantID int, jobID string) (e model.Execution, err error) {
+	query := `SELECT e.id, e.tenant_id, e.job_faktory_id, e.job_scheduler_id, e.job_scheduler_name, e.schema_id, e.status_id, t.name AS status_name, e.doc_meta_data, e.is_active, e.created_at, e.updated_at, e.is_deleted, e.deleted_at 
+				FROM itgr.execution e
+			   INNER JOIN itgr.status t ON e.tenant_id = t.tenant_id AND e.status_id = t.id
+			   WHERE e.tenant_id = $1 AND e.job_faktory_id = $2
+			   ORDER BY e.id DESC
+			   LIMIT 1;`
+
+	err = conn.Get(&e, query, tenantID, jobID)
+	if err != nil {
+		return e, db.WrapError(err, "conn.Get()")
+	}
+
+	return e, nil
 }
