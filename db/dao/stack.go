@@ -44,14 +44,18 @@ func GetStack(conn *sqlx.DB, stack string, tenantType TenantType) (mid model.Sta
 	return mid, nil
 }
 
-func GetAllStacks(conn *sqlx.DB, tenantType TenantType) (mid []model.Stack, err error) {
+func GetAllStacks(conn *sqlx.DB, tenantType TenantType, setup bool) (mid []model.Stack, err error) {
 	query := strings.Builder{}
 	query.WriteString(`
 		SELECT s.id, s."name", d.string AS dsn 
-		  FROM public.stack   s
+		  FROM public.stack    s
 		 INNER JOIN public.dsn d ON s.id = d.stack_id
 		 WHERE s.is_active = TRUE 
 		   AND s.is_deleted = FALSE`)
+
+	if setup {
+		query.WriteString(` AND d.do_setup = TRUE`)
+	}
 
 	switch tenantType {
 	case EnumTenentJob:
@@ -62,7 +66,7 @@ func GetAllStacks(conn *sqlx.DB, tenantType TenantType) (mid []model.Stack, err 
 		query.WriteString(` AND upper(d."type") = 'DEBUG'`)
 	}
 
-	if err = conn.Select(&mid, query.String()); err != nil {
+	if err = conn.Select(&mid, query.String(), setup); err != nil {
 		return mid, db.WrapError(err, "conn.Select()")
 	}
 
