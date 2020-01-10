@@ -27,6 +27,7 @@ type Function interface {
 }
 
 type innerFunc = func(conn, connCfg *sqlx.DB, ctx worker.Context, payload Payload, execID int64) error
+type innerFuncNoLog = func(conn, connCfg *sqlx.DB, ctx worker.Context, payload Payload) error
 
 func Get() map[string]Function {
 	return funcs
@@ -132,6 +133,51 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	// Log success on itgr.execution table
 	logger.Traceln("Logging success on itgr.execution table")
 	exec.LogExecution(dao.EnumStatusExecSuccess)
+
+	logger.Tracef("'%s' job function done!\n", fnName)
+
+	wg.Done()
+
+	return nil
+}
+
+func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...interface{}) error {
+	logger.Tracef("Executing job function '%s'...\n", fnName)
+
+	wg.Add(1)
+
+	// Queue
+	queue := os.Getenv("GOWORKER_QUEUE_NAME")
+	if len(queue) == 0 {
+		queue = "default"
+	}
+
+	// Parse payload that come of Faktory
+	payload, err := ParsePayload(args...)
+	if err != nil {
+		return errorHandler(err, "ParsePayload()")
+	}
+
+	// Get connection with Config DB
+	var connCfg *sqlx.DB
+	if _, exists := db.Connections.List["CONFIG"]; exists {
+		logger.Traceln("Get connection with Config DB")
+		connCfg, err = db.GetConnection("CONFIG")
+		if err != nil {
+			return errorHandler(err, "db.GetConnection('CONFIG')")
+		}
+	}
+
+	// Get connection with Data DB
+	logger.Traceln("Get connection with Data DB")
+	connData, err := db.GetConnection(payload.StackName)
+	if err != nil {
+		return errorHandler(err, fmt.Sprintf("db.GetConnection('%s')", payload.StackName))
+	}
+
+	if e := fn(connData, connCfg, ctx, payload); e != nil {
+		return errorHandler(e, "fn(conn, connCfg, payload, exec.ID)")
+	}
 
 	logger.Tracef("'%s' job function done!\n", fnName)
 

@@ -148,6 +148,24 @@ func UpdateParametersTx(conn *sqlx.Tx, params []model.Parameter) error {
 	return nil
 }
 
+// UpdateStackParameter atualiza o parametro de uma determinada org (tenant_id)
+func UpdateStackParameter(conn *sqlx.DB, param model.Parameter) error {
+	query := `
+		INSERT INTO public."parameter" (id, tenant_id, value, "type") 
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (id, tenant_id, app_id, record_type_id)
+		DO UPDATE SET 
+		  value  = EXCLUDED.value,
+		  "type" = EXCLUDED."type",
+		  updated_at = now();`
+
+	if _, err := conn.Exec(query, param.Name, param.TenantID, param.Value, param.Type); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
 // UpdateStackParameterTx atualiza o parametro de uma determinada org (tenant_id)
 func UpdateStackParameterTx(conn *sqlx.Tx, param model.Parameter) error {
 	query := `
@@ -155,11 +173,70 @@ func UpdateStackParameterTx(conn *sqlx.Tx, param model.Parameter) error {
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (id, tenant_id, app_id, record_type_id)
 		DO UPDATE SET 
-		  value = EXCLUDED.value,
+		  value  = EXCLUDED.value,
+		  "type" = EXCLUDED."type",
 		  updated_at = now();`
 
 	if _, err := conn.Exec(query, param.Name, param.TenantID, param.Value, param.Type); err != nil {
 		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+// UpdateStackParameters atualiza o parametro de uma determinada org (tenant_id)
+func UpdateStackParameters(conn *sqlx.DB, params []model.Parameter) error {
+	if len(params) == 0 {
+		return errors.New("no parameters to save")
+	}
+
+	query := `
+		INSERT INTO public."parameter" (id, tenant_id, value, "type") 
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (id, tenant_id, app_id, record_type_id)
+		DO UPDATE SET 
+		  value = EXCLUDED.value,
+		  "type" = EXCLUDED."type",
+		  updated_at = now();`
+
+	stmt, err := conn.Preparex(query)
+	if err != nil {
+		return db.WrapError(err, "conn.Preparex()")
+	}
+
+	for _, p := range params {
+		if _, err := stmt.Exec(p.Name, p.TenantID, p.Value, p.Type); err != nil {
+			return db.WrapError(err, "stmt.Exec()")
+		}
+	}
+
+	return nil
+}
+
+// UpdateStackParametersTx atualiza o parametro de uma determinada org (tenant_id)
+func UpdateStackParametersTx(conn *sqlx.Tx, params []model.Parameter) error {
+	if len(params) == 0 {
+		return errors.New("no parameters to save")
+	}
+
+	query := `
+		INSERT INTO public."parameter" (id, tenant_id, value, "type") 
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (id, tenant_id, app_id, record_type_id)
+		DO UPDATE SET 
+		  value = EXCLUDED.value,
+		  "type" = EXCLUDED."type",
+		  updated_at = now();`
+
+	stmt, err := conn.Preparex(query)
+	if err != nil {
+		return db.WrapError(err, "conn.Preparex()")
+	}
+
+	for _, p := range params {
+		if _, err := stmt.Exec(p.Name, p.TenantID, p.Value, p.Type); err != nil {
+			return db.WrapError(err, "stmt.Exec()")
+		}
 	}
 
 	return nil
