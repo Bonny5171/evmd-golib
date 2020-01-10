@@ -54,7 +54,7 @@ func GetAllStacks(conn *sqlx.DB, tenantType TenantType, setup bool) (mid []model
 		   AND s.is_deleted = FALSE`)
 
 	if setup {
-		query.WriteString(` AND d.do_setup = TRUE`)
+		query.WriteString(` AND s.do_setup = TRUE`)
 	}
 
 	switch tenantType {
