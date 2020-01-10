@@ -66,7 +66,7 @@ func GetAllStacks(conn *sqlx.DB, tenantType TenantType, setup bool) (mid []model
 		query.WriteString(` AND upper(d."type") = 'DEBUG'`)
 	}
 
-	if err = conn.Select(&mid, query.String(), setup); err != nil {
+	if err = conn.Select(&mid, query.String()); err != nil {
 		return mid, db.WrapError(err, "conn.Select()")
 	}
 
