@@ -4,10 +4,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"os/signal"
 	"strconv"
-	"sync"
-	"syscall"
 	"time"
 
 	"bitbucket.org/everymind/evmd-golib/db"
@@ -49,19 +46,6 @@ func NewJob() *Job {
 }
 
 func (j *Job) Run() {
-	gracefulStop := make(chan os.Signal, 1)
-	signal.Notify(gracefulStop, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
-
-	wg := sync.WaitGroup{}
-
-	go func() {
-		sig := <-gracefulStop
-		wg.Wait()
-		logger.Warningf("Signal '%s' received, graceful shutdown... ", sig.String())
-	}()
-
-	fn.SetWG(&wg)
-
 	// Starting web server
 	startWebServer()
 
@@ -100,6 +84,7 @@ func (j *Job) Run() {
 
 	// Do anything when this job is quite
 	mgr.On(worker.Quiet, func() {
+		logger.Infoln("Quieting job...")
 		mgr.Terminate()
 	})
 
@@ -153,19 +138,19 @@ func startWebServer() {
 		}).Methods("GET")
 
 		router.HandleFunc("/_ah/warmup", func(w http.ResponseWriter, r *http.Request) {
-			logger.Infoln("warmup received")
+			logger.Infoln("warmup command received")
 			w.WriteHeader(200)
 			w.Write([]byte("ok"))
 		}).Methods("GET")
 
 		router.HandleFunc("/_ah/start", func(w http.ResponseWriter, r *http.Request) {
-			logger.Infoln("start received")
+			logger.Infoln("start command received")
 			w.WriteHeader(200)
 			w.Write([]byte("ok"))
 		}).Methods("GET")
 
 		router.HandleFunc("/_ah/stop", func(w http.ResponseWriter, r *http.Request) {
-			logger.Infoln("stop signal received")
+			logger.Warningln("stop command received")
 			w.WriteHeader(200)
 			w.Write([]byte("ok"))
 		}).Methods("GET")
@@ -175,7 +160,7 @@ func startWebServer() {
 			port = "80"
 		}
 
-		logger.Traceln("Starting HTTP server...")
+		logger.Tracef("Starting HTTP server on port %s...", port)
 		if err := http.ListenAndServe(":"+port, router); err != nil {
 			logger.Errorln(err)
 		}

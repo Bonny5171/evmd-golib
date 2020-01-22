@@ -106,14 +106,14 @@ func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, device_id string, group_i
 		params = []interface{}{tid, device_id, execID}
 	)
 
-	query.WriteString("SELECT d.id FROM public.device_data d WHERE d.tenant_id = $1 AND d.is_active = TRUE AND d.device_id = $2 AND d.execution_id = $3 ")
+	query.WriteString("SELECT d.id FROM public.device_data d WHERE d.tenant_id = $1 AND d.is_active = TRUE AND d.is_deleted = FALSE AND d.device_id = $2 AND d.execution_id = $3 ")
 	if group_id.Valid {
 		query.WriteString("AND d.group_id = $4 ")
 		params = append(params, group_id.String)
 	} else {
 		query.WriteString("AND d.group_id = NULL ")
 	}
-	query.WriteString("AND d.is_deleted = FALSE ORDER BY d.sequential ASC;")
+	query.WriteString("ORDER BY d.sequential ASC;")
 
 	err = conn.Select(&d, query.String(), params...)
 	if err != nil {
@@ -126,7 +126,7 @@ func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, device_id string, group_i
 func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
 	query := `SELECT d.id, d.tenant_id, d.schema_name, d.table_name, o.id AS sf_object_id, o.sf_object_name, d.user_id, d.pk, d.external_id, d.sf_id, d.action_type,
 					 to_jsonb(regexp_replace(d.json_data, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g')::jsonb) AS json_data, 
-					 d.app_id, d.device_id, d.device_created_at, d.group_id, d.try, d.is_active, d.is_deleted
+					 d.app_id, d.device_id, d.device_created_at, d.group_id, d.sequential, d.try, d.is_active, d.is_deleted
 			  FROM public.device_data d
 			  INNER JOIN itgr.sf_object o ON d.tenant_id = o.tenant_id AND d.table_name = o.sfa_name
 			  WHERE d.id = $1
@@ -228,7 +228,9 @@ func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 }
 
 func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, statusID int16) (id int64, err error) {
-	query := `INSERT INTO itgr.device_data_log (original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,action_type,sf_id,original_json_data,app_id,execution_id,status_id,external_id,group_id,sequential,try,created_at,updated_at) 
+	query := `INSERT INTO itgr.device_data_log (
+				original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,action_type,sf_id,original_json_data,
+				app_id,execution_id,status_id,external_id,group_id,sequential,try,created_at,updated_at) 
 			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW())
 			  RETURNING id;`
 

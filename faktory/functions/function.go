@@ -3,8 +3,8 @@ package functions
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"sync"
 	"time"
 
 	"bitbucket.org/everymind/evmd-golib/db"
@@ -20,7 +20,6 @@ import (
 
 // A map of registered matchers for searching.
 var funcs = make(map[string]Function)
-var wg *sync.WaitGroup
 
 type Function interface {
 	Handler(ctx worker.Context, args ...interface{}) error
@@ -31,10 +30,6 @@ type innerFuncNoLog = func(conn, connCfg *sqlx.DB, ctx worker.Context, payload P
 
 func Get() map[string]Function {
 	return funcs
-}
-
-func SetWG(waitgroup *sync.WaitGroup) {
-	wg = waitgroup
 }
 
 // Register is called to register a function for use by the program.
@@ -48,9 +43,25 @@ func Add(functionName string, function Function) {
 }
 
 func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) error {
-	logger.Tracef("Executing job function '%s'...\n", fnName)
+	// Parse payload that come of Faktory
+	payload, err := ParsePayload(args...)
+	if err != nil {
+		return errorHandler(err, "ParsePayload()")
+	}
 
-	wg.Add(1)
+	logger.Tracef("[%s][%s] Executing job function '%s'...\n", payload.StackName, ctx.Jid(), fnName)
+
+	go func() {
+		port := os.Getenv("PORT")
+		if len(port) == 0 {
+			port = "80"
+		}
+
+		for {
+			http.Get(fmt.Sprintf("http://localhost:%s/_ah/warmup", port))
+			time.Sleep(30 * time.Second)
+		}
+	}()
 
 	// Queue
 	queue := os.Getenv("GOWORKER_QUEUE_NAME")
@@ -58,16 +69,10 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 		queue = "default"
 	}
 
-	// Parse payload that come of Faktory
-	payload, err := ParsePayload(args...)
-	if err != nil {
-		return errorHandler(err, "ParsePayload()")
-	}
-
 	// Get connection with Config DB
 	var connCfg *sqlx.DB
 	if _, exists := db.Connections.List["CONFIG"]; exists {
-		logger.Traceln("Get connection with Config DB")
+		logger.Tracef("[%s][%s] Get connection with Config DB", payload.StackName, ctx.Jid())
 		connCfg, err = db.GetConnection("CONFIG")
 		if err != nil {
 			return errorHandler(err, "db.GetConnection('CONFIG')")
@@ -75,14 +80,14 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	}
 
 	// Get connection with Data DB
-	logger.Traceln("Get connection with Data DB")
+	logger.Tracef("[%s][%s] Get connection with Data DB", payload.StackName, ctx.Jid())
 	connData, err := db.GetConnection(payload.StackName)
 	if err != nil {
 		return errorHandler(err, fmt.Sprintf("db.GetConnection('%s')", payload.StackName))
 	}
 
 	// Create log execution on itgr.execution table
-	logger.Traceln("Create log execution on itgr.execution table")
+	logger.Tracef("[%s][%s] Create log execution on itgr.execution table", payload.StackName, ctx.Jid())
 	exec, err := execlog.NewExec(connData, ctx.Jid(), payload.JobID, payload.JobName, payload.TenantID, 0, dao.EnumTypeStatusExec)
 	if err != nil {
 		return errorHandler(err, "execlog.NewExec()")
@@ -112,10 +117,10 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 				}
 
 				exec.LogExecution(dao.EnumStatusExecScheduled)
-				logger.Tracef("[%s] Job scheduled", ctx.Jid())
+				logger.Tracef("[%s][%s] Job scheduled", payload.StackName, ctx.Jid())
 			} else {
 				exec.LogExecution(dao.EnumStatusExecOverrided)
-				logger.Tracef("[%s] Job overrided", ctx.Jid())
+				logger.Tracef("[%s][%s] Job overrided", payload.StackName, ctx.Jid())
 			}
 
 			return nil
@@ -123,7 +128,7 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	}
 
 	// Start log execution on itgr.execution table
-	logger.Traceln("Start log execution on itgr.execution table")
+	logger.Tracef("[%s][%s] Start log execution on itgr.execution table", payload.StackName, ctx.Jid())
 	exec.LogExecution(dao.EnumStatusExecProcessing)
 
 	if e := fn(connData, connCfg, ctx, payload, exec.ID); e != nil {
@@ -131,20 +136,34 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	}
 
 	// Log success on itgr.execution table
-	logger.Traceln("Logging success on itgr.execution table")
+	logger.Tracef("[%s][%s] Logging success on itgr.execution table", payload.StackName, ctx.Jid())
 	exec.LogExecution(dao.EnumStatusExecSuccess)
 
-	logger.Tracef("'%s' job function done!\n", fnName)
-
-	wg.Done()
+	logger.Tracef("[%s][%s] '%s' job function done!\n", payload.StackName, ctx.Jid(), fnName)
 
 	return nil
 }
 
 func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...interface{}) error {
-	logger.Tracef("Executing job function '%s'...\n", fnName)
+	// Parse payload that come of Faktory
+	payload, err := ParsePayload(args...)
+	if err != nil {
+		return errorHandler(err, "ParsePayload()")
+	}
 
-	wg.Add(1)
+	logger.Tracef("[%s][%s] Executing job function '%s'...", payload.StackName, ctx.Jid(), fnName)
+
+	go func() {
+		port := os.Getenv("PORT")
+		if len(port) == 0 {
+			port = "80"
+		}
+
+		for {
+			http.Get(fmt.Sprintf("http://localhost:%s/_ah/warmup", port))
+			time.Sleep(30 * time.Second)
+		}
+	}()
 
 	// Queue
 	queue := os.Getenv("GOWORKER_QUEUE_NAME")
@@ -152,16 +171,10 @@ func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...inte
 		queue = "default"
 	}
 
-	// Parse payload that come of Faktory
-	payload, err := ParsePayload(args...)
-	if err != nil {
-		return errorHandler(err, "ParsePayload()")
-	}
-
 	// Get connection with Config DB
 	var connCfg *sqlx.DB
 	if _, exists := db.Connections.List["CONFIG"]; exists {
-		logger.Traceln("Get connection with Config DB")
+		logger.Tracef("[%s][%s] Get connection with Config DB", payload.StackName, ctx.Jid())
 		connCfg, err = db.GetConnection("CONFIG")
 		if err != nil {
 			return errorHandler(err, "db.GetConnection('CONFIG')")
@@ -169,7 +182,7 @@ func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...inte
 	}
 
 	// Get connection with Data DB
-	logger.Traceln("Get connection with Data DB")
+	logger.Tracef("[%s][%s] Get connection with Data DB", payload.StackName, ctx.Jid())
 	connData, err := db.GetConnection(payload.StackName)
 	if err != nil {
 		return errorHandler(err, fmt.Sprintf("db.GetConnection('%s')", payload.StackName))
@@ -179,9 +192,7 @@ func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...inte
 		return errorHandler(e, "fn(conn, connCfg, payload, exec.ID)")
 	}
 
-	logger.Tracef("'%s' job function done!\n", fnName)
-
-	wg.Done()
+	logger.Tracef("[%s][%s] '%s' job function done!", payload.StackName, ctx.Jid(), fnName)
 
 	return nil
 }
