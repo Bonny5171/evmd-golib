@@ -58,7 +58,7 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 		}
 
 		for {
-			http.Get(fmt.Sprintf("http://localhost:%s/_ah/warmup", port))
+			http.Get(fmt.Sprintf("http://localhost:%s/_ah/start", port))
 			time.Sleep(30 * time.Second)
 		}
 	}()
@@ -160,7 +160,7 @@ func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...inte
 		}
 
 		for {
-			http.Get(fmt.Sprintf("http://localhost:%s/_ah/warmup", port))
+			http.Get(fmt.Sprintf("http://localhost:%s/_ah/start", port))
 			time.Sleep(30 * time.Second)
 		}
 	}()
