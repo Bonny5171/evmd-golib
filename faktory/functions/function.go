@@ -52,11 +52,10 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 
 	logger.Tracef("[%s][%s] Executing job function '%s'...\n", payload.StackName, ctx.Jid(), fnName)
 
-	go func() {
-		for {
-			pingJob()
-		}
-	}()
+	quit := make(chan struct{})
+	defer close(quit)
+
+	go pingJob(quit)
 
 	// Queue
 	queue := os.Getenv("GOWORKER_QUEUE_NAME")
@@ -148,11 +147,10 @@ func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...inte
 
 	logger.Tracef("[%s][%s] Executing job function '%s'...", payload.StackName, ctx.Jid(), fnName)
 
-	go func() {
-		for {
-			pingJob()
-		}
-	}()
+	quit := make(chan struct{})
+	defer close(quit)
+
+	go pingJob(quit)
 
 	// Queue
 	queue := os.Getenv("GOWORKER_QUEUE_NAME")
@@ -186,34 +184,43 @@ func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...inte
 	return nil
 }
 
-func pingJob() {
-	appEngineName := os.Getenv("GAE_SERVICE")
-	cloudProject := os.Getenv("GOOGLE_CLOUD_PROJECT")
+func pingJob(quit <-chan struct{}) {
+	for {
+		select {
+		case <-quit:
+			return
+		default:
+		}
 
-	var sb strings.Builder
-	sb.WriteString("http://")
-	sb.WriteString(appEngineName)
-	sb.WriteString("-dot-")
-	sb.WriteString(cloudProject)
-	sb.WriteString(".appspot.com/")
+		appEngineName := os.Getenv("GAE_SERVICE")
+		cloudProject := os.Getenv("GOOGLE_CLOUD_PROJECT")
 
-	logger.Infoln("ping: " + sb.String())
+		var sb strings.Builder
+		sb.WriteString("http://")
+		sb.WriteString(appEngineName)
+		sb.WriteString("-dot-")
+		sb.WriteString(cloudProject)
+		sb.WriteString(".appspot.com/")
 
-	response, err := http.Get(sb.String())
-	if err != nil {
-		logger.Errorln(errors.Wrap(err, "http.Get()"))
+		logger.Infoln("ping: " + sb.String())
+
+		response, err := http.Get(sb.String())
+		if err != nil {
+			logger.Errorln(errors.Wrap(err, "http.Get()"))
+		}
+
+		if response.StatusCode/100 != 2 {
+			err := fmt.Errorf("job %s unavaliable", appEngineName)
+			logger.Errorln(err)
+		}
+
+		// Sleep time
+		pingSleepTime := cast.ToInt64(os.Getenv("PINGSLEEPTIME"))
+		if pingSleepTime == 0 {
+			pingSleepTime = 30
+		}
+		time.Sleep(time.Duration(pingSleepTime) * time.Second)
 	}
-
-	if response.StatusCode/100 != 2 {
-		err := fmt.Errorf("job %s unavaliable", appEngineName)
-		logger.Errorln(err)
-	}
-
-	pingSleepTime := cast.ToInt64(os.Getenv("PINGSLEEPTIME"))
-	if pingSleepTime == 0 {
-		pingSleepTime = 30
-	}
-	time.Sleep(time.Duration(pingSleepTime) * time.Second)
 }
 
 func errorHandler(err error, stack string) error {
