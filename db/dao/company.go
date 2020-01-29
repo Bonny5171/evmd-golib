@@ -1,8 +1,9 @@
 package dao
 
 import (
-	"bitbucket.org/everymind/evmd-golib/db"
 	"github.com/jmoiron/sqlx"
+
+	"bitbucket.org/everymind/evmd-golib/db"
 )
 
 func CheckEnvironmentAvailability(conn *sqlx.DB, companyID string, isSandbox bool) (result bool, err error) {

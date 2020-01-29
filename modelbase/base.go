@@ -3,10 +3,9 @@ package modelbase
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 // NullBool type represent sql.NullBool type from database/sql package
@@ -24,7 +23,7 @@ func (n NullBool) MarshalJSON() ([]byte, error) {
 func (n *NullBool) Scan(value interface{}) error {
 	var i sql.NullBool
 	if err := i.Scan(value); err != nil {
-		return errors.Wrap(err, "model.(n *NullBool)Scan()=>i.Scan()")
+		return fmt.Errorf("model.(n *NullBool)Scan()=>i.Scan(): %w", err)
 	}
 	// if nil the make Valid false
 	if reflect.TypeOf(value) == nil {
@@ -57,7 +56,7 @@ func (n NullFloat64) ToString(prec int) string {
 func (n *NullFloat64) Scan(value interface{}) error {
 	var i sql.NullFloat64
 	if err := i.Scan(value); err != nil {
-		return errors.Wrap(err, "model.(n *NullFloat64)Scan()=>i.Scan()")
+		return fmt.Errorf("model.(n *NullFloat64)Scan()=>i.Scan(): %w", err)
 	}
 	// if nil the make Valid false
 	if reflect.TypeOf(value) == nil {
@@ -83,7 +82,7 @@ func (n NullInt64) MarshalJSON() ([]byte, error) {
 func (n *NullInt64) Scan(value interface{}) error {
 	var i sql.NullInt64
 	if err := i.Scan(value); err != nil {
-		return errors.Wrap(err, "model.(n *NullInt64)Scan()=>i.Scan()")
+		return fmt.Errorf("model.(n *NullInt64)Scan()=>i.Scan(): %w", err)
 	}
 	// if nil the make Valid false
 	if reflect.TypeOf(value) == nil {
@@ -116,7 +115,7 @@ func (n NullString) MarshalJSON() ([]byte, error) {
 func (n *NullString) Scan(value interface{}) error {
 	var i sql.NullString
 	if err := i.Scan(value); err != nil {
-		return errors.Wrap(err, "model.(n *NullString)Scan()=>i.Scan()")
+		return fmt.Errorf("model.(n *NullString)Scan()=>i.Scan(): %w", err)
 	}
 	// if nil the make Valid false
 	if reflect.TypeOf(value) == nil {

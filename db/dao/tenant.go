@@ -1,14 +1,16 @@
 package dao
 
 import (
+	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 func GetTenantID(conn *sqlx.DB, orgID string) (tid int, err error) {
@@ -58,7 +60,7 @@ func SaveConfigTenant(conn *sqlx.DB, name, companyID, orgID, instanceUrl, organi
 	if len(instanceUrl) > 0 {
 		u, err := url.Parse(instanceUrl)
 		if err != nil {
-			return 0, errors.Wrap(err, "url.Parse()")
+			return 0, fmt.Errorf("url.Parse(): %w", err)
 		}
 		h := strings.Split(u.Hostname(), ".")
 		customDomain = h[0]
@@ -87,7 +89,7 @@ func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceUrl, orga
 	if len(instanceUrl) > 0 {
 		u, err := url.Parse(instanceUrl)
 		if err != nil {
-			return 0, errors.Wrap(err, "url.Parse()")
+			return 0, fmt.Errorf("url.Parse(): %w", err)
 		}
 		h := strings.Split(u.Hostname(), ".")
 		customDomain = h[0]

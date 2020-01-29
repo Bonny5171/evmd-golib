@@ -1,9 +1,10 @@
 package dao
 
 import (
+	"github.com/jmoiron/sqlx"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
-	"github.com/jmoiron/sqlx"
 )
 
 func GetResourceMetadataToProcess(conn *sqlx.DB, tenantId int) (d []model.ResourceMetadata, err error) {

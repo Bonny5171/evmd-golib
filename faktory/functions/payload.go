@@ -2,8 +2,10 @@ package functions
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 
-	"github.com/pkg/errors"
+	"github.com/spf13/cast"
 )
 
 type Payload struct {
@@ -20,71 +22,60 @@ type Payload struct {
 
 func ParsePayload(args ...interface{}) (p Payload, err error) {
 	if len(args) < 8 {
-		return p, errors.Wrap(err, "wrong number of args")
+		return p, errors.New("wrong number of args")
 	}
 
-	var ok bool
+	var e error
 
 	// parameter is int64
-	fID, ok := args[0].(float64)
-	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a number", 1)
+	if p.JobID, e = cast.ToInt64E(args[0]); e != nil {
+		return p, fmt.Errorf("parameter %d of job payload isn't a number: %w", 1, e)
 	}
-	p.JobID = int64(fID)
 
 	// parameter is string
-	p.JobName, ok = args[1].(string)
-	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a string", 2)
+	if p.JobName, e = cast.ToStringE(args[1]); e != nil {
+		return p, fmt.Errorf("parameter %d of job payload isn't a string: %w", 2, e)
 	}
 
 	// parameter is int
-	fTeID, ok := args[2].(float64)
-	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a number", 3)
-	}
-	p.TenantID = int(fTeID)
-
-	// parameter is string
-	p.TenantName, ok = args[3].(string)
-	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a string", 4)
+	if p.TenantID, e = cast.ToIntE(args[2]); e != nil {
+		return p, fmt.Errorf("parameter %d of job payload isn't a number: %w", 3, e)
 	}
 
 	// parameter is string
-	p.StackName, ok = args[4].(string)
-	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a string", 5)
+	if p.TenantName, e = cast.ToStringE(args[3]); e != nil {
+		return p, fmt.Errorf("parameter %d of job payload isn't a string: %w", 4, e)
+	}
+
+	// parameter is string
+	if p.StackName, e = cast.ToStringE(args[4]); e != nil {
+		return p, fmt.Errorf("parameter %d of job payload isn't a string: %w", 5, e)
 	}
 
 	// parameter is bool
-	p.AllowsConcurrency, ok = args[5].(bool)
-	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a boolean", 6)
+	if p.AllowsConcurrency, e = cast.ToBoolE(args[5]); e != nil {
+		return p, fmt.Errorf("parameter %d of job payload isn't a boolean: %w", 6, e)
 	}
 
 	// parameter is bool
-	p.AllowsSchedule, ok = args[6].(bool)
-	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a boolean", 7)
+	if p.AllowsSchedule, e = cast.ToBoolE(args[6]); e != nil {
+		return p, fmt.Errorf("parameter %d of job payload isn't a boolean: %w", 7, e)
 	}
 
 	// parameter is int
-	fSchTime, ok := args[7].(float64)
-	if !ok {
-		return p, errors.Wrapf(err, "parameter %d of job payload isn't a number", 8)
+	if p.ScheduleTime, e = cast.ToIntE(args[7]); e != nil {
+		return p, fmt.Errorf("parameter %d of job payload isn't a number: %w", 8, e)
 	}
-	p.ScheduleTime = int(fSchTime)
 
 	if len(args) > 8 {
 		// parameter is int
-		fParams, ok := args[8].(string)
-		if !ok {
-			return p, errors.Wrapf(err, "parameter %d of job payload isn't a json", 9)
+		fParams, e := cast.ToStringE(args[8])
+		if e != nil {
+			return p, fmt.Errorf("parameter %d of job payload isn't a JSON: %w", 9, e)
 		}
 
 		if e := json.Unmarshal([]byte(fParams), &p.Parameters); e != nil {
-			return p, errors.Wrap(e, "json.Unmarshal()")
+			return p, fmt.Errorf("json.Unmarshal(): %w", e)
 		}
 	}
 

@@ -3,9 +3,10 @@ package dao
 import (
 	"time"
 
+	"github.com/jmoiron/sqlx"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
-	"github.com/jmoiron/sqlx"
 )
 
 func GetUser(conn *sqlx.DB, tid int, uid string) (u model.User, err error) {

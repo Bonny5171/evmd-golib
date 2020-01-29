@@ -2,13 +2,13 @@ package execlog
 
 import (
 	"encoding/json"
+	"fmt"
 
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/multierr"
 
 	"bitbucket.org/everymind/evmd-golib/db/dao"
 	"bitbucket.org/everymind/evmd-golib/db/model"
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 type Exec struct {
@@ -32,7 +32,7 @@ func NewExec(conn *sqlx.DB, jfid string, jsid int64, jsname string, tid, sid int
 	exe.Connection = conn
 	exe.StatusList, err = dao.GetStatuses(conn, tid, st)
 	if err != nil {
-		return exe, errors.Wrap(err, "dao.GetStatuses()")
+		return exe, fmt.Errorf("dao.GetStatuses(): %w", err)
 	}
 	return
 }
@@ -94,14 +94,14 @@ func (e *Exec) log(s dao.Status, r error) error {
 	if e.ID == 0 {
 		id, err := dao.InsertExecution(e.Connection, obj)
 		if err != nil {
-			return errors.Wrap(err, "dao.InsertExecution()")
+			return fmt.Errorf("dao.InsertExecution(): %w", err)
 		}
 
 		e.ID = id
 	} else {
 		err := dao.UpdateExecution(e.Connection, obj)
 		if err != nil {
-			return errors.Wrap(err, "dao.UpdateExecution()")
+			return fmt.Errorf("dao.UpdateExecution(): %w", err)
 		}
 	}
 
@@ -152,14 +152,14 @@ func (e *Exec) logStack(s dao.Status, r []error) error {
 	if e.ID == 0 {
 		id, err := dao.InsertExecution(e.Connection, obj)
 		if err != nil {
-			return errors.Wrap(err, "dao.InsertExecution()")
+			return fmt.Errorf("dao.InsertExecution(): %w", err)
 		}
 
 		e.ID = id
 	} else {
 		err := dao.UpdateExecution(e.Connection, obj)
 		if err != nil {
-			return errors.Wrap(err, "dao.UpdateExecution()")
+			return fmt.Errorf("dao.UpdateExecution(): %w", err)
 		}
 	}
 

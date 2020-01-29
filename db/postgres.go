@@ -1,11 +1,10 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
-	"github.com/pkg/errors"
 )
 
 type PostgresDB struct {
@@ -18,7 +17,7 @@ type PostgresDB struct {
 func (p *PostgresDB) Connect() (*sqlx.DB, error) {
 	db, err := sqlx.Connect("postgres", p.ConnectionStr)
 	if err != nil {
-		return nil, errors.Wrap(err, "sqlx.Open()")
+		return nil, fmt.Errorf("sqlx.Open(): %w", err)
 	}
 
 	if p.MaxOpenConns >= 0 {

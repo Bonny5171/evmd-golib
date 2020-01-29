@@ -2,10 +2,10 @@ package dao
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"

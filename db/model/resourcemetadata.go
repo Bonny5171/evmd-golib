@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"time"
 
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
 	"github.com/lib/pq"
+
+	m "bitbucket.org/everymind/evmd-golib/modelbase"
 )
 
 type ResourceMetadata struct {

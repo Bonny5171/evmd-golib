@@ -1,10 +1,11 @@
 package dao
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
@@ -31,7 +32,7 @@ func SaveSFData(conn *sqlx.DB, data model.SFData) (id int, err error) {
 func PurgeAllDataETLSuccess(conn *sqlx.DB, tid int) (err error) {
 	statuses, err := GetStatuses(conn, tid, EnumTypeStatusETL)
 	if err != nil {
-		return errors.Wrap(err, "dao.GetStatuses()")
+		return fmt.Errorf("dao.GetStatuses(): %w", err)
 	}
 
 	statusEtlSuccess := statuses.GetId(EnumStatusEtlSuccess.String())
@@ -83,7 +84,7 @@ func GetSfData(conn *sqlx.DB, tenantID int, execID int64, objID int) (d []model.
 func UpdateStatusSfData(conn *sqlx.DB, tenantID int, execID, objectID int64, statusIDFrom, statusIDTo Status) (err error) {
 	statuses, err := GetStatuses(conn, tenantID, EnumTypeStatusETL)
 	if err != nil {
-		return errors.Wrap(err, "dao.GetStatuses()")
+		return fmt.Errorf("dao.GetStatuses(): %w", err)
 	}
 
 	statusFrom := statuses.GetId(statusIDFrom.String())

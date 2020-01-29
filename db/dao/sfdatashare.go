@@ -1,10 +1,11 @@
 package dao
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
@@ -33,7 +34,7 @@ func SaveSFDataShare(conn *sqlx.DB, data model.SFDataShare) (id int, err error) 
 func PurgeAllDataShareETLSuccess(conn *sqlx.DB, tid int) (err error) {
 	statuses, err := GetStatuses(conn, tid, EnumTypeStatusETL)
 	if err != nil {
-		return errors.Wrap(err, "dao.GetStatuses()")
+		return fmt.Errorf("dao.GetStatuses(): %w", err)
 	}
 
 	statusEtlSuccess := statuses.GetId(EnumStatusEtlSuccess.String())

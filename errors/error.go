@@ -3,8 +3,6 @@ package errors
 import (
 	"fmt"
 	"runtime"
-
-	"github.com/pkg/errors"
 )
 
 func Trace(err error) error {
@@ -12,5 +10,5 @@ func Trace(err error) error {
 	runtime.Callers(2, pc)
 	f := runtime.FuncForPC(pc[0])
 	file, line := f.FileLine(pc[0])
-	return errors.Wrap(err, fmt.Sprintf("%s:%d %s\n", file, line-1, f.Name()))
+	return fmt.Errorf("[%s:%d %s]: %w", file, line-1, f.Name(), err)
 }
