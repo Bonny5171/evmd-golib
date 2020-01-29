@@ -1,8 +1,9 @@
 package db
 
 import (
+	"fmt"
+
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 type DBDriver interface {
@@ -14,7 +15,7 @@ var Conn *sqlx.DB
 func Create(d DBDriver) (err error) {
 	Conn, err = d.Connect()
 	if err != nil {
-		return errors.Wrap(err, "db.Connect()")
+		return fmt.Errorf("db.Connect(): %w", err)
 	}
 	return nil
 }
@@ -22,7 +23,7 @@ func Create(d DBDriver) (err error) {
 // Close DB connection
 func Close() error {
 	if err := Conn.Close(); err != nil {
-		return errors.Wrap(err, "Conn.Close()")
+		return fmt.Errorf("Conn.Close(): %w", err)
 	}
 	return nil
 }
@@ -30,7 +31,7 @@ func Close() error {
 // Check DB connection
 func Check() error {
 	if err := Conn.Ping(); err != nil {
-		return errors.Wrap(err, "Conn.Ping()")
+		return fmt.Errorf("Conn.Ping(): %w", err)
 	}
 	return nil
 }

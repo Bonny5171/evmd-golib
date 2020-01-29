@@ -1,14 +1,15 @@
 package apicommon
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"os"
 	"path/filepath"
 
-	"bitbucket.org/everymind/evmd-golib/logger"
 	"github.com/go-chi/render"
-	"github.com/pkg/errors"
+
+	"bitbucket.org/everymind/evmd-golib/logger"
 )
 
 type ErrResponse struct {
@@ -53,12 +54,12 @@ func RenderError(w http.ResponseWriter, r *http.Request, err error, statusCode i
 
 		tmpl, err := template.ParseFiles(htmlfile)
 		if err != nil {
-			render.DefaultResponder(w, r, Err(errors.Wrap(err, "template.ParseFiles()"), http.StatusInternalServerError))
+			render.DefaultResponder(w, r, Err(fmt.Errorf("template.ParseFiles(): %w", err), http.StatusInternalServerError))
 			return
 		}
 
 		if err := tmpl.Execute(w, errResp); err != nil {
-			render.DefaultResponder(w, r, Err(errors.Wrap(err, "tmpl.Execute()"), http.StatusInternalServerError))
+			render.DefaultResponder(w, r, Err(fmt.Errorf("tmpl.Execute(): %w", err), http.StatusInternalServerError))
 			return
 		}
 	}

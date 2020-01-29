@@ -1,10 +1,10 @@
 package sf
 
 import (
+	"fmt"
 	"strings"
 
 	force "bitbucket.org/everymind/gforce/lib"
-	"github.com/pkg/errors"
 )
 
 func GetEndpoint(e string) force.ForceEndpoint {
@@ -27,7 +27,7 @@ func GetEndpointURL(e string) (url string, err error) {
 
 	url, err = force.GetEndpointURL(sfEndpoint)
 	if err != nil {
-		err = errors.Wrap(err, "force.GetEndpointURL()")
+		err = fmt.Errorf("force.GetEndpointURL(): %w", err)
 		return "", err
 	}
 

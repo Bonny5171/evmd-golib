@@ -1,11 +1,11 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/lib/pq"
-	"github.com/pkg/errors"
 )
 
 func WrapError(err error, message string) error {
@@ -63,7 +63,7 @@ func WrapError(err error, message string) error {
 			fmt.Fprintf(&sb, "\tRoutine: %v\n", e.Routine)
 		}
 
-		err = errors.Wrap(errors.New(sb.String()), message)
+		err = fmt.Errorf("%s: %w", message, errors.New(sb.String()))
 	}
 
 	return err

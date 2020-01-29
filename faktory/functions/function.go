@@ -8,15 +8,15 @@ import (
 	"strings"
 	"time"
 
+	worker "github.com/contribsys/faktory_worker_go"
+	"github.com/jmoiron/sqlx"
+	"github.com/spf13/cast"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/dao"
 	"bitbucket.org/everymind/evmd-golib/execlog"
 	"bitbucket.org/everymind/evmd-golib/faktory/push"
 	"bitbucket.org/everymind/evmd-golib/logger"
-	worker "github.com/contribsys/faktory_worker_go"
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
-	"github.com/spf13/cast"
 )
 
 // A map of registered matchers for searching.
@@ -206,7 +206,7 @@ func pingJob(quit <-chan struct{}) {
 
 		response, err := http.Get(sb.String())
 		if err != nil {
-			logger.Errorln(errors.Wrap(err, "http.Get()"))
+			logger.Errorln(fmt.Errorf("http.Get(): %w", err))
 		}
 
 		if response.StatusCode/100 != 2 {
@@ -225,7 +225,7 @@ func pingJob(quit <-chan struct{}) {
 
 func errorHandler(err error, stack string) error {
 	if err != nil {
-		err = errors.Wrap(err, stack)
+		err = fmt.Errorf("%s: %w", stack, err)
 		logger.Errorln(err)
 		return err
 	}

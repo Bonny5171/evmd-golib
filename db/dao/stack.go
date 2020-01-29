@@ -3,9 +3,10 @@ package dao
 import (
 	"strings"
 
+	"github.com/jmoiron/sqlx"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
-	"github.com/jmoiron/sqlx"
 )
 
 type TenantType int

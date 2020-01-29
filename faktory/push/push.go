@@ -1,10 +1,10 @@
 package push
 
 import (
+	"fmt"
 	"time"
 
 	faktory "github.com/contribsys/faktory/client"
-	"github.com/pkg/errors"
 )
 
 func Push(jobName, queue, stack, dsn string, retry int, at time.Time, params []interface{}) error {
@@ -14,7 +14,7 @@ func Push(jobName, queue, stack, dsn string, retry int, at time.Time, params []i
 	}
 
 	if err := PushCustom(jobName, queue, retry, at, params, custom); err != nil {
-		return errors.Wrap(err, "PushCustom()")
+		return fmt.Errorf("PushCustom(): %w", err)
 	}
 
 	return nil
@@ -26,7 +26,7 @@ func PushCustom(jobName, queue string, retry int, at time.Time, params []interfa
 		time.Sleep(5 * time.Second)
 		cl, err = faktory.Open()
 		if err != nil {
-			return errors.Wrap(err, "faktory.Open()")
+			return fmt.Errorf("faktory.Open(): %w", err)
 		}
 	}
 
@@ -42,7 +42,7 @@ func PushCustom(jobName, queue string, retry int, at time.Time, params []interfa
 	job.Custom = custom
 
 	if err = cl.Push(job); err != nil {
-		return errors.Wrap(err, "cl.Push()")
+		return fmt.Errorf("cl.Push(): %w", err)
 	}
 
 	return nil
@@ -52,7 +52,7 @@ func RetryLater(jobName, queue, stack, dsn string, params []interface{}, after t
 	at := time.Now().Add(after)
 
 	if err := Push(jobName, queue, stack, dsn, 1, at, params); err != nil {
-		return errors.Wrap(err, "faktory.Push()")
+		return fmt.Errorf("faktory.Push(): %w", err)
 	}
 
 	return nil

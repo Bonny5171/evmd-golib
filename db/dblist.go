@@ -1,8 +1,10 @@
 package db
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 type Conns struct {
@@ -54,7 +56,7 @@ func (l *Conns) Connect(n string, d DBDriver) (err error) {
 
 	db, err := d.Connect()
 	if err != nil {
-		return errors.Wrap(err, "db.Connect()")
+		return fmt.Errorf("db.Connect(): %w", err)
 	}
 
 	l.List[n] = db
@@ -64,14 +66,14 @@ func (l *Conns) Connect(n string, d DBDriver) (err error) {
 
 func (l *Conns) Close(n string) error {
 	if err := l.List[n].(*sqlx.DB).Close(); err != nil {
-		return errors.Wrap(err, "List.Close()")
+		return fmt.Errorf("List.Close(): %w", err)
 	}
 	return nil
 }
 
 func (l *Conns) Check(n string) error {
 	if err := l.List[n].(*sqlx.DB).Ping(); err != nil {
-		return errors.Wrap(err, "List.Ping()")
+		return fmt.Errorf("List.Ping(): %w", err)
 	}
 	return nil
 }

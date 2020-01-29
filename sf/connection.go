@@ -1,11 +1,12 @@
 package sf
 
 import (
+	"errors"
+	"fmt"
 	"os"
 
 	force "bitbucket.org/everymind/gforce/lib"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 
 	"bitbucket.org/everymind/evmd-golib/db/dao"
 	"bitbucket.org/everymind/evmd-golib/db/model"
@@ -14,7 +15,7 @@ import (
 func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, err error) {
 	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil)
 	if err != nil {
-		err = errors.Wrap(err, "dao.GetParameters()")
+		err = fmt.Errorf("dao.GetParameters(): %w", err)
 		return
 	}
 
@@ -119,7 +120,7 @@ func UpdateOrgCredentials(conn *sqlx.DB, tid int, f *force.ForceSession) error {
 	params = append(params, instanceURL)
 
 	if err := dao.UpdateParameters(conn, params); err != nil {
-		return errors.Wrap(err, "dao.UpdateParameters()")
+		return fmt.Errorf("dao.UpdateParameters(): %w", err)
 	}
 
 	return nil

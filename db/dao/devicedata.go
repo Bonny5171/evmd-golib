@@ -3,10 +3,11 @@ package dao
 import (
 	"strings"
 
+	"github.com/jmoiron/sqlx"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 	m "bitbucket.org/everymind/evmd-golib/modelbase"
-	"github.com/jmoiron/sqlx"
 )
 
 func GetDevices(conn *sqlx.DB, tid int, execID int64) (d []model.Device, err error) {

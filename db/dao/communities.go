@@ -3,9 +3,10 @@ package dao
 import (
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
+
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
-	"github.com/jmoiron/sqlx"
 )
 
 func GetCommunity(conn *sqlx.DB, tid int, cid string) (c model.Community, err error) {
