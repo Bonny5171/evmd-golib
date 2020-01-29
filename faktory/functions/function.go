@@ -12,11 +12,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cast"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/dao"
-	"bitbucket.org/everymind/evmd-golib/execlog"
-	"bitbucket.org/everymind/evmd-golib/faktory/push"
-	"bitbucket.org/everymind/evmd-golib/logger"
+	"bitbucket.org/everymind/evmd-golib/v2/db"
+	"bitbucket.org/everymind/evmd-golib/v2/db/dao"
+	"bitbucket.org/everymind/evmd-golib/v2/execlog"
+	"bitbucket.org/everymind/evmd-golib/v2/faktory/push"
+	"bitbucket.org/everymind/evmd-golib/v2/logger"
 )
 
 // A map of registered matchers for searching.

@@ -1,7 +1,7 @@
 package model
 
 import (
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "bitbucket.org/everymind/evmd-golib/v2/modelbase"
 )
 
 type SFIdentity struct {

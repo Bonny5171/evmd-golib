@@ -4,8 +4,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"bitbucket.org/everymind/evmd-golib/v2/db"
+	"bitbucket.org/everymind/evmd-golib/v2/db/model"
 )
 
 type (

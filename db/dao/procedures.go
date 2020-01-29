@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
+	"bitbucket.org/everymind/evmd-golib/v2/db"
 )
 
 func ExecSFEtlData(conn *sqlx.DB, execID int64, tenantID int, objID int64, reprocessAll bool) error {

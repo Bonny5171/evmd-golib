@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "bitbucket.org/everymind/evmd-golib/v2/modelbase"
 )
 
 type Device struct {

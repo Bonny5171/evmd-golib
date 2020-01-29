@@ -5,9 +5,9 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	"bitbucket.org/everymind/evmd-golib/v2/db"
+	"bitbucket.org/everymind/evmd-golib/v2/db/model"
+	m "bitbucket.org/everymind/evmd-golib/v2/modelbase"
 )
 
 func GetDevices(conn *sqlx.DB, tid int, execID int64) (d []model.Device, err error) {

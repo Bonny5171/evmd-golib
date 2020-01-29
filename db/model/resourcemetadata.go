@@ -6,7 +6,7 @@ import (
 
 	"github.com/lib/pq"
 
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "bitbucket.org/everymind/evmd-golib/v2/modelbase"
 )
 
 type ResourceMetadata struct {
