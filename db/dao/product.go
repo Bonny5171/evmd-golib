@@ -3,7 +3,7 @@ package dao
 import (
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/v2/db"
+	"bitbucket.org/everymind/evmd-golib/db"
 )
 
 func CheckProduct(conn *sqlx.DB, tid int, ref1, ref2 string) (exists bool, err error) {

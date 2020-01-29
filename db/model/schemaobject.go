@@ -5,7 +5,7 @@ import (
 
 	"github.com/lib/pq"
 
-	m "bitbucket.org/everymind/evmd-golib/v2/modelbase"
+	m "bitbucket.org/everymind/evmd-golib/modelbase"
 )
 
 type SchemaObject struct {

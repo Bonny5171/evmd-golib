@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	force "bitbucket.org/everymind/gforce/v2"
+	force "bitbucket.org/everymind/gforce"
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/v2/db/dao"
-	"bitbucket.org/everymind/evmd-golib/v2/db/model"
+	"bitbucket.org/everymind/evmd-golib/db/dao"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
 func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, err error) {

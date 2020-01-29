@@ -7,8 +7,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/v2/db"
-	"bitbucket.org/everymind/evmd-golib/v2/db/model"
+	"bitbucket.org/everymind/evmd-golib/db"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
 func SaveSFIdentifyDocOrg(conn *sqlx.DB, iden model.SFIdentity) (id int, err error) {

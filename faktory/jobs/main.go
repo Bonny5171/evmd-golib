@@ -10,10 +10,10 @@ import (
 	worker "github.com/contribsys/faktory_worker_go"
 	"github.com/gorilla/mux"
 
-	"bitbucket.org/everymind/evmd-golib/v2/db"
-	fn "bitbucket.org/everymind/evmd-golib/v2/faktory/functions"
-	"bitbucket.org/everymind/evmd-golib/v2/faktory/middleware"
-	"bitbucket.org/everymind/evmd-golib/v2/logger"
+	"bitbucket.org/everymind/evmd-golib/db"
+	fn "bitbucket.org/everymind/evmd-golib/faktory/functions"
+	"bitbucket.org/everymind/evmd-golib/faktory/middleware"
+	"bitbucket.org/everymind/evmd-golib/logger"
 )
 
 type DBVars struct {

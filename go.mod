@@ -1,9 +1,9 @@
-module bitbucket.org/everymind/evmd-golib/v2
+module bitbucket.org/everymind/evmd-golib
 
 go 1.13
 
 require (
-	bitbucket.org/everymind/gforce/v2 v2.0.1
+	bitbucket.org/everymind/gforce v1.4.0
 	github.com/contribsys/faktory v1.2.0-1
 	github.com/contribsys/faktory_worker_go v1.0.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
