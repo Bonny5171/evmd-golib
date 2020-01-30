@@ -4,30 +4,30 @@ import (
 	"fmt"
 	"strings"
 
-	force "bitbucket.org/everymind/gforce"
+	"bitbucket.org/everymind/gforce"
 )
 
-func GetEndpoint(e string) force.ForceEndpoint {
+func GetEndpoint(e string) gforce.ForceEndpoint {
 	switch strings.ToLower(e) {
 	case "prerelease":
-		return force.EndpointPrerelease
+		return gforce.EndpointPrerelease
 	case "test", "qa", "sandbox":
-		return force.EndpointTest
+		return gforce.EndpointTest
 	case "mobile":
-		return force.EndpointMobile1
+		return gforce.EndpointMobile1
 	case "custom":
-		return force.EndpointCustom
+		return gforce.EndpointCustom
 	default:
-		return force.EndpointProduction
+		return gforce.EndpointProduction
 	}
 }
 
 func GetEndpointURL(e string) (url string, err error) {
 	sfEndpoint := GetEndpoint(e)
 
-	url, err = force.GetEndpointURL(sfEndpoint)
+	url, err = gforce.GetEndpointURL(sfEndpoint)
 	if err != nil {
-		err = fmt.Errorf("force.GetEndpointURL(): %w", err)
+		err = fmt.Errorf("gforce.GetEndpointURL(): %w", err)
 		return "", err
 	}
 

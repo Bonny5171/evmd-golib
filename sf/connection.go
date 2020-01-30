@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"os"
 
-	force "bitbucket.org/everymind/gforce"
+	"bitbucket.org/everymind/gforce"
 	"github.com/jmoiron/sqlx"
 
 	"bitbucket.org/everymind/evmd-golib/db/dao"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
-func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, err error) {
+func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *gforce.Force, err error) {
 	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil)
 	if err != nil {
 		err = fmt.Errorf("dao.GetParameters(): %w", err)
@@ -25,7 +25,7 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 	}
 
 	var (
-		creds        force.ForceSession
+		creds        gforce.ForceSession
 		endpoint     = GetEndpoint(p.ByName("SF_ENVIRONMENT"))
 		userID       = p.ByName("SF_USER_ID")
 		instanceURL  = p.ByName("SF_INSTANCE_URL")
@@ -33,20 +33,20 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 		refreshToken = p.ByName("SF_REFRESH_TOKEN")
 	)
 
-	force.CustomEndpoint = instanceURL
+	gforce.CustomEndpoint = instanceURL
 
-	creds = force.ForceSession{
+	creds = gforce.ForceSession{
 		AccessToken:   accessToken,
 		RefreshToken:  refreshToken,
 		InstanceUrl:   instanceURL,
 		ForceEndpoint: endpoint,
-		UserInfo: &force.UserInfo{
+		UserInfo: &gforce.UserInfo{
 			OrgId:  p[0].OrgID,
 			UserId: userID,
 		},
-		SessionOptions: &force.SessionOptions{
-			ApiVersion:    force.ApiVersion(),
-			RefreshMethod: force.RefreshOauth,
+		SessionOptions: &gforce.SessionOptions{
+			ApiVersion:    gforce.ApiVersion(),
+			RefreshMethod: gforce.RefreshOauth,
 		},
 	}
 
@@ -54,24 +54,24 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *force.Force, 
 		creds.ClientId = os.Getenv("SF_CLIENT_ID")
 	}
 
-	f = force.NewForce(&creds)
+	f = gforce.NewForce(&creds)
 
 	return f, nil
 }
 
-func NewForceByUser(orgID, userID, accessToken, refreshToken, instanceURL string) (f *force.Force, err error) {
-	creds := force.ForceSession{
+func NewForceByUser(orgID, userID, accessToken, refreshToken, instanceURL string) (f *gforce.Force, err error) {
+	creds := gforce.ForceSession{
 		AccessToken:   accessToken,
 		RefreshToken:  refreshToken,
 		InstanceUrl:   instanceURL,
-		ForceEndpoint: force.EndpointInstace,
-		UserInfo: &force.UserInfo{
+		ForceEndpoint: gforce.EndpointInstace,
+		UserInfo: &gforce.UserInfo{
 			OrgId:  orgID,
 			UserId: userID,
 		},
-		SessionOptions: &force.SessionOptions{
-			ApiVersion:    force.ApiVersion(),
-			RefreshMethod: force.RefreshOauth,
+		SessionOptions: &gforce.SessionOptions{
+			ApiVersion:    gforce.ApiVersion(),
+			RefreshMethod: gforce.RefreshOauth,
 		},
 	}
 
@@ -79,12 +79,12 @@ func NewForceByUser(orgID, userID, accessToken, refreshToken, instanceURL string
 		creds.ClientId = os.Getenv("SF_CLIENT_ID")
 	}
 
-	f = force.NewForce(&creds)
+	f = gforce.NewForce(&creds)
 
 	return f, nil
 }
 
-func UpdateOrgCredentials(conn *sqlx.DB, tid int, f *force.ForceSession) error {
+func UpdateOrgCredentials(conn *sqlx.DB, tid int, f *gforce.ForceSession) error {
 	params := []model.Parameter{}
 
 	// access token
