@@ -195,6 +195,10 @@ func pingJob(quit <-chan struct{}) {
 		appEngineName := os.Getenv("GAE_SERVICE")
 		cloudProject := os.Getenv("GOOGLE_CLOUD_PROJECT")
 
+		if len(appEngineName) == 0 || len(cloudProject) == 0 {
+			return
+		}
+
 		var sb strings.Builder
 		sb.WriteString("http://")
 		sb.WriteString(appEngineName)
