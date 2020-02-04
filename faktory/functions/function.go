@@ -188,6 +188,7 @@ func pingJob(quit <-chan struct{}) {
 	for {
 		select {
 		case <-quit:
+			logger.Infoln("Quiting from pingJob loop")
 			return
 		default:
 		}
