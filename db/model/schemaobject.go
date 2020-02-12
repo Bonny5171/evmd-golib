@@ -12,7 +12,7 @@ type SchemaObject struct {
 	ID          int            `db:"id"`
 	TenantID    int            `db:"tenant_id"`
 	SchemaID    int            `db:"schema_id"`
-	ObjectID    int            `db:"sf_object_id"`
+	ObjectID    sql.NullInt64  `db:"sf_object_id"`
 	ObjectName  sql.NullString `db:"sf_object_name"`
 	Sequence    int16          `db:"sequence"`
 	DocFields   m.JSONB        `db:"doc_fields"`

@@ -18,3 +18,12 @@ func SnakeCase(s string) string {
 	re := regexp.MustCompile(`([[:lower:]])([[:upper:]])`)
 	return strings.ReplaceAll(strings.ToLower(re.ReplaceAllString(s, "${1}_${2}")), " ", "_")
 }
+
+func Find(objects []string, name string) bool {
+	for _, o := range objects {
+		if o == name {
+			return true
+		}
+	}
+	return false
+}
