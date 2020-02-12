@@ -43,8 +43,8 @@ func GetSchemaObjects(conn *sqlx.DB, tenantID, schemaID int) (s model.SchemaObje
 	return s, nil
 }
 
-// GetSchemaObjectsToProcess
-func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, schemaObjectName string, schemaType SchemaType) (s model.SchemaObjectToProcesses, err error) {
+// GetAllSchemaObjectsToProcess
+func GetAllSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, schemaObjectName string, schemaType SchemaType) (s model.SchemaObjectToProcesses, err error) {
 	const query = `
 		SELECT v.id, v.schema_id, v.schema_name, v.tenant_id, t."name" AS tenant_name, v."type", v.sf_object_id, v.sf_object_name, v.doc_fields, 
 		       v."sequence", v.filter, v.raw_command, v.sf_last_modified_date, v.layoutable, v.compactlayoutable, v.listviewable
@@ -67,22 +67,28 @@ func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, schemaObjectName str
 	return s, nil
 }
 
-// GetSchemaObjectToProcess
-func GetSchemaObjectToProcess(conn *sqlx.DB, tenantID int, objectName string) (s model.SchemaObjectToProcesses, err error) {
-	const query = `
+// GetSchemaObjectsToProcess
+func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, objectName []string) (s model.SchemaObjectToProcesses, err error) {
+	query, args, err := sqlx.In(`
 		SELECT v.id, v.schema_id, v.schema_name, v.tenant_id, t."name" AS tenant_name, v."type", v.sf_object_id, v.sf_object_name, v.doc_fields, 
 		       v."sequence", v.filter, v.raw_command, v.sf_last_modified_date, v.layoutable, v.compactlayoutable, v.listviewable
 		  FROM itgr.vw_schemas_objects v
 		 INNER JOIN public.tenant t ON v.tenant_id = t.id
-		 WHERE v.tenant_id = $1 
-		   AND v.sf_object_name = $2 
+		 WHERE v.tenant_id = ? 
+		   AND v.sf_object_name IN (?) 
 		   AND v.is_active = TRUE
 		   AND v.is_deleted = FALSE
 		   AND v.doc_fields IS NOT NULL
 		   AND (v.sf_object_id IS NOT NULL AND v.raw_command IS NULL) OR (v.sf_object_id IS NULL AND v.raw_command IS NOT NULL)
-		 LIMIT 1;`
+		 ORDER BY v."sequence", v.sf_object_id;`, tenantID, objectName)
 
-	err = conn.Select(&s, query, tenantID, objectName)
+	if err != nil {
+		return nil, db.WrapError(err, "sqlx.In()")
+	}
+
+	query = conn.Rebind(query)
+
+	err = conn.Select(&s, query, args...)
 	if err != nil {
 		return nil, db.WrapError(err, "conn.Select()")
 	}

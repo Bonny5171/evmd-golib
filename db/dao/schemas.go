@@ -33,7 +33,7 @@ func GetSchema(conn *sqlx.DB, sid int) (s model.Schema, err error) {
 
 // GetSchemaByName return schema details searched by name
 func GetSchemaByName(conn *sqlx.DB, tid int, name string) (s model.Schema, err error) {
-	const query = "SELECT name, description, type FROM itgr.schema WHERE tenant_id = $1 AND name = $2 LIMIT 1;"
+	const query = "SELECT id, tenant_id, name, description, type FROM itgr.schema WHERE tenant_id = $1 AND name = $2 LIMIT 1;"
 
 	err = conn.QueryRowx(query, tid, name).StructScan(&s)
 	if err != nil {
