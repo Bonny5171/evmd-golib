@@ -18,6 +18,7 @@ type StorageMetadata struct {
 	ColorCode             string      `db:"color_code"`
 	Sequence              string      `db:"sequence"`
 	SizeType              string      `db:"size_type"`
+	MD5                   string      `db:"md5"`
 	IsActive              bool        `db:"is_active"`
 	LastModified          time.Time   `db:"last_modified"`
 	CreatedAt             time.Time   `db:"created_at"`
