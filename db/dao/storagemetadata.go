@@ -9,8 +9,9 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
-//ProductLastModified type
-type ProductLastModified struct {
+//ProductStorageResource type
+type ProductStorageResource struct {
+	ID           string     `db:"id"`
 	Filename     string     `db:"filename"`
 	LastModified *time.Time `db:"last_modified"`
 }
@@ -39,15 +40,9 @@ func SaveStorageMetadata(conn *sqlx.DB, data *model.StorageMetadata) (err error)
 }
 
 //GetProductsWithNullB64 func
-func GetProductsWithNullB64(conn *sqlx.DB) (products []string, err error) {
+func GetProductsWithNullB64(conn *sqlx.DB) (products []*ProductStorageResource, err error) {
 	query := `
-		SELECT 
-			LPAD(r.ref_1::text, 5, '0') || 
-			LPAD(r.ref_2::text, 5, '0') || 
-			LPAD(r."sequence"::text, 2, '0') || '_' || 
-			r.size_type::text AS product 
-			FROM tn_011.sfa_resource_metadata_product AS r 
-			WHERE r.full_content_b64 ISNULL;`
+		SELECT r.id, LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text AS product FROM tn_011.sfa_resource_metadata_product AS r WHERE r.full_content_b64 ISNULL;`
 
 	err = conn.Select(&products, query)
 	if err != nil {
@@ -58,27 +53,29 @@ func GetProductsWithNullB64(conn *sqlx.DB) (products []string, err error) {
 }
 
 //GetProductsToUpdateB64 func
-func GetProductsToUpdateB64(conn *sqlx.DB) (products []*ProductLastModified, err error) {
+func GetProductsToUpdateB64(conn *sqlx.DB) (products []*ProductStorageResource, err error) {
 	query := `
-		SELECT 
-			LPAD(r.ref_1::text, 5, '0') || 
-			LPAD(r.ref_2::text, 5, '0') || 
-			LPAD(r."sequence"::text, 2, '0') || '_' || 
-			r.size_type::text AS filename, 
-			s.last_modified 
-			FROM tn_011.sfa_resource_metadata_product AS r 
-			LEFT JOIN public.storage_metadata AS s ON 
-			LPAD(r.ref_1::text, 5, '0') || 
-			LPAD(r.ref_2::text, 5, '0') || 
-			LPAD(r."sequence"::text, 2, '0') || '_' || 
-			r.size_type::text = LPAD(s.product_code::text, 5, '0') || 
-			LPAD(s.color_code::text, 5, '0') || 
-			LPAD(s."sequence"::text, 2, '0') || '_' || s.size_type::text
+		SELECT r.id, LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text AS filename, s.last_modified FROM tn_011.sfa_resource_metadata_product AS r LEFT JOIN public.storage_metadata AS s ON LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text = LPAD(s.product_code::text, 5, '0') || LPAD(s.color_code::text, 5, '0') || LPAD(s."sequence"::text, 2, '0') || '_' || s.size_type::text;
 	`
 
 	err = conn.Select(&products, query)
 	if err != nil {
 		return nil, db.WrapError(err, "conn.Select()")
+	}
+
+	return
+}
+
+//UpdateResourceBase64 func
+func UpdateResourceBase64(conn *sqlx.DB, data *model.StorageResource) (err error) {
+	query := `
+		UPDATE tn_011.sfa_resource_metadata_product SET full_content_b64 = $1 WHERE id = $2;
+	`
+
+	_, err = conn.Exec(query, data.FullContentB64, data.ID)
+	if err != nil {
+		err = db.WrapError(err, "conn.Exec()")
+		return
 	}
 
 	return
