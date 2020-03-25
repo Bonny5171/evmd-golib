@@ -1,11 +1,19 @@
 package dao
 
 import (
+	"time"
+
 	"github.com/jmoiron/sqlx"
 
 	"bitbucket.org/everymind/evmd-golib/db"
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
+
+//ProductLastModified type
+type ProductLastModified struct {
+	Filename     string     `db:"filename"`
+	LastModified *time.Time `db:"last_modified"`
+}
 
 //SaveStorageMetadata func
 func SaveStorageMetadata(conn *sqlx.DB, data *model.StorageMetadata) (err error) {
@@ -40,6 +48,33 @@ func GetProductsWithNullB64(conn *sqlx.DB) (products []string, err error) {
 			r.size_type::text AS product 
 			FROM tn_011.sfa_resource_metadata_product AS r 
 			WHERE r.full_content_b64 ISNULL;`
+
+	err = conn.Select(&products, query)
+	if err != nil {
+		return nil, db.WrapError(err, "conn.Select()")
+	}
+
+	return
+}
+
+//GetProductsToUpdateB64 func
+func GetProductsToUpdateB64(conn *sqlx.DB) (products []*ProductLastModified, err error) {
+	query := `
+		SELECT 
+			LPAD(r.ref_1::text, 5, '0') || 
+			LPAD(r.ref_2::text, 5, '0') || 
+			LPAD(r."sequence"::text, 2, '0') || '_' || 
+			r.size_type::text AS filename, 
+			s.last_modified 
+			FROM tn_011.sfa_resource_metadata_product AS r 
+			LEFT JOIN public.storage_metadata AS s ON 
+			LPAD(r.ref_1::text, 5, '0') || 
+			LPAD(r.ref_2::text, 5, '0') || 
+			LPAD(r."sequence"::text, 2, '0') || '_' || 
+			r.size_type::text = LPAD(s.product_code::text, 5, '0') || 
+			LPAD(s.color_code::text, 5, '0') || 
+			LPAD(s."sequence"::text, 2, '0') || '_' || s.size_type::text
+	`
 
 	err = conn.Select(&products, query)
 	if err != nil {
