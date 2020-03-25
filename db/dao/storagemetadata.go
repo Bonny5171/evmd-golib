@@ -42,7 +42,7 @@ func SaveStorageMetadata(conn *sqlx.DB, data *model.StorageMetadata) (err error)
 //GetProductsWithNullB64 func
 func GetProductsWithNullB64(conn *sqlx.DB) (products []*ProductStorageResource, err error) {
 	query := `
-		SELECT r.id, LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text AS product FROM tn_011.sfa_resource_metadata_product AS r WHERE r.full_content_b64 ISNULL;`
+		SELECT r.id, LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text AS filename FROM tn_011.sfa_resource_metadata_product AS r WHERE r.full_content_b64 ISNULL;`
 
 	err = conn.Select(&products, query)
 	if err != nil {
