@@ -15,6 +15,7 @@ const (
 	EnumTenentJob TenantType = iota
 	EnumTenentAPI
 	EnumTenentDebug
+	EnumtenentJobK8s
 )
 
 func GetStack(conn *sqlx.DB, stack string, tenantType TenantType) (mid model.Stack, err error) {
@@ -33,6 +34,8 @@ func GetStack(conn *sqlx.DB, stack string, tenantType TenantType) (mid model.Sta
 		query.WriteString(` AND upper(d."type") = 'API'`)
 	case EnumTenentDebug:
 		query.WriteString(` AND upper(d."type") = 'DEBUG'`)
+	case EnumtenentJobK8s:
+		query.WriteString(` AND upper(d."type") = 'JOB_K8S'`)
 	}
 
 	query.WriteString(` AND upper(s."name") = $1 LIMIT 1;`)
