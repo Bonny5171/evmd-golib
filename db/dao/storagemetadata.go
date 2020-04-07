@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -78,5 +79,17 @@ func UpdateResourceBase64(conn *sqlx.DB, data *model.StorageResource) (err error
 		return
 	}
 
+	return
+}
+
+//GetMidiaToProcess func
+func GetMidiaToProcess(conn *sqlx.DB, tenantID int) (midias []*model.StorageResource, err error) {
+	query := fmt.Sprintf("SELECT tn_%03d.sfa_resource_metadata_product WHERE is_active = TRUE AND is_deleted = FALSE", tenantID)
+
+	err = conn.Select(&midias, query)
+	if err != nil {
+		err = db.WrapError(err, "conn.Select()")
+		return
+	}
 	return
 }

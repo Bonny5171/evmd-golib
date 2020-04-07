@@ -21,4 +21,5 @@ type StorageResource struct {
 	Ref2                  string         `db:"ref_2"`
 	SizeType              string         `db:"size_type"`
 	Sequence              string         `db:"sequence"`
+	MidiaType             string         `db:"midia_type"`
 }
