@@ -40,6 +40,18 @@ func SaveStorageMetadata(conn *sqlx.DB, data *model.StorageMetadata) (err error)
 	return
 }
 
+//UpdateStorageMetadata func
+func UpdateStorageMetadata(conn *sqlx.DB, data *model.StorageResource, tenantID int) (err error) {
+	query := fmt.Sprintf(`UPDATE tn_%03d.sfa_resource_metadata_product SET content_type = $1, size = $2, original_file_extension = $3, full_content_b64 = $4 WHERE id = $5;`, tenantID)
+
+	_, err = conn.Exec(query, data.ContentType, data.Size, data.OriginalFileExtension, data.FullContentB64, data.ID)
+	if err != nil {
+		err = db.WrapError(err, "conn.Exec()")
+		return
+	}
+	return
+}
+
 //GetProductsWithNullB64 func
 func GetProductsWithNullB64(conn *sqlx.DB) (products []*ProductStorageResource, err error) {
 	query := `
