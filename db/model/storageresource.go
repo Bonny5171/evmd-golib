@@ -12,14 +12,14 @@ type StorageResource struct {
 	TenantID              int            `db:"tenant_id"`
 	IsActive              bool           `db:"is_active"`
 	IsDeleted             bool           `db:"is_deleted"`
-	ContentType           string         `db:"content_type"`
-	Size                  int64          `db:"size"`
+	ContentType           sql.NullString `db:"content_type"`
+	Size                  sql.NullInt64  `db:"size"`
 	OriginalFilename      string         `db:"original_file_name"`
-	OriginalFileExtension string         `db:"original_file_extension"`
+	OriginalFileExtension sql.NullString `db:"original_file_extension"`
 	FullContentB64        sql.NullString `db:"full_content_b64"`
-	Ref1                  string         `db:"ref_1"`
-	Ref2                  string         `db:"ref_2"`
+	Ref1                  sql.NullString `db:"ref_1"`
+	Ref2                  sql.NullString `db:"ref_2"`
 	SizeType              string         `db:"size_type"`
-	Sequence              string         `db:"sequence"`
+	Sequence              sql.NullString `db:"sequence"`
 	MidiaType             string         `db:"midia_type"`
 }
