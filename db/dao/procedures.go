@@ -107,7 +107,7 @@ func ExecSFAfterEtl(conn *sqlx.DB, tenantID int) error {
 
 //ExecSFAfterEtlSerial func
 func ExecSFAfterEtlSerial(conn *sqlx.DB, tentantID int) error {
-	query := fmt.Sprintf("SELECT etl_id FROM itgr.fn_sf_etl_config_tables(%d) etl ORDER BY etl.order_by;", tentantID)
+	query := fmt.Sprintf("SELECT COALESCE(etl.output_table_name, id) FROM itgr.fn_sf_etl_config_tables(%d) etl ORDER BY etl.order_by;", tentantID)
 
 	var etls []string
 	var etl string
