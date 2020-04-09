@@ -96,7 +96,7 @@ func UpdateResourceBase64(conn *sqlx.DB, data *model.StorageResource) (err error
 
 //GetMidiaToProcess func
 func GetMidiaToProcess(conn *sqlx.DB, tenantID int) (midias []*model.StorageResource, err error) {
-	query := fmt.Sprintf("SELECT id, tenant_id, is_active, is_deleted, content_type, size, original_file_name, original_file_extension, full_content_b64, ref_1, ref_2, size_type, sequence, midia_type FROM tn_%03d.sfa_resource_metadata_product WHERE is_active = TRUE AND is_deleted = FALSE", tenantID)
+	query := fmt.Sprintf("SELECT id, original_file_name, size_type FROM tn_%03d.sfa_resource_metadata_product WHERE full_content_b64 is null;", tenantID)
 
 	err = conn.Select(&midias, query)
 	if err != nil {
