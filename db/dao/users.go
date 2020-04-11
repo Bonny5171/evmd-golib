@@ -82,3 +82,14 @@ func SaveUser(conn *sqlx.DB, tid int, user model.User) (err error) {
 
 	return nil
 }
+
+func UpdateUserFrozen(conn *sqlx.DB, user *model.User) (err error) {
+
+	const query = `UPDATE public."user" SET sf_is_active = $1, sf_is_frozen = $2 WHERE user_id = $3;`
+
+	if _, err := conn.Exec(query, user.SfIsActive, user.SfIsFrozen, user.UserID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
