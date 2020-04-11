@@ -11,6 +11,8 @@ type User struct {
 	AccessToken  string `db:"access_token"`
 	RefreshToken string `db:"refresh_token"`
 	InstanceURL  string `db:"instance_url"`
+	SfIsActive   bool   `db:"sf_is_active"`
+	SfIsFrozen   bool   `db:"sf_is_frozen"`
 }
 
 type Users []User
