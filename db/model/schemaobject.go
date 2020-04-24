@@ -40,6 +40,8 @@ type SchemaObjectToProcess struct {
 	Layoutable        bool           `db:"layoutable"`
 	CompactLayoutable bool           `db:"compactlayoutable"`
 	Listviewable      bool           `db:"listviewable"`
+	SfPkName          string         `db:"sf_pk_name"`
+	SfaPks            m.JSONB        `db:"sfa_pks"`
 }
 
 type SchemaObjectToProcesses []SchemaObjectToProcess
