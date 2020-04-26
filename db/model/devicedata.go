@@ -21,6 +21,7 @@ type DeviceTableField struct {
 	Fields     m.SliceMapJSON `db:"from_to_fields"`
 	PrimaryKey m.NullString   `db:"primary_key"`
 	ExternalID m.NullString   `db:"external_id"`
+	SfaPks     m.JSONB        `db:"sfa_pks"`
 }
 
 type DeviceData struct {
