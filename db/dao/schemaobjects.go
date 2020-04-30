@@ -71,7 +71,7 @@ func GetAllSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, schemaObjectName 
 func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, objectName []string) (s model.SchemaObjectToProcesses, err error) {
 	query, args, err := sqlx.In(`
 		SELECT v.id, v.schema_id, v.schema_name, v.tenant_id, t."name" AS tenant_name, v."type", v.sf_object_id, v.sf_object_name, v.doc_fields, 
-		       v."sequence", v.filter, v.raw_command, v.sf_last_modified_date, v.layoutable, v.compactlayoutable, v.listviewable
+		       v."sequence", v.filter, v.raw_command, v.sf_last_modified_date, v.layoutable, v.compactlayoutable, v.listviewable, v.sfa_pks
 		  FROM itgr.vw_schemas_objects v
 		 INNER JOIN public.tenant t ON v.tenant_id = t.id
 		 WHERE v.tenant_id = ? 
