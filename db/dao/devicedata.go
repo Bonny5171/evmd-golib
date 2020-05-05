@@ -74,11 +74,7 @@ func GetDeviceDataTables(conn *sqlx.DB, tid int, execID int64) (t []*model.Devic
 			   INNER JOIN itgr.vw_sf_object_fields_from_to f ON o.tenant_id = f.tenant_id AND o.id = f.sf_object_id
 			   INNER JOIN itgr.sf_object_field pk ON o.tenant_id = pk.tenant_id AND o.id = pk.sf_object_id AND  sf_type = 'id'
 				LEFT JOIN itgr.sf_object_field e ON o.tenant_id = e.tenant_id AND o.id = e.sf_object_id AND e.sf_external_id = TRUE AND e.sfa_external_id = TRUE
-<<<<<<< HEAD
-				LEFT JOIN itgr.vw_schemas_object so ON o.tenant_id = so.tenant_id AND o.sf_object_id = so.object_id
-=======
 				LEFT JOIN itgr.vw_schemas_objects so ON o.tenant_id = so.tenant_id AND o.id = so.sf_object_id
->>>>>>> develop
 			   WHERE o.sfa_name IN (SELECT DISTINCT table_name FROM public.device_data WHERE tenant_id = $1 AND is_active = TRUE AND execution_id = $2);`
 
 	err = conn.Select(&t, query, tid, execID)
