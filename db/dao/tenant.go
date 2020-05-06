@@ -42,9 +42,9 @@ func GetTenantByID(conn *sqlx.DB, tid int) (tenant model.Tenant, err error) {
 		LIMIT 1;
 	`
 
-	row := conn.QueryRow(query, tid)
-	if e := row.Scan(&tenant); e != nil {
-		err = db.WrapError(e, "row.Scan()")
+	row := conn.QueryRowx(query, tid)
+	if e := row.StructScan(&tenant); e != nil {
+		err = db.WrapError(e, "row.StructScan()")
 		return
 	}
 
