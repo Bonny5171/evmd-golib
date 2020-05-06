@@ -21,4 +21,5 @@ type Tenant struct {
 	IsDeleted        bool           `db:"is_deleted"`
 	DeletedAt        pq.NullTime    `db:"deleted_at"`
 	LastModifiedByID sql.NullString `db:"last_modified_by_id"`
+	IsCloned         bool           `db:"is_cloned"`
 }
