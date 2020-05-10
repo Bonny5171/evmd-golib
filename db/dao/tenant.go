@@ -34,7 +34,7 @@ func GetTenantID(conn *sqlx.DB, orgID string) (tid int, err error) {
 
 func GetTenantByID(conn *sqlx.DB, tid int) (tenant model.Tenant, err error) {
 	const query = `
-		SELECT id, company_id, name, org_id, organization_type, custom_domain, is_sandbox, is_active, created_at, updated_at, is_deleted, deleted_at, last_modified_by_id, is_cloned
+		SELECT id, company_id, name, org_id, organization_type, custom_domain, is_sandbox, is_active, created_at, updated_at, is_deleted, deleted_at, last_modified_by_id, is_cloned, sf_client_id
 		FROM public.tenant
 		WHERE id = $1
 		AND is_active = TRUE
