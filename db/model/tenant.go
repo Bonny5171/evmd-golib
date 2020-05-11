@@ -22,4 +22,5 @@ type Tenant struct {
 	DeletedAt        pq.NullTime    `db:"deleted_at"`
 	LastModifiedByID sql.NullString `db:"last_modified_by_id"`
 	IsCloned         bool           `db:"is_cloned"`
+	SfClientID       string         `db:"sf_client_id"`
 }
