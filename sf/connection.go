@@ -3,6 +3,7 @@ package sf
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"bitbucket.org/everymind/gforce"
@@ -74,14 +75,26 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 
 	var user model.User
 	tenant, err := dao.GetTenantByID(conn, tid)
+	if err != nil {
+		return nil, err
+	}
 
 	if len(uid) == 0 {
 		user, err = dao.GetUser(conn, tid, p.ByName("SF_USER_ID"))
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		user, err = dao.GetUser(conn, tid, uid)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	endpoint, err := GetEndpointURL(p.ByName("SF_ENVIROMENT"))
+	if err != nil {
+		return nil, err
+	}
 
 	var authURL string
 	if p.ByName("SF_ENVIRONMENT") == "PRODUCTION" {
@@ -91,6 +104,10 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 	}
 
 	session, err := gforce.GetServerAuthorization(p[0].OrgID, tenant.SfClientID, user.Email, authURL, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("Session: %v", session)
 
 	creds := gforce.ForceSession{
 		AccessToken:   session.AccessToken,
@@ -109,6 +126,8 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 	}
 
 	f = gforce.NewForce(&creds)
+
+	log.Printf("Force -> %v", f)
 
 	return f, nil
 }
