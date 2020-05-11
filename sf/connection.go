@@ -79,6 +79,8 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 		return nil, err
 	}
 
+	log.Printf("UID - USER: %v - %v", uid, p.ByName("SF_USER_ID"))
+
 	if len(uid) == 0 {
 		user, err = dao.GetUser(conn, tid, p.ByName("SF_USER_ID"))
 		if err != nil {
@@ -91,10 +93,7 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 		}
 	}
 
-	endpoint, err := GetEndpointURL(p.ByName("SF_ENVIROMENT"))
-	if err != nil {
-		return nil, err
-	}
+	instanceEndpoint := p.ByName("SF_INSTANCE_URL")
 
 	var authURL string
 	if p.ByName("SF_ENVIRONMENT") == "PRODUCTION" {
@@ -103,7 +102,7 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 		authURL = "https://test.salesforce.com"
 	}
 
-	session, err := gforce.GetServerAuthorization(p[0].OrgID, tenant.SfClientID, user.Email, authURL, endpoint)
+	session, err := gforce.GetServerAuthorization(p[0].OrgID, tenant.SfClientID, user.Email, authURL, instanceEndpoint)
 	if err != nil {
 		return nil, err
 	}
