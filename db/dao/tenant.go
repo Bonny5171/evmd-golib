@@ -51,6 +51,24 @@ func GetTenantByID(conn *sqlx.DB, tid int) (tenant model.Tenant, err error) {
 	return
 }
 
+func GetTenantByCustomDomain(conn *sqlx.DB, domain string) (tenant model.Tenant, err error) {
+	const query = `
+		SELECT id, company_id, name, org_id, organization_type, custom_domain, is_sandbox, is_active, created_at, updated_at, is_deleted, deleted_at, last_modified_by_id, is_cloned, sf_client_id, sf_client_secret, sf_callback_token_url
+		FROM public.tenant
+		WHERE custom_domain = $1
+		AND is_active = TRUE
+		AND is_deleted = FALSE
+		LIMIT 1;
+	`
+
+	row := conn.QueryRowx(query, domain)
+	if e := row.StructScan(&tenant); e != nil {
+		err = db.WrapError(e, "row.StructScan()")
+		return
+	}
+	return
+}
+
 func GetTenant(conn *sqlx.DB, orgID string) (tenant model.Tenant, err error) {
 	const query = `
 		SELECT id, company_id, name, org_id, organization_type, custom_domain, is_sandbox, is_active, is_deleted
