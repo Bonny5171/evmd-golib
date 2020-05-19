@@ -72,9 +72,9 @@ func SaveSFObject(conn *sqlx.DB, obj model.SFObject) (id int, err error) {
 			updated_at = $6, 
 			is_deleted = false, 
 			deleted_at = null
-		WHERE id = $7;`
+		WHERE id = $7 AND tenant_id = $8;`
 
-		if _, err := conn.Exec(query, obj.TenantID, obj.ExecutionID, obj.Name, obj.DocDescribe, obj.DocMetaData, t, id); err != nil {
+		if _, err := conn.Exec(query, obj.TenantID, obj.ExecutionID, obj.Name, obj.DocDescribe, obj.DocMetaData, t, id, obj.TenantID); err != nil {
 			return 0, db.WrapError(err, "conn.Exec()")
 		}
 	}
