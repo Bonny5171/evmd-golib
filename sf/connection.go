@@ -11,6 +11,7 @@ import (
 
 	"bitbucket.org/everymind/evmd-golib/db/dao"
 	"bitbucket.org/everymind/evmd-golib/db/model"
+	"bitbucket.org/everymind/evmd-golib/logger"
 )
 
 //NewForce func
@@ -103,6 +104,8 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 	} else {
 		authURL = "https://test.salesforce.com"
 	}
+
+	logger.Debugf("Session parameters: %s - %s - %s - %s - %s", p[0].OrgID, tenant.SfClientID, user.UserName, authURL, instanceEndpoint)
 
 	session, err := gforce.GetServerAuthorization(p[0].OrgID, tenant.SfClientID, user.UserName, authURL, instanceEndpoint)
 	if err != nil {
