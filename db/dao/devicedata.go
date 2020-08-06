@@ -154,12 +154,30 @@ func GetDeviceDataUsersToProcess(conn *sqlx.DB, tid int, execID int64) (d []stri
 	return d, nil
 }
 
-func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int) error {
-	query := `UPDATE public.device_data
-	          SET execution_id = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN $2 ELSE execution_id END, updated_at = now()
-  	          WHERE tenant_id = $3 AND is_active = TRUE AND is_deleted = FALSE;`
+func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int, maxWorkers int) error {
+	query := `
+		WITH a AS (
+			SELECT * FROM (
+			SELECT DISTINCT ON (group_id) group_id, created_at
+			FROM public.device_data
+			WHERE tenant_id = $3 AND is_active = TRUE AND is_deleted = FALSE
+			ORDER BY group_id, created_at ASC NULLS LAST
+			) sub
+		ORDER BY created_at ASC NULLS LAST LIMIT $4
+		)
+		UPDATE
+			public.device_data d
+		SET execution_id = CASE public.fn_check_retry (try,$1) WHEN TRUE THEN $2 ELSE execution_id END, updated_at = now()
+		FROM a
+		WHERE
+		a.group_id = d.group_id;
+		`
 
-	if _, err := conn.Exec(query, retry, execID, tid); err != nil {
+	// query := `UPDATE public.device_data
+	//           SET execution_id = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN $2 ELSE execution_id END, updated_at = now()
+	//           WHERE tenant_id = $3 AND is_active = TRUE AND is_deleted = FALSE;`
+
+	if _, err := conn.Exec(query, retry, execID, tid, maxWorkers); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
