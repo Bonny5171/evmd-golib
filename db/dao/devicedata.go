@@ -154,7 +154,7 @@ func GetDeviceDataUsersToProcess(conn *sqlx.DB, tid int, execID int64) (d []stri
 	return d, nil
 }
 
-func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int, maxWorkers int) error {
+func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int, maxWorkers int64) error {
 	query := `
 		WITH a AS (
 			SELECT * FROM (
