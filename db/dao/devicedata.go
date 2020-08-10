@@ -304,3 +304,16 @@ func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusI
 
 	return nil
 }
+
+func GetDeviceDataLogReport(conn *sqlx.DB, tid int64) (logs []model.DeviceDataLogReport, err error) {
+	query := `
+		SELECT id, tenant_id, created_at, updated_at, is_active, is_deleted, log_status_name, log_error, device_data_id, device_created_at, table_name, pk, sf_id, action_type, external_id, device_id, user_id, group_id, original_json_data, brewed_json_data, execution_id, execution_status_name, execution_job_faktory_id, reported
+		FROM itgr.vw_report_device_data_log_errors WHERE tenant_id = $1`
+
+	err = conn.Select(&logs, query, tid)
+	if err != nil {
+		return nil, db.WrapError(err, "conn.Select()")
+	}
+
+	return logs, nil
+}
