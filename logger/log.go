@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -16,9 +17,10 @@ var (
 	ErrorLog   *log.Logger
 	FatalLog   *log.Logger
 	PanicLog   *log.Logger
+	MetricLog  *log.Logger
 )
 
-func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, errorHandle io.Writer) {
+func Init(appname, metric string, infoHandle, traceHandle, debugHandle, warningHandle, errorHandle, metricHandle io.Writer) {
 	if len(appname) > 0 {
 		appname = fmt.Sprintf("[%s] ", appname)
 	}
@@ -30,6 +32,27 @@ func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, e
 	ErrorLog = log.New(errorHandle, fmt.Sprintf("%sERROR  : ", appname), log.Ldate|log.Ltime)
 	FatalLog = log.New(errorHandle, fmt.Sprintf("%sFATAL  : ", appname), log.Ldate|log.Ltime)
 	PanicLog = log.New(errorHandle, fmt.Sprintf("%sPANIC  : ", appname), log.Ldate|log.Ltime)
+	MetricLog = log.New(metricHandle, fmt.Sprintf("%sMETRIC  : ", appname), log.Ldate|log.Ltime)
+}
+
+func metricActive() bool {
+	ma, err := strconv.ParseBool(os.Getenv("METRICGO"))
+	if err != nil {
+		return false
+	}
+	return ma
+}
+
+func Metric(t interface{}) {
+	if metricActive() {
+		MetricLog.Print(t)
+	}
+}
+
+func Metricf(format string, v ...interface{}) {
+	if metricActive() {
+		MetricLog.Printf(format, v...)
+	}
 }
 
 func debugActive() bool {
@@ -49,6 +72,16 @@ func Debug(t interface{}) {
 func Debugf(format string, v ...interface{}) {
 	if debugActive() {
 		DebugLog.Printf(format, v...)
+	}
+}
+
+func DebugfJSON(format string, v ...interface{}) {
+	if debugActive() {
+		strJSON, err := json.MarshalIndent(v, "", " ")
+		if err != nil {
+			Errorf("Error marshalling log JSON: %v", err)
+		}
+		DebugLog.Printf(format, strJSON)
 	}
 }
 
