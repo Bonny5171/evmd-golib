@@ -20,7 +20,7 @@ var (
 	MetricLog  *log.Logger
 )
 
-func Init(appname, metric string, infoHandle, traceHandle, debugHandle, warningHandle, errorHandle, metricHandle io.Writer) {
+func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, errorHandle, metricHandle io.Writer) {
 	if len(appname) > 0 {
 		appname = fmt.Sprintf("[%s] ", appname)
 	}
