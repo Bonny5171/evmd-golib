@@ -59,9 +59,9 @@ func metricActive() bool {
 }
 
 //Metric func
-func Metric(t interface{}) {
+func Metric(t []byte) {
 	if metricActive() {
-		GCLog.Log(logging.Entry{Payload: t})
+		GCLog.Log(logging.Entry{Payload: json.RawMessage(t)})
 		MetricLog.Print(t)
 	}
 }
