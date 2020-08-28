@@ -1,12 +1,16 @@
 package logger
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"strconv"
+
+	"cloud.google.com/go/logging"
+	"google.golang.org/api/option"
 )
 
 var (
@@ -18,6 +22,7 @@ var (
 	FatalLog   *log.Logger
 	PanicLog   *log.Logger
 	MetricLog  *log.Logger
+	GCLog      *logging.Logger
 )
 
 func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, errorHandle, metricHandle io.Writer) {
@@ -33,6 +38,16 @@ func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, e
 	FatalLog = log.New(errorHandle, fmt.Sprintf("%sFATAL  : ", appname), log.Ldate|log.Ltime)
 	PanicLog = log.New(errorHandle, fmt.Sprintf("%sPANIC  : ", appname), log.Ldate|log.Ltime)
 	MetricLog = log.New(metricHandle, fmt.Sprintf("%sMETRIC  : ", appname), log.Ldate|log.Ltime)
+
+	ctx := context.Background()
+
+	credentialsPath := os.Getenv("LOGGING_CREDENTIALS")
+
+	client, err := logging.NewClient(ctx, os.Getenv("GCPROJECT"), option.WithCredentialsFile(credentialsPath))
+	if err != nil {
+		panic(err)
+	}
+	GCLog = client.Logger(appname)
 }
 
 func metricActive() bool {
@@ -43,14 +58,18 @@ func metricActive() bool {
 	return ma
 }
 
+//Metric func
 func Metric(t interface{}) {
 	if metricActive() {
+		GCLog.Log(logging.Entry{Payload: t})
 		MetricLog.Print(t)
 	}
 }
 
+//Metricf func
 func Metricf(format string, v ...interface{}) {
 	if metricActive() {
+		GCLog.Log(logging.Entry{Payload: v})
 		MetricLog.Printf(format, v...)
 	}
 }
