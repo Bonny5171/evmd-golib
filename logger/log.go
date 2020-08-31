@@ -59,20 +59,20 @@ func metricActive() bool {
 }
 
 //Metric func
-func Metric(t []byte) {
+func Metric(payload []byte, severity logging.Severity, logName string) {
 	if metricActive() {
-		GCLog.Log(logging.Entry{Payload: json.RawMessage(t)})
-		MetricLog.Print(t)
+		GCLog.Log(logging.Entry{Payload: json.RawMessage(payload), Severity: severity, LogName: fmt.Sprintf(`projects/%s/logs/%s`, os.Getenv("GCPROJECT"), logName)})
+		// MetricLog.Print(payload)
 	}
 }
 
 //Metricf func
-func Metricf(format string, v ...interface{}) {
-	if metricActive() {
-		GCLog.Log(logging.Entry{Payload: v})
-		MetricLog.Printf(format, v...)
-	}
-}
+// func Metricf(format string, v ...interface{}) {
+// 	if metricActive() {
+// 		GCLog.Log(logging.Entry{Payload: v})
+// 		MetricLog.Printf(format, v...)
+// 	}
+// }
 
 func debugActive() bool {
 	da, err := strconv.ParseBool(os.Getenv("DEBUGGO"))
