@@ -64,12 +64,9 @@ func metricActive() bool {
 }
 
 //Metric func
-func Metric(payload MetricLog, severity logging.Severity) {
+func Metric(log logging.Entry) {
 	if metricActive() {
-		GCLog.Log(logging.Entry{
-			Payload:  payload,
-			Severity: severity,
-		})
+		GCLog.Log(log)
 		// MetricLog.Print(payload)
 	}
 }
