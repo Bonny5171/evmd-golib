@@ -52,7 +52,7 @@ func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, e
 	if err != nil {
 		panic(err)
 	}
-	GCLog = client.Logger(appname)
+	GCLog = client.Logger("jobs")
 }
 
 func metricActive() bool {
