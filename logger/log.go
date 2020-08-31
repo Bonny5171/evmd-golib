@@ -21,9 +21,15 @@ var (
 	ErrorLog   *log.Logger
 	FatalLog   *log.Logger
 	PanicLog   *log.Logger
-	MetricLog  *log.Logger
 	GCLog      *logging.Logger
 )
+
+type MetricLog struct {
+	Message  string
+	Type     string
+	TenantID int
+	Extra    map[string]interface{}
+}
 
 func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, errorHandle, metricHandle io.Writer) {
 	if len(appname) > 0 {
@@ -37,7 +43,6 @@ func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, e
 	ErrorLog = log.New(errorHandle, fmt.Sprintf("%sERROR  : ", appname), log.Ldate|log.Ltime)
 	FatalLog = log.New(errorHandle, fmt.Sprintf("%sFATAL  : ", appname), log.Ldate|log.Ltime)
 	PanicLog = log.New(errorHandle, fmt.Sprintf("%sPANIC  : ", appname), log.Ldate|log.Ltime)
-	MetricLog = log.New(metricHandle, fmt.Sprintf("%sMETRIC  : ", appname), log.Ldate|log.Ltime)
 
 	ctx := context.Background()
 
@@ -59,10 +64,10 @@ func metricActive() bool {
 }
 
 //Metric func
-func Metric(payload []byte, severity logging.Severity) {
+func Metric(payload MetricLog, severity logging.Severity) {
 	if metricActive() {
 		GCLog.Log(logging.Entry{
-			Payload:  json.RawMessage(payload),
+			Payload:  payload,
 			Severity: severity,
 		})
 		// MetricLog.Print(payload)
