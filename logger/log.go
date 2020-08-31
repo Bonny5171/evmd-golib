@@ -59,9 +59,9 @@ func metricActive() bool {
 }
 
 //Metric func
-func Metric(payload []byte, severity logging.Severity, logName string) {
+func Metric(payload []byte, severity logging.Severity) {
 	if metricActive() {
-		GCLog.Log(logging.Entry{Payload: json.RawMessage(payload), Severity: severity, LogName: fmt.Sprintf(`projects/%s/logs/%s`, os.Getenv("GCPROJECT"), logName)})
+		GCLog.Log(logging.Entry{Payload: json.RawMessage(payload), Severity: severity, LogName: fmt.Sprintf(`projects/%s/logs/%s`, os.Getenv("GCPROJECT"))})
 		// MetricLog.Print(payload)
 	}
 }
