@@ -26,6 +26,7 @@ var (
 
 type MetricLog struct {
 	Message      string                 `json:"message"`
+	JobName      string                 `json:"job_name"`
 	Type         string                 `json:"type"`
 	TenantID     int                    `json:"tenant_id"`
 	JobFaktoryID string                 `json:"job_faktory_id"`
