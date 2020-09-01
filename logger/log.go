@@ -9,7 +9,6 @@ import (
 	"os"
 	"strconv"
 
-	"bitbucket.org/everymind/evmd-job-purge/private/bitbucket.org/everymind/evmd-golib/logger"
 	"cloud.google.com/go/logging"
 	"google.golang.org/api/option"
 )
@@ -66,7 +65,7 @@ func metricActive() bool {
 }
 
 //Metric func
-func Metric(log logger.MetricLog, severity logging.Severity) {
+func Metric(log MetricLog, severity logging.Severity) {
 	if metricActive() {
 		GCLog.Log(logging.Entry{Payload: log, Severity: severity})
 		// MetricLog.Print(payload)
