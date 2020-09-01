@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 
+	"bitbucket.org/everymind/evmd-job-purge/private/bitbucket.org/everymind/evmd-golib/logger"
 	"cloud.google.com/go/logging"
 	"google.golang.org/api/option"
 )
@@ -25,10 +26,11 @@ var (
 )
 
 type MetricLog struct {
-	Message  string
-	Type     string
-	TenantID int
-	Extra    map[string]interface{}
+	Message      string                 `json:"message"`
+	Type         string                 `json:"type"`
+	TenantID     int                    `json:"tenant_id"`
+	JobFaktoryID string                 `json:"job_faktory_id"`
+	Info         map[string]interface{} `json:"info"`
 }
 
 func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, errorHandle, metricHandle io.Writer) {
@@ -64,9 +66,9 @@ func metricActive() bool {
 }
 
 //Metric func
-func Metric(log logging.Entry) {
+func Metric(log logger.MetricLog, severity logging.Severity) {
 	if metricActive() {
-		GCLog.Log(log)
+		GCLog.Log(logging.Entry{Payload: log, Severity: severity})
 		// MetricLog.Print(payload)
 	}
 }
