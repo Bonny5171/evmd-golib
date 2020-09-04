@@ -10,10 +10,13 @@ import (
 )
 
 type (
-	Status     int
+	//Status type
+	Status int
+	//StatusType types
 	StatusType int
 )
 
+//EnumStatus types
 const (
 	EnumStatusExecProcessing Status = iota
 	EnumStatusExecError
@@ -30,6 +33,7 @@ const (
 	EnumStatusUpsertError
 )
 
+// EnumTyoe types
 const (
 	EnumTypeStatusNil StatusType = iota
 	EnumTypeStatusETL
@@ -54,12 +58,12 @@ func (t StatusType) String() string {
 }
 
 // GetStatuses retorna a lista de status de processamento de uma determinada org (tenant_id)
-func GetStatuses(conn *sqlx.DB, tenantId int, sType StatusType) (s model.Statuses, err error) {
+func GetStatuses(conn *sqlx.DB, tenantID int, sType StatusType) (s model.Statuses, err error) {
 	qb := strings.Builder{}
 	var args []interface{}
 
 	qb.WriteString("SELECT id, name, type FROM itgr.status WHERE tenant_id = $1 AND is_active = true AND is_deleted = false")
-	args = append(args, tenantId)
+	args = append(args, tenantID)
 
 	if sType != EnumTypeStatusNil {
 		qb.WriteString(" AND type = $2")

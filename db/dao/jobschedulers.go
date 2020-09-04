@@ -117,6 +117,7 @@ func GetJobByID(conn *sqlx.DB, jobID int64) (s model.JobScheduler, err error) {
 	return s, nil
 }
 
+//SetCronJobSchedule func
 func SetCronJobSchedule(conn *sqlx.DB, jobID int64, cronexpr string) error {
 	query := `UPDATE public.job_scheduler SET cron = $1 WHERE id = $2;`
 
@@ -127,6 +128,7 @@ func SetCronJobSchedule(conn *sqlx.DB, jobID int64, cronexpr string) error {
 	return nil
 }
 
+//ActiveJobSchedule func
 func ActiveJobSchedule(conn *sqlx.DB, jobID int64, active bool) error {
 	query := `UPDATE public.job_scheduler SET is_active = $1 WHERE id = $2;`
 

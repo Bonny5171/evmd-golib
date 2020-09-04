@@ -10,8 +10,10 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
+//ParameterType type
 type ParameterType int
 
+//EnumParam types
 const (
 	EnumParamNil ParameterType = iota
 	EnumParamA

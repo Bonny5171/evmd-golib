@@ -7,11 +7,12 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
-func GetResourceMetadataToProcess(conn *sqlx.DB, tenantId int) (d []model.ResourceMetadata, err error) {
+//GetResourceMetadataToProcess func
+func GetResourceMetadataToProcess(conn *sqlx.DB, tenantID int) (d []model.ResourceMetadata, err error) {
 	query := `SELECT tenant_id, sf_content_document_id, sf_content_version_id 
 	            FROM public.fn_get_resource_to_process($1);`
 
-	err = conn.Select(&d, query, tenantId)
+	err = conn.Select(&d, query, tenantID)
 	if err != nil {
 		return nil, db.WrapError(err, "conn.Select()")
 	}
@@ -19,7 +20,8 @@ func GetResourceMetadataToProcess(conn *sqlx.DB, tenantId int) (d []model.Resour
 	return
 }
 
-func GetProductsWithoutResources(conn *sqlx.DB, tenantId int) (d []string, err error) {
+//GetProductsWithoutResources func
+func GetProductsWithoutResources(conn *sqlx.DB, tenantID int) (d []string, err error) {
 	query := `
 		WITH t AS (
 			SELECT DISTINCT p.ref1, p.ref2
@@ -39,7 +41,7 @@ func GetProductsWithoutResources(conn *sqlx.DB, tenantId int) (d []string, err e
 		SELECT DISTINCT LPAD(t.ref1::text, 5, '0'::text) || LPAD(t.ref2::text, 5, '0'::text) AS product_color
 		FROM t;`
 
-	err = conn.Select(&d, query, tenantId)
+	err = conn.Select(&d, query, tenantID)
 	if err != nil {
 		return nil, db.WrapError(err, "conn.Select()")
 	}
@@ -47,6 +49,7 @@ func GetProductsWithoutResources(conn *sqlx.DB, tenantId int) (d []string, err e
 	return
 }
 
+//SaveResourceMetadata func
 func SaveResourceMetadata(conn *sqlx.DB, data *model.ResourceMetadata) (err error) {
 	query := `
 		INSERT INTO public.resource_metadata (tenant_id, original_file_name, original_file_extension, content_type, "size", preview_content_b64, full_content_b64, sf_content_document_id, sf_content_version_id, is_downloaded) 
@@ -71,6 +74,7 @@ func SaveResourceMetadata(conn *sqlx.DB, data *model.ResourceMetadata) (err erro
 	return
 }
 
+//SaveResourceMetadataWithRefs func
 func SaveResourceMetadataWithRefs(conn *sqlx.DB, data *model.ResourceMetadata) (rows int64, err error) {
 	query := `
 		INSERT INTO public.resource_metadata (tenant_id, original_file_name, original_file_extension, content_type, "size", ref1, ref2, sequence, size_type, full_content_b64) 
@@ -101,7 +105,8 @@ func SaveResourceMetadataWithRefs(conn *sqlx.DB, data *model.ResourceMetadata) (
 	return
 }
 
-func SoftDeleteImages(conn *sqlx.DB, tenantId int) error {
+//SoftDeleteImages func
+func SoftDeleteImages(conn *sqlx.DB, tenantID int) error {
 	query := `
 		UPDATE public.resource_metadata 
 		   SET is_deleted = TRUE, 
@@ -118,7 +123,7 @@ func SoftDeleteImages(conn *sqlx.DB, tenantId int) error {
 		   AND r.is_deleted = FALSE
 		   AND p.tenant_id IS NULL;`
 
-	if _, err := conn.Exec(query, tenantId); err != nil {
+	if _, err := conn.Exec(query, tenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 

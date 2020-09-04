@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db"
 )
 
+//GetCompleteOrgID func
 func GetCompleteOrgID(conn *sqlx.DB, orgID string) (cOrgID string, err error) {
 	log.Printf("GetCompleteOrgID: %v", orgID)
 	const query = `
