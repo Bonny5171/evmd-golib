@@ -11,6 +11,7 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
+//SaveSFData func
 func SaveSFData(conn *sqlx.DB, data model.SFData) (id int, err error) {
 	query := `INSERT INTO itgr.sf_data (tenant_id, execution_id, record_type_id, status_id, sf_object_id, sf_object_name, doc_id, doc_name, doc_record, is_active, created_at, updated_at)
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)
@@ -29,6 +30,7 @@ func SaveSFData(conn *sqlx.DB, data model.SFData) (id int, err error) {
 	return id, nil
 }
 
+//PurgeAllDataETLSuccess func
 func PurgeAllDataETLSuccess(conn *sqlx.DB, tid int) (err error) {
 	statuses, err := GetStatuses(conn, tid, EnumTypeStatusETL)
 	if err != nil {
@@ -49,6 +51,7 @@ func PurgeAllDataETLSuccess(conn *sqlx.DB, tid int) (err error) {
 	return nil
 }
 
+//PurgeAllPublicSFData func
 func PurgeAllPublicSFData(conn *sqlx.DB, tid int) (err error) {
 	query := `DELETE FROM public.sf_data
 			   WHERE tenant_id = $1
@@ -63,6 +66,7 @@ func PurgeAllPublicSFData(conn *sqlx.DB, tid int) (err error) {
 	return nil
 }
 
+//GetSfData func
 func GetSfData(conn *sqlx.DB, tenantID int, execID int64, objID int) (d []model.SFData, err error) {
 	query := `
 		SELECT DISTINCT d.id, d.doc_id, o.sf_object_name
@@ -81,6 +85,7 @@ func GetSfData(conn *sqlx.DB, tenantID int, execID int64, objID int) (d []model.
 	return
 }
 
+//UpdateStatusSfData func
 func UpdateStatusSfData(conn *sqlx.DB, tenantID int, execID, objectID int64, statusIDFrom, statusIDTo Status) (err error) {
 	statuses, err := GetStatuses(conn, tenantID, EnumTypeStatusETL)
 	if err != nil {

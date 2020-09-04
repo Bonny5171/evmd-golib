@@ -10,6 +10,7 @@ import (
 	m "bitbucket.org/everymind/evmd-golib/modelbase"
 )
 
+//GetDevices func
 func GetDevices(conn *sqlx.DB, tid int, execID int64) (d []model.Device, err error) {
 	query := `SELECT d.device_id, count(*) AS qty
 			    FROM public.device_data d
@@ -27,6 +28,7 @@ func GetDevices(conn *sqlx.DB, tid int, execID int64) (d []model.Device, err err
 	return d, nil
 }
 
+//GetDevicesByGroup func
 func GetDevicesByGroup(conn *sqlx.DB, tid int, execID int64) (d []model.Device, err error) {
 	query := `SELECT d.device_id, d.group_id, count(*) AS qty
 			    FROM public.device_data d
@@ -44,6 +46,7 @@ func GetDevicesByGroup(conn *sqlx.DB, tid int, execID int64) (d []model.Device, 
 	return d, nil
 }
 
+//GetDeviceByIdGroupedByGroup func
 func GetDeviceByIdGroupedByGroup(conn *sqlx.DB, tid int, execID int64, deviceID string) (d []model.Device, err error) {
 	query := `SELECT d.device_id, d.group_id, count(*) AS qty
 			    FROM public.device_data d
@@ -62,6 +65,7 @@ func GetDeviceByIdGroupedByGroup(conn *sqlx.DB, tid int, execID int64, deviceID 
 	return d, nil
 }
 
+//GetDeviceDataTables func
 func GetDeviceDataTables(conn *sqlx.DB, tid int, execID int64) (t []*model.DeviceTableField, err error) {
 	query := `SELECT o.id AS sf_object_id, 
 			         o.sf_object_name, 
@@ -85,6 +89,7 @@ func GetDeviceDataTables(conn *sqlx.DB, tid int, execID int64) (t []*model.Devic
 	return t, nil
 }
 
+//GetDeviceDataIDs func
 func GetDeviceDataIDs(conn *sqlx.DB, tid int, device string, execID int64) (d []string, err error) {
 	query := `SELECT d.id
 			    FROM public.device_data d
@@ -103,16 +108,17 @@ func GetDeviceDataIDs(conn *sqlx.DB, tid int, device string, execID int64) (d []
 	return d, nil
 }
 
-func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, device_id string, group_id m.NullString, execID int64) (d []string, err error) {
+//GetDeviceDataIDsByGroupID func
+func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, deviceID string, groupID m.NullString, execID int64) (d []string, err error) {
 	var (
 		query  = strings.Builder{}
-		params = []interface{}{tid, device_id, execID}
+		params = []interface{}{tid, deviceID, execID}
 	)
 
 	query.WriteString("SELECT d.id FROM public.device_data d WHERE d.tenant_id = $1 AND d.is_active = TRUE AND d.is_deleted = FALSE AND d.device_id = $2 AND d.execution_id = $3 ")
-	if group_id.Valid {
+	if groupID.Valid {
 		query.WriteString("AND d.group_id = $4 ")
-		params = append(params, group_id.String)
+		params = append(params, groupID.String)
 	} else {
 		query.WriteString("AND d.group_id = NULL ")
 	}
@@ -126,6 +132,7 @@ func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, device_id string, group_i
 	return d, nil
 }
 
+//GetDeviceData func
 func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
 	query := `SELECT d.id, d.tenant_id, d.schema_name, d.table_name, o.id AS sf_object_id, o.sf_object_name, d.user_id, d.pk, d.external_id, d.sf_id, d.action_type,
 					 to_jsonb(regexp_replace(d.json_data, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g')::jsonb) AS json_data, 
@@ -142,6 +149,7 @@ func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
 	return
 }
 
+//GetDeviceDataUsersToProcess func
 func GetDeviceDataUsersToProcess(conn *sqlx.DB, tid int, execID int64) (d []string, err error) {
 	query := `SELECT DISTINCT user_id FROM public.device_data
 			  WHERE tenant_id = $1 AND execution_id = $2 AND is_active = TRUE AND is_deleted = FALSE;`
@@ -154,6 +162,7 @@ func GetDeviceDataUsersToProcess(conn *sqlx.DB, tid int, execID int64) (d []stri
 	return d, nil
 }
 
+//SetDeviceDataToExecution func
 func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int, maxWorkers int64) error {
 	query := `
 		WITH a AS (
@@ -184,6 +193,7 @@ func SetDeviceDataToExecution(conn *sqlx.DB, tid int, execID int64, retry int, m
 	return nil
 }
 
+//DeactivateDeviceDataRows func
 func DeactivateDeviceDataRows(conn *sqlx.DB, tid int, retry int) error {
 	query := `
 		WITH b AS (
@@ -210,6 +220,7 @@ func DeactivateDeviceDataRows(conn *sqlx.DB, tid int, retry int) error {
 	return nil
 }
 
+//SetTryDeviceDataRows func
 func SetTryDeviceDataRows(conn *sqlx.DB, id string, retry int) (try int, err error) {
 	query := `UPDATE public.device_data 
 			  SET try = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN try + 1 ELSE try END, updated_at = now()
@@ -224,6 +235,7 @@ func SetTryDeviceDataRows(conn *sqlx.DB, id string, retry int) (try int, err err
 	return try, nil
 }
 
+//SetDeviceDataToDelete func
 func SetDeviceDataToDelete(conn *sqlx.DB, id string) error {
 	query := `UPDATE public.device_data
 			  SET is_deleted = TRUE, deleted_at = NOW()
@@ -236,6 +248,7 @@ func SetDeviceDataToDelete(conn *sqlx.DB, id string) error {
 	return nil
 }
 
+//PurgeAllDeviceDataToDelete func
 func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 	query := `DELETE FROM public.device_data
 			  WHERE tenant_id = $1 AND is_deleted = TRUE;`
@@ -248,6 +261,7 @@ func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 	return nil
 }
 
+//InsertDeviceDataLog func
 func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, statusID int16) (id int64, err error) {
 	query := `INSERT INTO itgr.device_data_log (
 				original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,action_type,sf_id,original_json_data,
@@ -283,6 +297,7 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 	return id, nil
 }
 
+//UpdateDeviceDataLog func
 func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusID int16, try int, err error) error {
 	params := make([]interface{}, 0)
 	params = append(params, logID)
@@ -305,6 +320,7 @@ func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusI
 	return nil
 }
 
+//GetDeviceDataLogReport func
 func GetDeviceDataLogReport(conn *sqlx.DB, tid int) (logs []model.DeviceDataLogReport, err error) {
 	query := `
 		SELECT id, tenant_id, created_at, updated_at, is_active, is_deleted, log_status_name, log_error, device_data_id, device_created_at, table_name, pk, sf_id, action_type, external_id, device_id, user_id, group_id, original_json_data, brewed_json_data, execution_id, execution_status_name, execution_job_faktory_id, reported

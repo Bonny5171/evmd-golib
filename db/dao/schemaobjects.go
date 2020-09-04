@@ -8,10 +8,12 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
+//SchemaType type
 type (
 	SchemaType int
 )
 
+//SchemaType types
 const (
 	EnumSchemaTypeInboud SchemaType = iota
 	EnumSchemaTypeOutbound
@@ -25,7 +27,7 @@ func (t SchemaType) String() string {
 	return n[t]
 }
 
-// GetSchemaObjects
+//GetSchemaObjects func
 func GetSchemaObjects(conn *sqlx.DB, tenantID, schemaID int) (s model.SchemaObjects, err error) {
 	const query = `SELECT id, schema_id, sf_object_id, sf_object_name, sequence, raw_command 
 				     FROM itgr.schema_object 
@@ -43,7 +45,7 @@ func GetSchemaObjects(conn *sqlx.DB, tenantID, schemaID int) (s model.SchemaObje
 	return s, nil
 }
 
-// GetAllSchemaObjectsToProcess func
+//GetAllSchemaObjectsToProcess func
 func GetAllSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, schemaObjectName string, schemaType SchemaType) (s model.SchemaObjectToProcesses, err error) {
 	const query = `
 		SELECT v.id, v.schema_id, v.schema_name, v.tenant_id, t."name" AS tenant_name, v."type", v.sf_object_id, v.sf_object_name, v.doc_fields, 
@@ -96,7 +98,7 @@ func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, objectName []string)
 	return s, nil
 }
 
-// GetSchemaShareObjectsToProcess
+//GetSchemaShareObjectsToProcess func
 func GetSchemaShareObjectsToProcess(conn *sqlx.DB, tenantID int) (o model.SFObjectToProcesses, err error) {
 	const query = `
 			SELECT DISTINCT o.id, o.sf_object_name, o.tenant_id, t."name" AS tenant_name, s."filter" 
@@ -117,7 +119,7 @@ func GetSchemaShareObjectsToProcess(conn *sqlx.DB, tenantID int) (o model.SFObje
 	return o, nil
 }
 
-// UpdateSfObjectIDs
+//UpdateSfObjectIDs func
 func UpdateSfObjectIDs(conn *sqlx.DB) error {
 	const query = `UPDATE itgr.schema_object AS so 
 	                  SET sf_object_id = o.id 
@@ -133,7 +135,7 @@ func UpdateSfObjectIDs(conn *sqlx.DB) error {
 	return nil
 }
 
-// UpdateLastModifiedDate
+//UpdateLastModifiedDate func
 func UpdateLastModifiedDate(conn *sqlx.DB, schemaObjectID int, lastModifiedDate pq.NullTime) error {
 	const query = `UPDATE itgr.schema_object
 	                  SET sf_last_modified_date = $1 

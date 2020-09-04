@@ -6,6 +6,7 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db"
 )
 
+//CheckEnvironmentAvailability func
 func CheckEnvironmentAvailability(conn *sqlx.DB, companyID string, isSandbox bool) (result bool, err error) {
 	var prodQtd, sndbQtd int
 

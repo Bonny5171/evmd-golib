@@ -10,7 +10,7 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
-// InsertExecution
+//InsertExecution func
 func InsertExecution(conn *sqlx.DB, obj model.Execution) (r int64, err error) {
 	t := time.Now()
 
@@ -31,7 +31,7 @@ func InsertExecution(conn *sqlx.DB, obj model.Execution) (r int64, err error) {
 	return r, nil
 }
 
-// UpdateExecution
+//UpdateExecution func
 func UpdateExecution(conn *sqlx.DB, obj model.Execution) error {
 	t := time.Now()
 
@@ -46,7 +46,7 @@ func UpdateExecution(conn *sqlx.DB, obj model.Execution) error {
 	return nil
 }
 
-// GetLastExecutionByJobID
+//GetLastExecutionByJobID func
 func GetLastExecutionByJobID(conn *sqlx.DB, tenantID int, jobID string) (e model.Execution, err error) {
 	query := `SELECT e.id, e.tenant_id, e.job_faktory_id, e.job_scheduler_id, e.job_scheduler_name, e.schema_id, e.status_id, t.name AS status_name, e.doc_meta_data, e.is_active, e.created_at, e.updated_at, e.is_deleted, e.deleted_at 
 				FROM itgr.execution e

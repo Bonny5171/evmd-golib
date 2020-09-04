@@ -11,7 +11,7 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
-// GetSFObject
+//GetSFObject func
 func GetSFObject(conn *sqlx.DB, tid int, objectName string) (o model.SFObject, err error) {
 	const query = `
 		SELECT id, tenant_id, sf_object_name, doc_describe, doc_meta_data
@@ -27,6 +27,7 @@ func GetSFObject(conn *sqlx.DB, tid int, objectName string) (o model.SFObject, e
 	return
 }
 
+//SaveSFObject func
 func SaveSFObject(conn *sqlx.DB, obj model.SFObject) (id int, err error) {
 	t := time.Now()
 

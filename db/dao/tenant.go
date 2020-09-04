@@ -13,6 +13,7 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
+//GetTenantID func
 func GetTenantID(conn *sqlx.DB, orgID string) (tid int, err error) {
 	const query = `
 		SELECT id
@@ -32,6 +33,7 @@ func GetTenantID(conn *sqlx.DB, orgID string) (tid int, err error) {
 	return
 }
 
+//GetTenantByID func
 func GetTenantByID(conn *sqlx.DB, tid int) (tenant model.Tenant, err error) {
 	const query = `
 		SELECT id, company_id, name, org_id, organization_type, custom_domain, is_sandbox, is_active, created_at, updated_at, is_deleted, deleted_at, last_modified_by_id, is_cloned, sf_client_id, sf_client_secret, sf_callback_token_url
@@ -51,6 +53,7 @@ func GetTenantByID(conn *sqlx.DB, tid int) (tenant model.Tenant, err error) {
 	return
 }
 
+//GetTenantByCustomDomain func
 func GetTenantByCustomDomain(conn *sqlx.DB, domain string) (tenant model.Tenant, err error) {
 	const query = `
 		SELECT id, company_id, name, org_id, organization_type, custom_domain, is_sandbox, is_active, created_at, updated_at, is_deleted, deleted_at, last_modified_by_id, is_cloned, sf_client_id, sf_client_secret, sf_callback_token_url
@@ -69,7 +72,8 @@ func GetTenantByCustomDomain(conn *sqlx.DB, domain string) (tenant model.Tenant,
 	return
 }
 
-func GetTenantByCommunityUrl(conn *sqlx.DB, communityUrl string) (tenant model.Tenant, err error) {
+//GetTenantByCommunityUrl func
+func GetTenantByCommunityUrl(conn *sqlx.DB, communityURL string) (tenant model.Tenant, err error) {
 	const query = `
 		SELECT id, company_id, name, org_id, organization_type, custom_domain, is_sandbox, is_active, created_at, updated_at, is_deleted, deleted_at, last_modified_by_id, is_cloned, sf_client_id, sf_client_secret, sf_callback_token_url
 		FROM public.tenant
@@ -79,7 +83,7 @@ func GetTenantByCommunityUrl(conn *sqlx.DB, communityUrl string) (tenant model.T
 		LIMIT 1;
 	`
 
-	row := conn.QueryRowx(query, communityUrl)
+	row := conn.QueryRowx(query, communityURL)
 	if e := row.StructScan(&tenant); e != nil {
 		err = db.WrapError(e, "row.StructScan()")
 		return
@@ -87,6 +91,7 @@ func GetTenantByCommunityUrl(conn *sqlx.DB, communityUrl string) (tenant model.T
 	return
 }
 
+//GetTenant func
 func GetTenant(conn *sqlx.DB, orgID string) (tenant model.Tenant, err error) {
 	const query = `
 		SELECT id, company_id, name, org_id, organization_type, custom_domain, is_sandbox, is_active, is_deleted
@@ -103,6 +108,7 @@ func GetTenant(conn *sqlx.DB, orgID string) (tenant model.Tenant, err error) {
 	return
 }
 
+//SaveConfigTenant func
 func SaveConfigTenant(conn *sqlx.DB, name, companyID, orgID, instanceUrl, organizationType, userID string, isSandbox bool) (tid int, err error) {
 	const query = `
 		INSERT INTO public.tenant (id, "name", company_id, org_id, custom_domain, organization_type, is_sandbox, last_modified_by_id, is_active) 
@@ -134,6 +140,7 @@ func SaveConfigTenant(conn *sqlx.DB, name, companyID, orgID, instanceUrl, organi
 	return
 }
 
+//SaveConfigTenantTx func
 func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceUrl, organizationType, userID string, isSandbox bool) (tid int, err error) {
 	const query = `
 		INSERT INTO public.tenant (id, "name", company_id, org_id, custom_domain, organization_type, is_sandbox, last_modified_by_id, is_active) 
@@ -163,6 +170,7 @@ func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceUrl, orga
 	return
 }
 
+//SaveBusinessTenant func
 func SaveBusinessTenant(conn *sqlx.DB, tenantID int, name, orgID, userID string) error {
 	const query = `
 		INSERT INTO public.tenant (id, "name", org_id, last_modified_by_id, is_active) 
@@ -178,6 +186,7 @@ func SaveBusinessTenant(conn *sqlx.DB, tenantID int, name, orgID, userID string)
 	return nil
 }
 
+//SaveBusinessTenantTx func
 func SaveBusinessTenantTx(conn *sqlx.Tx, tenantID int, name, orgID, userID string) error {
 	const query = `
 		INSERT INTO public.tenant (id, "name", org_id, last_modified_by_id, is_active) 
@@ -193,6 +202,7 @@ func SaveBusinessTenantTx(conn *sqlx.Tx, tenantID int, name, orgID, userID strin
 	return nil
 }
 
+//CheckTenantAvailability func
 func CheckTenantAvailability(conn *sqlx.DB, orgID string) (inUse bool, err error) {
 	query := `SELECT CASE WHEN count(*) > 0 THEN true ELSE false END AS in_use FROM public.tenant WHERE LOWER(LEFT(org_id, 15)) = LOWER(LEFT($1, 15)) AND is_deleted = FALSE;`
 
@@ -204,6 +214,7 @@ func CheckTenantAvailability(conn *sqlx.DB, orgID string) (inUse bool, err error
 	return
 }
 
+//DisableTenant func
 func DisableTenant(conn *sqlx.DB, tenantID int, userID string) error {
 	query := "UPDATE public.tenant SET is_active = FALSE, updated_at = $3, last_modified_by_id = $2 WHERE id = $1;"
 
@@ -214,6 +225,7 @@ func DisableTenant(conn *sqlx.DB, tenantID int, userID string) error {
 	return nil
 }
 
+//DisableTenantTx func
 func DisableTenantTx(conn *sqlx.Tx, tenantID int, userID string) error {
 	query := "UPDATE public.tenant SET is_active = FALSE, updated_at = $3, last_modified_by_id = $2 WHERE id = $1;"
 
@@ -224,6 +236,7 @@ func DisableTenantTx(conn *sqlx.Tx, tenantID int, userID string) error {
 	return nil
 }
 
+//DeleteTenant func
 func DeleteTenant(conn *sqlx.DB, tenantID int, userID string) error {
 	query := "UPDATE public.tenant SET is_active = FALSE, updated_at = $3, is_deleted = TRUE, deleted_at = $3, last_modified_by_id = $2 WHERE id = $1;"
 
@@ -234,6 +247,7 @@ func DeleteTenant(conn *sqlx.DB, tenantID int, userID string) error {
 	return nil
 }
 
+//DeleteTenantTx func
 func DeleteTenantTx(conn *sqlx.Tx, tenantID int, userID string) error {
 	query := "UPDATE public.tenant SET is_active = FALSE, updated_at = $3, is_deleted = TRUE, deleted_at = $3, last_modified_by_id = $2 WHERE id = $1;"
 
@@ -244,6 +258,7 @@ func DeleteTenantTx(conn *sqlx.Tx, tenantID int, userID string) error {
 	return nil
 }
 
+//EnableTenant func
 func EnableTenant(conn *sqlx.DB, tenantID int, userID string) error {
 	query := "UPDATE public.tenant SET is_active = TRUE, updated_at = $3, last_modified_by_id = $2 WHERE id = $1;"
 
@@ -254,6 +269,7 @@ func EnableTenant(conn *sqlx.DB, tenantID int, userID string) error {
 	return nil
 }
 
+//EnableTenantTx func
 func EnableTenantTx(conn *sqlx.Tx, tenantID int, userID string) error {
 	query := "UPDATE public.tenant SET is_active = TRUE, updated_at = $3, last_modified_by_id = $2 WHERE id = $1;"
 

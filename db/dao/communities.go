@@ -9,6 +9,7 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
+//GetCommunity func
 func GetCommunity(conn *sqlx.DB, tid int, cid string) (c model.Community, err error) {
 	const query = `
 		SELECT id, tenant_id, "name", description, login_url, site_url, path_prefix
@@ -27,6 +28,7 @@ func GetCommunity(conn *sqlx.DB, tid int, cid string) (c model.Community, err er
 	return c, nil
 }
 
+//GetCommunities func
 func GetCommunities(conn *sqlx.DB, tid int) (c model.Communities, err error) {
 	const query = `
 		SELECT id, tenant_id, "name", description, login_url, site_url, path_prefix 
@@ -44,6 +46,7 @@ func GetCommunities(conn *sqlx.DB, tid int) (c model.Communities, err error) {
 	return c, nil
 }
 
+//SaveCommunity func
 func SaveCommunity(conn *sqlx.DB, community model.Community) (err error) {
 	const query = `
 		INSERT INTO public.community (id, tenant_id, "name", description, login_url, site_url, path_prefix) 
@@ -64,6 +67,7 @@ func SaveCommunity(conn *sqlx.DB, community model.Community) (err error) {
 	return nil
 }
 
+//SaveCommunities func
 func SaveCommunities(conn *sqlx.DB, communities model.Communities) (err error) {
 	query := `INSERT INTO public.community (id, tenant_id, "name", description, login_url, site_url, path_prefix) VALUES`
 

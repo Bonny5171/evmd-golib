@@ -11,6 +11,7 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
+//SaveSFIdentifyDocOrg func
 func SaveSFIdentifyDocOrg(conn *sqlx.DB, iden model.SFIdentity) (id int, err error) {
 	t := time.Now()
 
@@ -49,6 +50,7 @@ func SaveSFIdentifyDocOrg(conn *sqlx.DB, iden model.SFIdentity) (id int, err err
 	return id, nil
 }
 
+//UpdateSFIdentifyDocObjects func
 func UpdateSFIdentifyDocObjects(conn *sqlx.DB, iden model.SFIdentity) error {
 	t := time.Now()
 

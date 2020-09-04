@@ -11,6 +11,7 @@ import (
 	"bitbucket.org/everymind/evmd-golib/db/model"
 )
 
+//SaveSFDataShare func
 func SaveSFDataShare(conn *sqlx.DB, data model.SFDataShare) (id int, err error) {
 	t := time.Now()
 
@@ -31,6 +32,7 @@ func SaveSFDataShare(conn *sqlx.DB, data model.SFDataShare) (id int, err error) 
 	return id, nil
 }
 
+//PurgeAllDataShareETLSuccess func
 func PurgeAllDataShareETLSuccess(conn *sqlx.DB, tid int) (err error) {
 	statuses, err := GetStatuses(conn, tid, EnumTypeStatusETL)
 	if err != nil {
