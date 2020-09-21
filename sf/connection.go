@@ -16,7 +16,7 @@ import (
 
 //NewForce func
 func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *gforce.Force, err error) {
-	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil)
+	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil, "public")
 	if err != nil {
 		err = fmt.Errorf("dao.GetParameters(): %w", err)
 		return
@@ -64,7 +64,7 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *gforce.Force,
 
 //NewJobForce func
 func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f *gforce.Force, err error) {
-	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil)
+	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil, "public")
 	if err != nil {
 		err = fmt.Errorf("dao.GetParameters(): %w", err)
 	}
