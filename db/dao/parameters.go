@@ -30,14 +30,20 @@ func (t ParameterType) String() string {
 }
 
 // GetParameters retorna os parametros de uma determinada org (tenant_id) do Salesforce
-func GetParameters(conn *sqlx.DB, tenantID int, pType ParameterType) (p model.Parameters, err error) {
+func GetParameters(conn *sqlx.DB, tenantID int, pType ParameterType, namespace string) (p model.Parameters, err error) {
 	sb := strings.Builder{}
 	var a []interface{}
 
 	sb.WriteString(`
 		SELECT p.id, p.tenant_id, t.org_id, p."name", p."type", p.value 
-		  FROM public."parameter" p
-		  JOIN public.tenant      t ON p.tenant_id = t.id
+			FROM `)
+	if len(namespace) > 0 {
+		sb.WriteString(namespace)
+	} else {
+		sb.WriteString(`public`)
+	}
+	sb.WriteString(`."parameter" p
+			JOIN public.tenant      t ON p.tenant_id = t.id
 		 WHERE p.tenant_id = $1 
 		   AND p.is_active = true 
 		   AND p.is_deleted = false`)
