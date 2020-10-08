@@ -16,3 +16,6 @@ vendor/*
 
 # VSCode Workspaces
 *.code-workspace
+
+# Goland config files
+.idea
