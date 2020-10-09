@@ -106,7 +106,6 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Session: %v", session)
 
 	creds := gforce.ForceSession{
 		AccessToken:   session.AccessToken,
@@ -125,8 +124,6 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 	}
 
 	f = gforce.NewForce(&creds)
-
-	log.Printf("Force -> %v", f)
 
 	return f, nil
 }
