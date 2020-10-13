@@ -22,6 +22,7 @@ var (
 	FatalLog   *log.Logger
 	PanicLog   *log.Logger
 	GCLog      *logging.Logger
+	AppName    string
 )
 
 type MetricLog struct {
@@ -36,6 +37,7 @@ type MetricLog struct {
 func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, errorHandle, metricHandle io.Writer) {
 	if len(appname) > 0 {
 		appname = fmt.Sprintf("[%s] ", appname)
+		AppName = appname
 	}
 
 	InfoLog = log.New(infoHandle, fmt.Sprintf("%sINFO   : ", appname), log.Ldate|log.Ltime)
@@ -55,6 +57,18 @@ func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, e
 		panic(err)
 	}
 	GCLog = client.Logger("jobs")
+}
+
+func MetricHandler(err error, jobFaktoryID, metricType string, tid int, info map[string]interface{}, severity logging.Severity) {
+	metric := MetricLog{
+		Message:      err.Error(),
+		JobName:      AppName,
+		JobFaktoryID: jobFaktoryID,
+		Type:         metricType,
+		TenantID:     tid,
+		Info:         info,
+	}
+	Metric(metric, severity)
 }
 
 func metricActive() bool {
