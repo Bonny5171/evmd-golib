@@ -14,16 +14,17 @@ import (
 )
 
 //GetTenantID func
-func GetTenantID(conn *sqlx.DB, orgID string) (tid int, err error) {
+func GetTenantID(conn *sqlx.DB, orgID, alias string) (tid int, err error) {
 	const query = `
 		SELECT id
 		FROM public.tenant
 		WHERE LEFT(org_id, 15) = LEFT($1, 15)
+		AND alias = $2
 		AND is_active = TRUE
 		AND is_deleted = FALSE
 		LIMIT 1;`
 
-	row := conn.QueryRow(query, orgID)
+	row := conn.QueryRow(query, orgID, alias)
 
 	if e := row.Scan(&tid); e != nil {
 		err = db.WrapError(e, "row.Scan()")
