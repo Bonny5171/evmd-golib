@@ -171,23 +171,55 @@ func ExecSFAExecEtls(conn *sqlx.DB, tenantID int, tableName string) error {
 	return nil
 }
 
-//ExecSFCreateJobScheduler func
-func ExecSFCreateJobScheduler(conn *sqlx.DB, tenantID int) error {
-	query := "SELECT public.fn_create_job_scheduler($1);"
+//ExecSFAExecEtlsTx func
+func ExecSFAExecEtlsTx(conn *sqlx.Tx, tenantID int, tableName string) error {
+	params := make([]interface{}, 0)
+	params = append(params, tenantID)
 
-	if _, err := conn.Exec(query, tenantID); err != nil {
+	sb := strings.Builder{}
+	sb.WriteString("SELECT itgr.fn_exec_etls($1")
+	if len(tableName) > 0 {
+		sb.WriteString(", $2")
+		params = append(params, tableName)
+	}
+	sb.WriteString(");")
+
+	if _, err := conn.Exec(sb.String(), params...); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
 	return nil
 }
 
-//ExecSFCreateJobSchedulerTx func
-func ExecSFCreateJobSchedulerTx(conn *sqlx.Tx, tenantID int) error {
-	query := "SELECT public.fn_create_job_scheduler($1);"
+//ExecSFCreateJobScheduler func
+func ExecSFCreateJobScheduler(conn *sqlx.DB, tenantID int, templateTenantID int) error {
+	if templateTenantID > 0 {
+		query := "SELECT public.fn_create_job_scheduler($1, $2);"
+		if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
+	} else {
+		query := "SELECT public.fn_create_job_scheduler($1);"
+		if _, err := conn.Exec(query, tenantID); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
+	}
 
-	if _, err := conn.Exec(query, tenantID); err != nil {
-		return db.WrapError(err, "conn.Exec()")
+	return nil
+}
+
+//ExecSFCreateJobSchedulerTx func
+func ExecSFCreateJobSchedulerTx(conn *sqlx.Tx, tenantID int, templateTenantID int) error {
+	if templateTenantID > 0 {
+		query := "SELECT public.fn_create_job_scheduler($1, $2);"
+		if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
+	} else {
+		query := "SELECT public.fn_create_job_scheduler($1);"
+		if _, err := conn.Exec(query, tenantID); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
 	}
 
 	return nil
@@ -275,6 +307,72 @@ func ExecSFDataCreateFromTemplatesTx(conn *sqlx.Tx, tenantID int) error {
 	query := "SELECT public.fn_data_create_from_templates($1);"
 
 	if _, err := conn.Exec(query, tenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+//ExecSFSchemaCreateCloned func
+func ExecSFSchemaCreateCloned(conn *sqlx.DB, tenantName, orgID string, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_schema_create_cloned($1, $2, $3, $4)"
+
+	if _, err := conn.Exec(query, tenantName, orgID, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+//ExecSFSchemaCreateClonedTx func
+func ExecSFSchemaCreateClonedTx(conn *sqlx.Tx, tenantName, orgID string, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_schema_create_cloned($1, $2, $3, $4)"
+
+	if _, err := conn.Exec(query, tenantName, orgID, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+//ExecSFTablesCloneCreate func
+func ExecSFTablesCloneCreate(conn *sqlx.DB, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_sf_tables_clone_create($1, $2)"
+
+	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+//ExecSFTablesCloneCreateTx func
+func ExecSFTablesCloneCreateTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_sf_tables_clone_create($1, $2)"
+
+	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+//ExecSFTablesCloneData func
+func ExecSFTablesCloneData(conn *sqlx.DB, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_sf_tables_clone_data($1, $2)"
+
+	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+//ExecSFTablesCloneDataTx func
+func ExecSFTablesCloneDataTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_sf_tables_clone_data($1, $2)"
+
+	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 

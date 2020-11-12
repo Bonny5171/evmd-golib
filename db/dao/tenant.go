@@ -142,15 +142,15 @@ func SaveConfigTenant(conn *sqlx.DB, name, companyID, orgID, instanceUrl, organi
 }
 
 //SaveConfigTenantTx func
-func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceUrl, organizationType, userID string, isSandbox bool) (tid int, err error) {
+func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceURL, organizationType, userID string, isSandbox bool, clientID, clientSecret, callbackURL, alias string, isCloned bool, clonedFrom int) (tid int, err error) {
 	const query = `
-		INSERT INTO public.tenant (id, "name", company_id, org_id, custom_domain, organization_type, is_sandbox, last_modified_by_id, is_active) 
-		VALUES(fn_next_tenant_id(), $1, $2, $3, $4, $5, $6, $7, true) 
+		INSERT INTO public.tenant (id, "name", company_id, org_id, custom_domain, organization_type, is_sandbox, last_modified_by_id, is_active, sf_client_id, sf_client_secret, sf_callback_token_url, alias, is_cloned, cloned_from) 
+		VALUES(fn_next_tenant_id(), $1, $2, $3, $4, $5, $6, $7, true, $8, $9, $10, $11, $12, $13) 
 		RETURNING id;`
 
 	var customDomain string
-	if len(instanceUrl) > 0 {
-		u, err := url.Parse(instanceUrl)
+	if len(instanceURL) > 0 {
+		u, err := url.Parse(instanceURL)
 		if err != nil {
 			return 0, fmt.Errorf("url.Parse(): %w", err)
 		}
@@ -158,7 +158,7 @@ func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceUrl, orga
 		customDomain = h[0]
 	}
 
-	err = conn.QueryRowx(query, name, companyID, orgID, customDomain, organizationType, isSandbox, userID).Scan(&tid)
+	err = conn.QueryRowx(query, name, companyID, orgID, customDomain, organizationType, isSandbox, userID, clientID, clientSecret, callbackURL, alias, isCloned, clonedFrom).Scan(&tid)
 	if err != nil {
 		return 0, db.WrapError(err, "conn.QueryRowx()")
 	}
