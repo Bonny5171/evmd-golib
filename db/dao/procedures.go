@@ -378,3 +378,25 @@ func ExecSFTablesCloneDataTx(conn *sqlx.Tx, tenantID, templateTenantID int) erro
 
 	return nil
 }
+
+//ExecSFForeignSchemaClone func
+func ExecSFForeignSchemaClone(conn *sqlx.DB, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_foreign_schema_clone($1, $2)"
+
+	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+//ExecSFForeignSchemaCloneTx func
+func ExecSFForeignSchemaCloneTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_foreign_schema_clone($1, $2)"
+
+	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
