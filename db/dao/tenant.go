@@ -171,6 +171,36 @@ func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceURL, orga
 	return
 }
 
+//SaveConfigTenantWithIDTx func
+func SaveConfigTenantWithIDTx(conn *sqlx.Tx, name, companyID, orgID, instanceURL, organizationType, userID string, isSandbox bool, clientID, clientSecret, callbackURL, alias string, isCloned bool, clonedFrom, tenantID int) (tid int, err error) {
+	const query = `
+		INSERT INTO public.tenant (id, "name", company_id, org_id, custom_domain, organization_type, is_sandbox, last_modified_by_id, is_active, sf_client_id, sf_client_secret, sf_callback_token_url, alias, is_cloned, cloned_from) 
+		VALUES($1, $2, $3, $4, $5, $6, $7, $8, true, $9, $10, $11, $12, $13, $14) 
+		RETURNING id;`
+
+	var customDomain string
+	if len(instanceURL) > 0 {
+		u, err := url.Parse(instanceURL)
+		if err != nil {
+			return 0, fmt.Errorf("url.Parse(): %w", err)
+		}
+		h := strings.Split(u.Hostname(), ".")
+		customDomain = h[0]
+	}
+
+	err = conn.QueryRowx(query, tenantID, name, companyID, orgID, customDomain, organizationType, isSandbox, userID, clientID, clientSecret, callbackURL, alias, isCloned, clonedFrom).Scan(&tid)
+	if err != nil {
+		return 0, db.WrapError(err, "conn.QueryRowx()")
+	}
+
+	if tid <= 0 {
+		err = errors.New("An error has occurred while inserting on 'itgr.execution'")
+		return 0, err
+	}
+
+	return
+}
+
 //SaveBusinessTenant func
 func SaveBusinessTenant(conn *sqlx.DB, tenantID int, name, orgID, userID string) error {
 	const query = `
