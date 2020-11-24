@@ -128,6 +128,7 @@ func attemptConnectDB(dsn string, configDB *db.PostgresDB) error {
 	if err := db.Connections.Connect("CONFIG", configDB); err != nil {
 		logger.Infof("DSN: %s\n", dsn)
 		logger.Errorln(err)
+		time.Sleep(5 * time.Second)
 		attemptConnectDB(dsn, configDB)
 	}
 	return nil
