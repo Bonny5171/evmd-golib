@@ -46,9 +46,10 @@ func NewJob() *Job {
 	}
 }
 
+//Run func
 func (j *Job) Run() {
 	// Starting web server
-	startWebServer()
+	// startWebServer()
 
 	// Setting config DB connection
 	configDB := db.PostgresDB{
@@ -60,8 +61,8 @@ func (j *Job) Run() {
 
 	// Starting config DB connection
 	if len(j.DB.ConfigDSN) > 0 {
-		if err := db.Connections.Connect("CONFIG", &configDB); err != nil {
-			logger.Infof("DSN: %s\n", j.DB.ConfigDSN)
+		err := attemptConnectDB(j.DB.ConfigDSN, &configDB)
+		if err != nil {
 			logger.Errorln(err)
 		}
 	}
@@ -121,6 +122,15 @@ func (j *Job) Run() {
 
 	// Start processing jobs, this method does not return
 	mgr.Run()
+}
+
+func attemptConnectDB(dsn string, configDB *db.PostgresDB) error {
+	if err := db.Connections.Connect("CONFIG", configDB); err != nil {
+		logger.Infof("DSN: %s\n", dsn)
+		logger.Errorln(err)
+		attemptConnectDB(dsn, configDB)
+	}
+	return nil
 }
 
 func startWebServer() {
