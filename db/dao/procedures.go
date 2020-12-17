@@ -400,3 +400,14 @@ func ExecSFForeignSchemaCloneTx(conn *sqlx.Tx, tenantID, templateTenantID int) e
 
 	return nil
 }
+
+//ExecSFCloneUsersTx func
+func ExecSFCloneUsersTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_clone_users($1, $2)"
+
+	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
