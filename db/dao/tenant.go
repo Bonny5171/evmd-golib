@@ -150,12 +150,16 @@ func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceURL, orga
 
 	var customDomain string
 	if len(instanceURL) > 0 {
-		u, err := url.Parse(instanceURL)
-		if err != nil {
-			return 0, fmt.Errorf("url.Parse(): %w", err)
+		if strings.Contains(instanceURL, "http") {
+			u, err := url.Parse(instanceURL)
+			if err != nil {
+				return 0, fmt.Errorf("url.Parse(): %w", err)
+			}
+			h := strings.Split(u.Hostname(), ".")
+			customDomain = h[0]
+		} else {
+			customDomain = instanceURL
 		}
-		h := strings.Split(u.Hostname(), ".")
-		customDomain = h[0]
 	}
 
 	err = conn.QueryRowx(query, name, companyID, orgID, customDomain, organizationType, isSandbox, userID, clientID, clientSecret, callbackURL, alias, isCloned, clonedFrom).Scan(&tid)
@@ -180,12 +184,16 @@ func SaveConfigTenantWithIDTx(conn *sqlx.Tx, name, companyID, orgID, instanceURL
 
 	var customDomain string
 	if len(instanceURL) > 0 {
-		u, err := url.Parse(instanceURL)
-		if err != nil {
-			return 0, fmt.Errorf("url.Parse(): %w", err)
+		if strings.Contains(instanceURL, "http") {
+			u, err := url.Parse(instanceURL)
+			if err != nil {
+				return 0, fmt.Errorf("url.Parse(): %w", err)
+			}
+			h := strings.Split(u.Hostname(), ".")
+			customDomain = h[0]
+		} else {
+			customDomain = instanceURL
 		}
-		h := strings.Split(u.Hostname(), ".")
-		customDomain = h[0]
 	}
 
 	err = conn.QueryRowx(query, tenantID, name, companyID, orgID, customDomain, organizationType, isSandbox, userID, clientID, clientSecret, callbackURL, alias, isCloned, clonedFrom).Scan(&tid)
