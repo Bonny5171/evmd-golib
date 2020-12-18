@@ -4,6 +4,7 @@ import (
 	m "bitbucket.org/everymind/evmd-golib/modelbase"
 )
 
+//SFIdentity type
 type SFIdentity struct {
 	ID          int     `db:"id"`
 	TenantID    int     `db:"tenant_id"`

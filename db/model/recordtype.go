@@ -6,6 +6,7 @@ import (
 	"github.com/lib/pq"
 )
 
+//RecordType type
 type RecordType struct {
 	ID           int         `db:"id"`
 	TenantID     int         `db:"tenant_id"`

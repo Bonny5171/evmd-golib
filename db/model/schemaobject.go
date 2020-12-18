@@ -8,6 +8,7 @@ import (
 	m "bitbucket.org/everymind/evmd-golib/modelbase"
 )
 
+//SchemaObject type
 type SchemaObject struct {
 	ID          int            `db:"id"`
 	TenantID    int            `db:"tenant_id"`
@@ -21,8 +22,10 @@ type SchemaObject struct {
 	DocMetaData m.JSONB        `db:"doc_meta_data"` // In DB is JSONB
 }
 
+//SchemaObjects type
 type SchemaObjects []SchemaObject
 
+//SchemaObjectToProcess type
 type SchemaObjectToProcess struct {
 	ID                int            `db:"id"`
 	TenantID          int            `db:"tenant_id"`
@@ -30,6 +33,7 @@ type SchemaObjectToProcess struct {
 	SchemaID          int            `db:"schema_id"`
 	SchemaName        string         `db:"schema_name"`
 	Type              string         `db:"type"`
+	APIType           string         `db:"api_type"`
 	ObjectID          sql.NullInt64  `db:"sf_object_id"`
 	ObjectName        sql.NullString `db:"sf_object_name"`
 	Sequence          int16          `db:"sequence"`
@@ -44,4 +48,5 @@ type SchemaObjectToProcess struct {
 	SfaPks            m.JSONB        `db:"sfa_pks"`
 }
 
+//SchemaObjectToProcesses type
 type SchemaObjectToProcesses []SchemaObjectToProcess

@@ -6,6 +6,7 @@ import (
 	"github.com/lib/pq"
 )
 
+//SFDataSync type
 type SFDataSync struct {
 	ID            int64       `db:"id"`
 	TenantID      int         `db:"tenant_id"`

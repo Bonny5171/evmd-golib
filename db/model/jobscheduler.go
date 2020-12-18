@@ -4,6 +4,7 @@ import (
 	"database/sql"
 )
 
+//JobScheduler type
 type JobScheduler struct {
 	ID                int64          `db:"id"`
 	OrgID             string         `db:"org_id"`

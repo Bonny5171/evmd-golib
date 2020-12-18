@@ -1,5 +1,6 @@
 package model
 
+//User type
 type User struct {
 	UserID       string `db:"user_id"`
 	UserName     string `db:"username"`
@@ -15,4 +16,5 @@ type User struct {
 	SfIsFrozen   bool   `db:"sf_is_frozen"`
 }
 
+//Users type
 type Users []User

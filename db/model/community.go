@@ -1,5 +1,6 @@
 package model
 
+//Community type
 type Community struct {
 	ID          string      `db:"id"`
 	TenantID    int         `db:"tenant_id"`
@@ -10,4 +11,5 @@ type Community struct {
 	PathPrefix  string      `db:"path_prefix"`
 }
 
+//Communities type
 type Communities []Community

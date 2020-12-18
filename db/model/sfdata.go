@@ -8,6 +8,7 @@ import (
 	"github.com/lib/pq"
 )
 
+//SFData type
 type SFData struct {
 	ID           int64           `db:"id"`
 	TenantID     int             `db:"tenant_id"`

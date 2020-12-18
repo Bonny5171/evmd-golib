@@ -6,6 +6,7 @@ import (
 	m "bitbucket.org/everymind/evmd-golib/modelbase"
 )
 
+//SFObject type
 type SFObject struct {
 	ID          int     `db:"id"`
 	TenantID    int     `db:"tenant_id"`
@@ -15,6 +16,7 @@ type SFObject struct {
 	DocMetaData m.JSONB `db:"doc_meta_data"` // In DB is JSONB
 }
 
+//SFObjectToProcess type
 type SFObjectToProcess struct {
 	ID         int64          `db:"id"`
 	ObjectName sql.NullString `db:"sf_object_name"`
@@ -23,4 +25,5 @@ type SFObjectToProcess struct {
 	Filter     sql.NullString `db:"filter"`
 }
 
+//SFObjectToProcesses type
 type SFObjectToProcesses []SFObjectToProcess

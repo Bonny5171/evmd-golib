@@ -6,6 +6,7 @@ import (
 	"github.com/lib/pq"
 )
 
+//SFDataShare type
 type SFDataShare struct {
 	ID            int64       `db:"id"`
 	TenantID      int         `db:"tenant_id"`
