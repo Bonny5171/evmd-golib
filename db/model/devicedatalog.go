@@ -6,6 +6,7 @@ import (
 	m "bitbucket.org/everymind/evmd-golib/modelbase"
 )
 
+//DeviceDataLogReport type
 type DeviceDataLogReport struct {
 	ID               int          `db:"id"`
 	TenantID         int          `db:"tenant_id"`

@@ -2,6 +2,7 @@ package model
 
 import "encoding/json"
 
+//Schema type
 type Schema struct {
 	ID          int             `db:"id"`
 	TenantID    int             `db:"tenant_id"`
@@ -11,4 +12,5 @@ type Schema struct {
 	DocMetaData json.RawMessage `db:"doc_meta_data"` // In DB is JSONB
 }
 
+//Schemas type
 type Schemas []Schema

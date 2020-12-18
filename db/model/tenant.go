@@ -7,6 +7,7 @@ import (
 	"github.com/lib/pq"
 )
 
+//Tenant type
 type Tenant struct {
 	ID                 int            `db:"id"`
 	CompanyID          string         `db:"company_id"`

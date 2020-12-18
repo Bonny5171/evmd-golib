@@ -6,6 +6,7 @@ import (
 	m "bitbucket.org/everymind/evmd-golib/modelbase"
 )
 
+//SFObjectField type
 type SFObjectField struct {
 	ID          int            `db:"id"`
 	TenantID    int            `db:"tenant_id"`

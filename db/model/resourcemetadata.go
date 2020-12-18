@@ -9,6 +9,7 @@ import (
 	m "bitbucket.org/everymind/evmd-golib/modelbase"
 )
 
+//ResourceMetadata type
 type ResourceMetadata struct {
 	ID                    string         `db:"id"`
 	TenantID              int            `db:"tenant_id"`
