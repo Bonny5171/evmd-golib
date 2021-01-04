@@ -262,10 +262,10 @@ func PurgeAllDeviceDataToDelete(conn *sqlx.DB, tid int) (err error) {
 }
 
 //InsertDeviceDataLog func
-func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, statusID int16) (id int64, err error) {
+func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, statusID int16, statusName string) (id int64, err error) {
 	query := `INSERT INTO itgr.device_data_log (
 				original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,action_type,sf_id,original_json_data,
-				app_id,execution_id,status_id,external_id,group_id,sequential,try,created_at,updated_at) 
+				app_id,execution_id,status_id,status_name,external_id,group_id,sequential,try,created_at,updated_at) 
 			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW())
 			  RETURNING id;`
 
@@ -284,10 +284,11 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 	params = append(params, obj.AppID)           // 12
 	params = append(params, execID)              // 13
 	params = append(params, statusID)            // 14
-	params = append(params, obj.ExternalID)      // 15
-	params = append(params, obj.GroupID)         // 16
-	params = append(params, obj.Sequential)      // 17
-	params = append(params, obj.Try)             // 18
+	params = append(params, statusName)          // 15
+	params = append(params, obj.ExternalID)      // 16
+	params = append(params, obj.GroupID)         // 17
+	params = append(params, obj.Sequential)      // 18
+	params = append(params, obj.Try)             // 19
 
 	if e := conn.QueryRowx(query, params...).Scan(&id); e != nil {
 		err = db.WrapError(e, "conn.QueryRowx(query, params...).Scan(&id)")
@@ -298,17 +299,18 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 }
 
 //UpdateDeviceDataLog func
-func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusID int16, try int, err error) error {
+func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusID int16, statusName string, try int, err error) error {
 	params := make([]interface{}, 0)
 	params = append(params, logID)
 	params = append(params, statusID)
+	params = append(params, statusName)
 	params = append(params, brewedJSON)
 	params = append(params, try)
 
 	query := strings.Builder{}
-	query.WriteString("UPDATE itgr.device_data_log SET status_id = $2, brewed_json_data = $3, try = $4, ")
+	query.WriteString("UPDATE itgr.device_data_log SET status_id = $2, status_name = $3, brewed_json_data = $4, try = $5, ")
 	if err != nil {
-		query.WriteString("error = $5, ")
+		query.WriteString("error = $6, ")
 		params = append(params, err.Error())
 	}
 	query.WriteString("updated_at = NOW() WHERE id = $1;")
