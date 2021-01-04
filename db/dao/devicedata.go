@@ -266,7 +266,7 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 	query := `INSERT INTO itgr.device_data_log (
 				original_id,tenant_id,device_created_at,schema_name,table_name,pk,device_id,user_id,action_type,sf_id,original_json_data,
 				app_id,execution_id,status_id,status_name,external_id,group_id,sequential,try,created_at,updated_at) 
-			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW())
+			  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW())
 			  RETURNING id;`
 
 	params := make([]interface{}, 0)
