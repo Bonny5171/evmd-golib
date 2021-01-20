@@ -74,7 +74,7 @@ func GetJob(conn *sqlx.DB, tenantID, stackID int, name string) (s model.JobSched
 }
 
 // GetJobByFuncQueue retorna os dados de um 'job' por function name e queue
-func GetJobByFuncQueue(conn *sqlx.DB, tenantID int, stackName, funcName, queue string) (s model.JobScheduler, err error) {
+func GetJobByFuncQueue(conn *sqlx.DB, tenantID int, stackName, funcName, queue, jobName string) (s model.JobScheduler, err error) {
 	query := `
 	  SELECT j.id, t.org_id, j.tenant_id, t."name" AS tenant_name, j.stack_id, j.job_name, j.function_name, j.queue, 
 			 j.cron, j.parameters, j.retry, j.allows_concurrency, j.allows_schedule, j.schedule_time, j.description, 
@@ -86,10 +86,11 @@ func GetJobByFuncQueue(conn *sqlx.DB, tenantID int, stackName, funcName, queue s
 	     AND lower(s."name") = $2
 		 AND lower(j.function_name) = $3
 		 AND lower(j.queue) = $4
+		 AND lower(j.job_name) = $5
 		 AND t.is_active = TRUE
 	   LIMIT 1;`
 
-	err = conn.Get(&s, query, tenantID, strings.ToLower(stackName), strings.ToLower(funcName), strings.ToLower(queue))
+	err = conn.Get(&s, query, tenantID, strings.ToLower(stackName), strings.ToLower(funcName), strings.ToLower(queue), strings.ToLower(jobName))
 	if err != nil {
 		return s, db.WrapError(err, "conn.Get()")
 	}
