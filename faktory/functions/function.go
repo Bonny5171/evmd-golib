@@ -87,7 +87,7 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 		return errorHandler(err, "execlog.NewExec()")
 	}
 
-	jobInfo, err := dao.GetJobByFuncQueue(connCfg, payload.TenantID, payload.StackName, fnName, queue)
+	jobInfo, err := dao.GetJobByFuncQueue(connCfg, payload.TenantID, payload.StackName, fnName, queue, payload.JobName)
 	if err != nil {
 		return errorHandler(err, "dao.GetJobByFuncQueue()")
 	}
