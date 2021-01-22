@@ -81,6 +81,7 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	}
 
 	// Clean Ghost Jobs
+	logger.Tracef("Cleaning ghost jobs")
 	err = cleanGhostJobs(connData)
 	if err != nil {
 		return errorHandler(err, fmt.Sprintf("cleanGhostJobs(): %v", err))
@@ -244,10 +245,8 @@ func errorHandler(err error, stack string) error {
 }
 
 func cleanGhostJobs(conn *sqlx.DB) (err error) {
-	logger.Tracef("Calling CleanGhostJob on: %v", conn)
 	if err = dao.CleanGhostJobs(conn); err != nil {
 		return err
 	}
-	logger.Tracef("CleanGhostJob complete.")
 	return nil
 }
