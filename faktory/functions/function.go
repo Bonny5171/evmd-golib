@@ -80,6 +80,12 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 		return errorHandler(err, fmt.Sprintf("db.GetConnection('%s')", payload.StackName))
 	}
 
+	// Clean Ghost Jobs
+	err = cleanGhostJobs(connData)
+	if err != nil {
+		return errorHandler(err, fmt.Sprintf("cleanGhostJobs(): %v", err))
+	}
+
 	// Create log execution on itgr.execution table
 	logger.Tracef("[%s][%s] Create log execution on itgr.execution table", payload.StackName, ctx.Jid())
 	exec, err := execlog.NewExec(connData, ctx.Jid(), payload.JobID, payload.JobName, payload.TenantID, 0, dao.EnumTypeStatusExec)
@@ -234,5 +240,14 @@ func errorHandler(err error, stack string) error {
 		logger.Errorln(err)
 		return err
 	}
+	return nil
+}
+
+func cleanGhostJobs(conn *sqlx.DB) (err error) {
+	logger.Tracef("Calling CleanGhostJob on: %v", conn)
+	if err = dao.CleanGhostJobs(conn); err != nil {
+		return err
+	}
+	logger.Tracef("CleanGhostJob complete.")
 	return nil
 }
