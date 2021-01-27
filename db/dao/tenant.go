@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/url"
@@ -162,7 +163,13 @@ func SaveConfigTenantTx(conn *sqlx.Tx, name, companyID, orgID, instanceURL, orga
 		}
 	}
 
-	err = conn.QueryRowx(query, name, companyID, orgID, customDomain, organizationType, isSandbox, userID, clientID, clientSecret, callbackURL, alias, isCloned, clonedFrom).Scan(&tid)
+	var clonedFromTenant sql.NullInt64
+	if isCloned {
+		clonedFromTenant.Int64 = int64(clonedFrom)
+		clonedFromTenant.Valid = true
+	}
+
+	err = conn.QueryRowx(query, name, companyID, orgID, customDomain, organizationType, isSandbox, userID, clientID, clientSecret, callbackURL, alias, isCloned, clonedFromTenant).Scan(&tid)
 	if err != nil {
 		return 0, db.WrapError(err, "conn.QueryRowx()")
 	}
