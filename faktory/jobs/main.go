@@ -80,24 +80,14 @@ func (j *Job) Run() {
 	logger.Traceln("Middleware 'ExtractDSN' configured")
 
 	// Do anything when this job is starting up
-	// mgr.On(worker.Startup, func() {
-	// 	logger.Infoln("Starting JOB, waiting for processing jobs...")
-	// 	return nil
-	// })
-	mgr.On(worker.Startup, func(mgr *worker.Manager) error {
+	mgr.On(worker.Startup, func() {
 		logger.Infoln("Starting JOB, waiting for processing jobs...")
-		return nil
 	})
 
 	// Do anything when this job is quite
-	// mgr.On(worker.Quiet, func() {
-	// 	logger.Infoln("Quieting job...")
-	// 	mgr.Terminate()
-	// })
-	mgr.On(worker.Quiet, func(mgr *worker.Manager) error {
+	mgr.On(worker.Quiet, func() {
 		logger.Infoln("Quieting job...")
-		mgr.Terminate(true)
-		return nil
+		mgr.Terminate()
 	})
 
 	// register job types and the function to execute them
