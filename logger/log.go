@@ -9,8 +9,8 @@ import (
 	"os"
 	"strconv"
 
-	"cloud.google.com/go/logging"
-	"google.golang.org/api/option"
+	gcLog "cloud.google.com/go/logging"
+	option "google.golang.org/api/option"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 	ErrorLog   *log.Logger
 	FatalLog   *log.Logger
 	PanicLog   *log.Logger
-	GCLog      *logging.Logger
+	GCLog      *gcLog.Logger
 	AppName    string
 )
 
@@ -52,14 +52,14 @@ func Init(appname string, infoHandle, traceHandle, debugHandle, warningHandle, e
 
 	credentialsPath := os.Getenv("LOGGING_CREDENTIALS")
 
-	client, err := logging.NewClient(ctx, os.Getenv("GCPROJECT"), option.WithCredentialsFile(credentialsPath))
+	client, err := gcLog.NewClient(ctx, os.Getenv("GCPROJECT"), option.WithCredentialsFile(credentialsPath))
 	if err != nil {
 		panic(err)
 	}
 	GCLog = client.Logger("jobs")
 }
 
-func MetricHandler(err error, jobFaktoryID, metricType string, tid int, info map[string]interface{}, severity logging.Severity) {
+func MetricHandler(err error, jobFaktoryID, metricType string, tid int, info map[string]interface{}, severity gcLog.Severity) {
 	metric := MetricLog{
 		Message:      err.Error(),
 		JobName:      AppName,
@@ -80,9 +80,9 @@ func metricActive() bool {
 }
 
 //Metric func
-func Metric(log MetricLog, severity logging.Severity) {
+func Metric(log MetricLog, severity gcLog.Severity) {
 	if metricActive() {
-		GCLog.Log(logging.Entry{Payload: log, Severity: severity})
+		GCLog.Log(gcLog.Entry{Payload: log, Severity: severity})
 		// MetricLog.Print(payload)
 	}
 }
