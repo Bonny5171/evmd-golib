@@ -80,13 +80,6 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 		return errorHandler(err, fmt.Sprintf("db.GetConnection('%s')", payload.StackName))
 	}
 
-	// Clean Ghost Jobs
-	logger.Tracef("Cleaning ghost jobs")
-	err = cleanGhostJobs(connData)
-	if err != nil {
-		return errorHandler(err, fmt.Sprintf("cleanGhostJobs(): %v", err))
-	}
-
 	// Create log execution on itgr.execution table
 	logger.Tracef("[%s][%s] Create log execution on itgr.execution table", payload.StackName, ctx.Jid())
 	exec, err := execlog.NewExec(connData, ctx.Jid(), payload.JobID, payload.JobName, payload.TenantID, 0, dao.EnumTypeStatusExec)
@@ -145,6 +138,7 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	return nil
 }
 
+//RunNoLog func
 func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...interface{}) error {
 	// Parse payload that come of Faktory
 	payload, err := ParsePayload(args...)
@@ -239,13 +233,6 @@ func errorHandler(err error, stack string) error {
 	if err != nil {
 		err = fmt.Errorf("%s: %w", stack, err)
 		logger.Errorln(err)
-		return err
-	}
-	return nil
-}
-
-func cleanGhostJobs(conn *sqlx.DB) (err error) {
-	if err = dao.CleanGhostJobs(conn); err != nil {
 		return err
 	}
 	return nil

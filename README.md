@@ -1,4 +1,4 @@
-# evmd-golib: Extra/Util Go package v1.29.8
+# evmd-golib: Extra/Util Go package v1.29.9
 
 Third-party libraries used in this project
 
