@@ -51,6 +51,20 @@ func PurgeAllDataETLSuccess(conn *sqlx.DB, tid int) (err error) {
 	return nil
 }
 
+//PurgeAllDataETLError func
+func PurgeAllDataETLError(conn *sqlx.DB, tid, days int) (err error) {
+	query := `DELETE FROM itgr.sf_data 
+						WHERE tenant_id = $1
+						AND created_at::date < CURRENT_DATE - INTERVAL '$2 DAY';`
+
+	_, err = conn.Exec(query, tid, days)
+	if err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
 //PurgeAllPublicSFData func
 func PurgeAllPublicSFData(conn *sqlx.DB, tid int) (err error) {
 	query := `DELETE FROM public.sf_data
