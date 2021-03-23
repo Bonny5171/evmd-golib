@@ -136,12 +136,12 @@ func UpdateSfObjectIDs(conn *sqlx.DB) error {
 }
 
 //UpdateLastModifiedDate func
-func UpdateLastModifiedDate(conn *sqlx.DB, schemaObjectID int, lastModifiedDate pq.NullTime) error {
+func UpdateLastModifiedDate(conn *sqlx.DB, schemaObjectID int, lastModifiedDate pq.NullTime, tenantID int) error {
 	const query = `UPDATE itgr.schema_object
 	                  SET sf_last_modified_date = $1 
-					WHERE id = $2;`
+					WHERE id = $2 AND tenant_id = $3;`
 
-	if _, err := conn.Exec(query, lastModifiedDate, schemaObjectID); err != nil {
+	if _, err := conn.Exec(query, lastModifiedDate, schemaObjectID, tenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
