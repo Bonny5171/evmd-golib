@@ -119,10 +119,10 @@ func GetJobByID(conn *sqlx.DB, jobID int64) (s model.JobScheduler, err error) {
 }
 
 //SetCronJobSchedule func
-func SetCronJobSchedule(conn *sqlx.DB, jobID int64, cronexpr string) error {
-	query := `UPDATE public.job_scheduler SET cron = $1 WHERE id = $2;`
+func SetCronJobSchedule(conn *sqlx.DB, jobID int64, cronexpr string, tenantID int) error {
+	query := `UPDATE public.job_scheduler SET cron = $1 WHERE id = $2 AND tenant_id = $3;`
 
-	if _, err := conn.Exec(query, cronexpr, jobID); err != nil {
+	if _, err := conn.Exec(query, cronexpr, jobID, tenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
@@ -130,10 +130,10 @@ func SetCronJobSchedule(conn *sqlx.DB, jobID int64, cronexpr string) error {
 }
 
 //ActiveJobSchedule func
-func ActiveJobSchedule(conn *sqlx.DB, jobID int64, active bool) error {
-	query := `UPDATE public.job_scheduler SET is_active = $1 WHERE id = $2;`
+func ActiveJobSchedule(conn *sqlx.DB, jobID int64, active bool, tenantID int) error {
+	query := `UPDATE public.job_scheduler SET is_active = $1 WHERE id = $2 AND tenant_id = $3;`
 
-	if _, err := conn.Exec(query, active, jobID); err != nil {
+	if _, err := conn.Exec(query, active, jobID, tenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
