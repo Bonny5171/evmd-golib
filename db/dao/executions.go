@@ -37,9 +37,9 @@ func UpdateExecution(conn *sqlx.DB, obj model.Execution) error {
 
 	query := `UPDATE itgr.execution
 			  SET status_id = $1, doc_meta_data = $2, updated_at = $3
-			  WHERE id = $4;`
+			  WHERE id = $4 AND tenant_id = $5;`
 
-	if _, err := conn.Exec(query, obj.StatusID, obj.DocMetaData, t, obj.ID); err != nil {
+	if _, err := conn.Exec(query, obj.StatusID, obj.DocMetaData, t, obj.ID, obj.TenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
