@@ -368,6 +368,17 @@ func ExecSFTablesCloneData(conn *sqlx.DB, tenantID, templateTenantID int) error 
 	return nil
 }
 
+//ExecSFTablesCloneDataIndex func
+func ExecSFTablesCloneDataIndex(conn *sqlx.DB, tenantID, templateTenantID int) error {
+	query := "SELECT public.fn_sf_tables_clone_data_index($1, $2)"
+
+	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
 //ExecSFTablesCloneDataTx func
 func ExecSFTablesCloneDataTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_sf_tables_clone_data($1, $2)"
