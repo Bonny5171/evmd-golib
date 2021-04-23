@@ -20,10 +20,10 @@ func GetSchemas(conn *sqlx.DB, tid int) (s model.Schemas, err error) {
 }
 
 // GetSchema return schema details searched by id
-func GetSchema(conn *sqlx.DB, sid int) (s model.Schema, err error) {
-	const query = "SELECT name, description, type FROM itgr.schema WHERE id = $1 LIMIT 1;"
+func GetSchema(conn *sqlx.DB, sid int, tenantID int) (s model.Schema, err error) {
+	const query = "SELECT name, description, type FROM itgr.schema WHERE id = $1 AND tenant_id = $2 LIMIT 1;"
 
-	err = conn.QueryRowx(query, sid).StructScan(&s)
+	err = conn.QueryRowx(query, sid, tenantID).StructScan(&s)
 	if err != nil {
 		return s, db.WrapError(err, "conn.QueryRowx()")
 	}

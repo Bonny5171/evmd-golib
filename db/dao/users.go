@@ -66,7 +66,7 @@ func UpdateUserAccessToken(conn *sqlx.DB, tid int, userID, accessToken string) (
 //SaveUser func
 func SaveUser(conn *sqlx.DB, tid int, user model.User) (err error) {
 	const query = `
-		INSERT INTO public."user" (tenant_id, user_id, username, name, firstname, lastname, email, full_photo_url, access_token, refresh_token, instance_url) 
+		INSERT INTO public."user" AS u (tenant_id, user_id, username, name, firstname, lastname, email, full_photo_url, access_token, refresh_token, instance_url) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		    ON CONFLICT (tenant_id, user_id) DO UPDATE 
 		   SET username       = EXCLUDED.username, 
@@ -78,7 +78,8 @@ func SaveUser(conn *sqlx.DB, tid int, user model.User) (err error) {
 		       access_token   = EXCLUDED.access_token, 
 		       refresh_token  = EXCLUDED.refresh_token, 
 		       instance_url   = EXCLUDED.instance_url, 
-		       updated_at     = now();`
+		       updated_at     = now()
+			WHERE u.tenant_id = $1;`
 
 	if _, err = conn.Exec(query, tid, user.UserID, user.UserName, user.Name, user.FirstName, user.LastName, user.Email, user.FullPhotoURL, user.AccessToken, user.RefreshToken, user.InstanceURL); err != nil {
 		return db.WrapError(err, "conn.Exec()")

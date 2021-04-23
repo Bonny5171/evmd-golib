@@ -133,16 +133,17 @@ func GetDeviceDataIDsByGroupID(conn *sqlx.DB, tid int, deviceID string, groupID 
 }
 
 //GetDeviceData func
-func GetDeviceData(conn *sqlx.DB, id string) (d model.DeviceData, err error) {
+func GetDeviceData(conn *sqlx.DB, id string, tid int) (d model.DeviceData, err error) {
 	query := `SELECT d.id, d.tenant_id, d.schema_name, d.table_name, o.id AS sf_object_id, o.sf_object_name, d.user_id, d.pk, d.external_id, d.sf_id, d.action_type,
 					 to_jsonb(regexp_replace(d.json_data, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g')::jsonb) AS json_data, 
 					 d.app_id, d.device_id, d.device_created_at, d.group_id, d.sequential, d.try, d.is_active, d.is_deleted
 			  FROM public.device_data d
 			  INNER JOIN itgr.sf_object o ON d.tenant_id = o.tenant_id AND d.table_name = o.sfa_name
 			  WHERE d.id = $1
+			  AND d.tenant_id = $2
 			  LIMIT 1;`
 
-	if err = conn.Get(&d, query, id); err != nil {
+	if err = conn.Get(&d, query, id, tid); err != nil {
 		err = db.WrapError(err, "conn.Get()")
 	}
 

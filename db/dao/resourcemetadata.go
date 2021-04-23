@@ -52,7 +52,7 @@ func GetProductsWithoutResources(conn *sqlx.DB, tenantID int) (d []string, err e
 //SaveResourceMetadata func
 func SaveResourceMetadata(conn *sqlx.DB, data *model.ResourceMetadata) (err error) {
 	query := `
-		INSERT INTO public.resource_metadata (tenant_id, original_file_name, original_file_extension, content_type, "size", preview_content_b64, full_content_b64, sf_content_document_id, sf_content_version_id, is_downloaded) 
+		INSERT INTO public.resource_metadata AS rm (tenant_id, original_file_name, original_file_extension, content_type, "size", preview_content_b64, full_content_b64, sf_content_document_id, sf_content_version_id, is_downloaded) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true)
 			ON CONFLICT (tenant_id, sf_content_document_id)
 			DO UPDATE
@@ -63,7 +63,8 @@ func SaveResourceMetadata(conn *sqlx.DB, data *model.ResourceMetadata) (err erro
 			   "size"                  = EXCLUDED."size",
 			   preview_content_b64     = EXCLUDED.preview_content_b64,
 			   full_content_b64        = EXCLUDED.full_content_b64,
-			   updated_at              = now();`
+			   updated_at              = now()
+			WHERE rm.tenant_id = $1;`
 
 	_, err = conn.Exec(query, data.TenantID, data.OriginalFileName, data.OriginalFileExtension, data.ContentType, data.Size, data.PreviewBontentB64, data.FullContentB64, data.SfContentDocumentID, data.SfContentVersionID)
 	if err != nil {
@@ -77,7 +78,7 @@ func SaveResourceMetadata(conn *sqlx.DB, data *model.ResourceMetadata) (err erro
 //SaveResourceMetadataWithRefs func
 func SaveResourceMetadataWithRefs(conn *sqlx.DB, data *model.ResourceMetadata) (rows int64, err error) {
 	query := `
-		INSERT INTO public.resource_metadata (tenant_id, original_file_name, original_file_extension, content_type, "size", ref1, ref2, sequence, size_type, full_content_b64) 
+		INSERT INTO public.resource_metadata AS rm (tenant_id, original_file_name, original_file_extension, content_type, "size", ref1, ref2, sequence, size_type, full_content_b64) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 			ON CONFLICT (tenant_id, ref1, ref2, sequence, size_type)
 			DO UPDATE
@@ -88,7 +89,8 @@ func SaveResourceMetadataWithRefs(conn *sqlx.DB, data *model.ResourceMetadata) (
 			   full_content_b64        = EXCLUDED.full_content_b64,
 			   is_deleted              = FALSE,
 			   deleted_at              = NULL,
-			   updated_at              = NOW();`
+			   updated_at              = NOW()
+			WHERE rm.tenant_id = $1;`
 
 	result, err := conn.Exec(query, data.TenantID, data.OriginalFileName, data.OriginalFileExtension, data.ContentType, data.Size, data.Ref1, data.Ref2, data.Sequence, data.SizeType, data.FullContentB64)
 	if err != nil {
