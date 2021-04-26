@@ -336,7 +336,17 @@ func ExecSFSchemaCreateClonedTx(conn *sqlx.Tx, tenantName, orgID string, tenantI
 }
 
 //ExecSFTablesCloneCreate func
-func ExecSFTablesCloneCreate(conn *sqlx.DB, tenantID, templateTenantID int) error {
+func ExecSFTablesCloneCreate(conn *sqlx.DB, tenantID, templateTenantID int, tableName string) error {
+	if tableName != "" {
+		query := "SELECT public.fn_sf_tables_clone_create($1, $2, $3)"
+
+		if _, err := conn.Exec(query, tenantID, templateTenantID, tableName); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
+
+		return nil
+	}
+
 	query := "SELECT public.fn_sf_tables_clone_create($1, $2)"
 
 	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
@@ -358,7 +368,14 @@ func ExecSFTablesCloneCreateTx(conn *sqlx.Tx, tenantID, templateTenantID int) er
 }
 
 //ExecSFTablesCloneData func
-func ExecSFTablesCloneData(conn *sqlx.DB, tenantID, templateTenantID int) error {
+func ExecSFTablesCloneData(conn *sqlx.DB, tenantID, templateTenantID int, tableName string) error {
+	if tableName != "" {
+		query := "SELECT public.fn_sf_tables_clone_data($1, $2, $3)"
+
+		if _, err := conn.Exec(query, tenantID, templateTenantID, tableName); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
+	}
 	query := "SELECT public.fn_sf_tables_clone_data($1, $2)"
 
 	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
@@ -369,7 +386,14 @@ func ExecSFTablesCloneData(conn *sqlx.DB, tenantID, templateTenantID int) error 
 }
 
 //ExecSFTablesCloneDataIndex func
-func ExecSFTablesCloneDataIndex(conn *sqlx.DB, tenantID, templateTenantID int) error {
+func ExecSFTablesCloneDataIndex(conn *sqlx.DB, tenantID, templateTenantID int, tableName string) error {
+	if tableName != "" {
+		query := "SELECT public.fn_sf_tables_clone_data_index($1, $2, $3)"
+
+		if _, err := conn.Exec(query, tenantID, templateTenantID, tableName); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
+	}
 	query := "SELECT public.fn_sf_tables_clone_data_index($1, $2)"
 
 	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
