@@ -27,3 +27,8 @@ type Tenant struct {
 	SfClientSecret     string         `db:"sf_client_secret"`
 	SfCallbackTokenUrl string         `db:"sf_callback_token_url"`
 }
+
+type TenantCloneTable struct {
+	TemplateTenantID string `db:"table_schema"`
+	TableName        string `db:"table_name"`
+}
