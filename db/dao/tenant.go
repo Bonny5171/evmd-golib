@@ -331,7 +331,7 @@ func GetTenantTablesToClone(conn *sqlx.DB, tenantID int) (t []model.TenantCloneT
 	query := fmt.Sprintf(`
 	SELECT table_schema, table_name
 	  FROM itgr.vw_tenant_clone	 
-	 WHERE table_schema = tn_%03d;`, tenantID)
+	 WHERE table_schema = 'tn_%03d';`, tenantID)
 
 	err = conn.Select(&t, query, tenantID)
 	if err != nil {
