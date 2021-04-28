@@ -32,3 +32,8 @@ type TenantCloneTable struct {
 	TemplateTenantID string `db:"table_schema"`
 	TableName        string `db:"table_name"`
 }
+
+type TenantCloneETL struct {
+	TableName string `db:"output_table_name"`
+	OrderBy   int    `db:"order_by"`
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"bitbucket.org/everymind/evmd-golib/db"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 	"bitbucket.org/everymind/evmd-golib/logger"
 )
 
@@ -445,4 +446,23 @@ func ExecSFCloneUsersTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
 	}
 
 	return nil
+}
+
+func GetTablesToETL(conn *sqlx.DB, tenantID int) (t []model.TenantCloneETL, err error) {
+	query := `SELECT
+	etl.output_table_name, 
+	-1 as order_by			 
+	FROM
+		itgr.fn_sf_etl_config_tables($1) etl
+	WHERE etl.output_table_name IS NOT NULL
+	ORDER BY
+		etl.order_by
+	`
+
+	err = conn.Select(&t, query, tenantID)
+	if err != nil {
+		return nil, db.WrapError(err, "db.Conn.Select()")
+	}
+
+	return t, nil
 }
