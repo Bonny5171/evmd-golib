@@ -86,7 +86,9 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	if err != nil {
 		return errorHandler(err, "execlog.NewExec()")
 	}
+	logger.Debugf("[%s][%s] Execution write ok", payload.StackName, ctx.Jid())
 
+	logger.Debugf("[%s][%s] Get Job Info", payload.StackName, ctx.Jid())
 	jobInfo, err := dao.GetJobByFuncQueue(connCfg, payload.TenantID, payload.StackName, fnName, queue, payload.JobName)
 	if err != nil {
 		return errorHandler(err, "dao.GetJobByFuncQueue()")
@@ -95,6 +97,7 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	// Verifying concurrency
 	if payload.AllowsConcurrency == false {
 		//Checking if this job is executing
+		logger.Debugf("[%s][%s] CheckJobs Execution", payload.StackName, ctx.Jid())
 		executing, err := dao.ExecSFCheckJobsExecution(connData, payload.TenantID, jobInfo.ID, "processing")
 		if err != nil {
 			return exec.LogError(errorHandler(err, "dao.ExecSFCheckJobsExecution()"))

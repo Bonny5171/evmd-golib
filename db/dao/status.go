@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"bitbucket.org/everymind/evmd-golib/logger"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -70,10 +71,15 @@ func GetStatuses(conn *sqlx.DB, tenantID int, sType StatusType) (s model.Statuse
 		args = append(args, sType.String())
 	}
 
+	logger.Debugf("Query string to get Statuses: %v", qb.String())
+	logger.Debugf("Query Args to get Statuses: %v", args)
+
 	err = conn.Select(&s, qb.String(), args...)
 	if err != nil {
 		return nil, db.WrapError(err, "conn.Select()")
 	}
+
+	logger.Debugf("Return of query with statuses: %v", s)
 
 	return s, nil
 }

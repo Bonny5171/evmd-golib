@@ -1,6 +1,7 @@
 package execlog
 
 import (
+	"bitbucket.org/everymind/evmd-golib/logger"
 	"encoding/json"
 	"fmt"
 
@@ -30,10 +31,12 @@ func NewExec(conn *sqlx.DB, jfid string, jsid int64, jsname string, tid, sid int
 	exe.TenantID = tid
 	exe.SchemaID = sid
 	exe.Connection = conn
+	logger.Debugf("[%s][%s] Getting statuses", jfid, jsname)
 	exe.StatusList, err = dao.GetStatuses(conn, tid, st)
 	if err != nil {
 		return exe, fmt.Errorf("dao.GetStatuses(): %w", err)
 	}
+	logger.Debugf("[%s][%s] Statuses: %s", jfid, jsname, exe.StatusList)
 	return
 }
 
