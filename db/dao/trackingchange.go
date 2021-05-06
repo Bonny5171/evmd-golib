@@ -1,14 +1,21 @@
 package dao
 
+import (
+	"fmt"
+
+	"bitbucket.org/everymind/evmd-golib/db"
+	"github.com/jmoiron/sqlx"
+)
+
 func SelectRebuildTables(conn *sqlx.DB, tid int) ([]string, error) {
 	var tableName []string
 	query := fmt.Sprintf("SELECT table_name FROM itgr.vw_tenant_clone WHERE table_name LIKE 'sfa_%' AND table_schema = tn_%03d", tid)
 
 	if err := conn.Get(&tableName, query); err != nil {
-		return "", db.WrapError(err, "conn.Get()")
+		return nil, db.WrapError(err, "conn.Get()")
 	}
 
-	return tableName, err
+	return tableName, nil
 }
 
 func CountTableRows(conn *sqlx.DB, tid int, tableName string) (int, error) {
@@ -16,10 +23,10 @@ func CountTableRows(conn *sqlx.DB, tid int, tableName string) (int, error) {
 	query := fmt.Sprintf("SELECT count(*) FROM tn_%03d.%s", tid, tableName)
 
 	if err := conn.Get(&count, query); err != nil {
-		return "", db.WrapError(err, "conn.Get()")
+		return 0, db.WrapError(err, "conn.Get()")
 	}
 
-	return count, err
+	return count, nil
 }
 
 //RebuildTrackingChange func
