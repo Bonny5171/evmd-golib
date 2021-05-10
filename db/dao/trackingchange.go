@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func GetCountParameter(conn *sqlx.Tx, tid int) (int, error) {
+func GetCountParameter(conn *sqlx.DB, tid int) (int, error) {
 	var count int
 	query := `SELECT value FROM public.parameter WHERE tenant_id=$1 AND name='REBUILD_TRACKING_CHANGE_COUNT'`
 
