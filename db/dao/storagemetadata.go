@@ -82,10 +82,10 @@ func GetProductsToUpdateB64(conn *sqlx.DB) (products []*ProductStorageResource, 
 //UpdateResourceBase64 func
 func UpdateResourceBase64(conn *sqlx.DB, data *model.StorageResource) (err error) {
 	query := `
-		UPDATE tn_011.sfa_resource_metadata_product SET full_content_b64 = $1 WHERE id = $2;
+		UPDATE tn_011.sfa_resource_metadata_product SET full_content_b64 = $1 WHERE id = $2 AND tenant_id = $3;
 	`
 
-	_, err = conn.Exec(query, data.FullContentB64, data.ID)
+	_, err = conn.Exec(query, data.FullContentB64, data.ID, data.TenantID)
 	if err != nil {
 		err = db.WrapError(err, "conn.Exec()")
 		return
