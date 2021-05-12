@@ -9,7 +9,7 @@ import (
 
 func GetCountParameter(conn *sqlx.DB, tid int) (int, error) {
 	var count int
-	query := `SELECT value FROM public.parameter WHERE tenant_id=$1 AND name='REBUILD_TRACKING_CHANGE_COUNT'`
+	query := `SELECT value FROM itgr.parameter WHERE tenant_id=$1 AND name='REBUILD_TRACKING_CHANGE_COUNT'`
 
 	if err := conn.Get(&count, query); err != nil {
 		return 0, db.WrapError(err, "conn.Get()")
