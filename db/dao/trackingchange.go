@@ -18,11 +18,11 @@ func GetCountParameter(conn *sqlx.DB, tid int) (int, error) {
 	return count, nil
 }
 
-func SelectRebuildTables(conn *sqlx.DB, tid int) ([]string, error) {
+func SelectRebuildTables(conn *sqlx.DB, tid string) ([]string, error) {
 	var tableName []string
-	query := fmt.Sprintf("SELECT table_name FROM itgr.vw_tenant_clone WHERE table_name LIKE 'sfa_%' AND table_schema = tn_%03d", tid)
+	query := "SELECT table_name FROM itgr.vw_tenant_clone WHERE table_name LIKE 'sfa_%' AND table_schema = ?"
 
-	if err := conn.Get(&tableName, query); err != nil {
+	if err := conn.Get(&tableName, query, tid); err != nil {
 		return nil, db.WrapError(err, "conn.Get()")
 	}
 
