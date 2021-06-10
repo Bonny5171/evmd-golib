@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+	"strings"
 
 	"bitbucket.org/everymind/evmd-golib/db"
 	"github.com/jmoiron/sqlx"
@@ -18,11 +19,28 @@ func GetCountParameter(conn *sqlx.DB, tid int) (int, error) {
 	return count, nil
 }
 
-func SelectRebuildTables(conn *sqlx.DB, tid string) ([]string, error) {
+func SelectRebuildTables(conn *sqlx.DB, tid int, excludedTables []string) ([]string, error) {
 	var tableName []string
-	query := "SELECT table_name FROM itgr.vw_tenant_clone WHERE table_name LIKE 'sfa_%' AND table_schema = ?"
+	// query := "SELECT table_name FROM itgr.vw_tenant_clone WHERE table_name LIKE 'sfa_%' AND table_schema = ?"
 
-	if err := conn.Get(&tableName, query, tid); err != nil {
+	var query strings.Builder
+
+	query.WriteString(`SELECT distinct t.table_name AS table_name
+						FROM sync.vw_tab t 
+						WHERE t.column_name = ('tracking_change_id') 
+							AND t.table_name like 'sfa_%'
+							AND t.table_schema = public.fn_schema_name(`)
+	query.WriteString(fmt.Sprintf("%d", tid))
+	query.WriteString(`) AND t.table_name NOT IN (`)
+	for index, table := range excludedTables {
+		query.WriteString(fmt.Sprintf("'%s'", table))
+		if index < len(excludedTables) - 1 {
+			query.WriteString(`,`)
+		}
+	}
+	query.WriteString(`) ORDER BY 1`)
+
+	if err := conn.Get(&tableName, query.String()); err != nil {
 		return nil, db.WrapError(err, "conn.Get()")
 	}
 
