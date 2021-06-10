@@ -325,3 +325,33 @@ func EnableTenantTx(conn *sqlx.Tx, tenantID int, userID string) error {
 
 	return nil
 }
+
+// GetTenantTablesToClone function to return a list of tables to clone
+func GetTenantTablesToClone(conn *sqlx.DB, tenantID int) (t []model.TenantCloneTable, err error) {
+	query := fmt.Sprintf(`
+	SELECT table_schema, table_name
+	  FROM itgr.vw_tenant_clone	 
+	 WHERE table_schema = 'tn_%03d';`, tenantID)
+
+	err = conn.Select(&t, query)
+	if err != nil {
+		return nil, db.WrapError(err, "db.Conn.Select()")
+	}
+
+	return t, nil
+}
+
+// GetTenantTablesToCloneConfig function to return a list of tables to clone
+func GetTenantTablesToCloneConfig(conn *sqlx.DB, tenantID int) (t []model.TenantCloneTable, err error) {
+	query := fmt.Sprintf(`
+	SELECT table_schema, table_name
+	  FROM public.vw_tenant_clone	 
+	 WHERE table_schema = 'tn_%03d';`, tenantID)
+
+	err = conn.Select(&t, query)
+	if err != nil {
+		return nil, db.WrapError(err, "db.Conn.Select()")
+	}
+
+	return t, nil
+}

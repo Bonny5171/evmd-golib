@@ -29,7 +29,8 @@ func SaveStorageMetadata(conn *sqlx.DB, data *model.StorageMetadata) (err error)
 			   original_file_name      = EXCLUDED.original_file_name,
 			   original_file_extension = EXCLUDED.original_file_extension,
 			   last_modified		   = EXCLUDED.last_modified,
-			   updated_at              = now();`
+			   updated_at              = now()
+			WHERE tenant_id = $1;`
 
 	_, err = conn.Exec(query, data.TenantID, data.ProductCode, data.ColorCode, data.Sequence, data.SizeType, data.ContentType, data.Size, data.OriginalFileName, data.OriginalFileExtension, data.LastModified)
 	if err != nil {
@@ -53,9 +54,9 @@ func UpdateStorageMetadata(conn *sqlx.DB, data *model.StorageResource, tenantID 
 }
 
 //GetProductsWithNullB64 func
-func GetProductsWithNullB64(conn *sqlx.DB) (products []*ProductStorageResource, err error) {
-	query := `
-		SELECT r.id, LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text AS filename FROM tn_011.sfa_resource_metadata_product AS r WHERE r.full_content_b64 ISNULL;`
+func GetProductsWithNullB64(conn *sqlx.DB, tenantID int) (products []*ProductStorageResource, err error) {
+	query := fmt.Sprintf(`
+		SELECT r.id, LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text AS filename FROM tn_%03d.sfa_resource_metadata_product AS r WHERE r.full_content_b64 ISNULL;`, tenantID)
 
 	err = conn.Select(&products, query)
 	if err != nil {
@@ -66,10 +67,10 @@ func GetProductsWithNullB64(conn *sqlx.DB) (products []*ProductStorageResource, 
 }
 
 //GetProductsToUpdateB64 func
-func GetProductsToUpdateB64(conn *sqlx.DB) (products []*ProductStorageResource, err error) {
-	query := `
-		SELECT r.id, LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text AS filename, s.last_modified FROM tn_011.sfa_resource_metadata_product AS r LEFT JOIN public.storage_metadata AS s ON LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text = LPAD(s.product_code::text, 5, '0') || LPAD(s.color_code::text, 5, '0') || LPAD(s."sequence"::text, 2, '0') || '_' || s.size_type::text;
-	`
+func GetProductsToUpdateB64(conn *sqlx.DB, tenantID int) (products []*ProductStorageResource, err error) {
+	query := fmt.Sprintf(`
+		SELECT r.id, LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text AS filename, s.last_modified FROM tn_%03d.sfa_resource_metadata_product AS r LEFT JOIN public.storage_metadata AS s ON LPAD(r.ref_1::text, 5, '0') || LPAD(r.ref_2::text, 5, '0') || LPAD(r."sequence"::text, 2, '0') || '_' || r.size_type::text = LPAD(s.product_code::text, 5, '0') || LPAD(s.color_code::text, 5, '0') || LPAD(s."sequence"::text, 2, '0') || '_' || s.size_type::text;
+	`, tenantID)
 
 	err = conn.Select(&products, query)
 	if err != nil {
@@ -81,9 +82,9 @@ func GetProductsToUpdateB64(conn *sqlx.DB) (products []*ProductStorageResource, 
 
 //UpdateResourceBase64 func
 func UpdateResourceBase64(conn *sqlx.DB, data *model.StorageResource) (err error) {
-	query := `
-		UPDATE tn_011.sfa_resource_metadata_product SET full_content_b64 = $1 WHERE id = $2 AND tenant_id = $3;
-	`
+	query := fmt.Sprintf(`
+		UPDATE tn_%03d.sfa_resource_metadata_product SET full_content_b64 = $1 WHERE id = $2 AND tenant_id = $3;
+	`, data.TenantID)
 
 	_, err = conn.Exec(query, data.FullContentB64, data.ID, data.TenantID)
 	if err != nil {

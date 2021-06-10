@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"bitbucket.org/everymind/evmd-golib/db"
+	"bitbucket.org/everymind/evmd-golib/db/model"
 	"bitbucket.org/everymind/evmd-golib/logger"
 )
 
@@ -336,7 +337,17 @@ func ExecSFSchemaCreateClonedTx(conn *sqlx.Tx, tenantName, orgID string, tenantI
 }
 
 //ExecSFTablesCloneCreate func
-func ExecSFTablesCloneCreate(conn *sqlx.DB, tenantID, templateTenantID int) error {
+func ExecSFTablesCloneCreate(conn *sqlx.DB, tenantID, templateTenantID int, tableName string) error {
+	if tableName != "" {
+		query := "SELECT public.fn_sf_tables_clone_create($1, $2, $3)"
+
+		if _, err := conn.Exec(query, tenantID, templateTenantID, tableName); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
+
+		return nil
+	}
+
 	query := "SELECT public.fn_sf_tables_clone_create($1, $2)"
 
 	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
@@ -358,8 +369,33 @@ func ExecSFTablesCloneCreateTx(conn *sqlx.Tx, tenantID, templateTenantID int) er
 }
 
 //ExecSFTablesCloneData func
-func ExecSFTablesCloneData(conn *sqlx.DB, tenantID, templateTenantID int) error {
+func ExecSFTablesCloneData(conn *sqlx.DB, tenantID, templateTenantID int, tableName string) error {
+	if tableName != "" {
+		query := "SELECT public.fn_sf_tables_clone_data($1, $2, $3)"
+
+		if _, err := conn.Exec(query, tenantID, templateTenantID, tableName); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
+	}
 	query := "SELECT public.fn_sf_tables_clone_data($1, $2)"
+
+	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
+		return db.WrapError(err, "conn.Exec()")
+	}
+
+	return nil
+}
+
+//ExecSFTablesCloneDataIndex func
+func ExecSFTablesCloneDataIndex(conn *sqlx.DB, tenantID, templateTenantID int, tableName string) error {
+	if tableName != "" {
+		query := "SELECT public.fn_sf_tables_clone_data_index($1, $2, $3)"
+
+		if _, err := conn.Exec(query, tenantID, templateTenantID, tableName); err != nil {
+			return db.WrapError(err, "conn.Exec()")
+		}
+	}
+	query := "SELECT public.fn_sf_tables_clone_data_index($1, $2)"
 
 	if _, err := conn.Exec(query, tenantID, templateTenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
@@ -410,4 +446,23 @@ func ExecSFCloneUsersTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
 	}
 
 	return nil
+}
+
+func GetTablesToETL(conn *sqlx.DB, tenantID int) (t []model.TenantCloneETL, err error) {
+	query := `SELECT
+	etl.output_table_name, 
+	-1 as order_by			 
+	FROM
+		itgr.fn_sf_etl_config_tables($1) etl
+	WHERE etl.output_table_name IS NOT NULL
+	ORDER BY
+		etl.order_by
+	`
+
+	err = conn.Select(&t, query, tenantID)
+	if err != nil {
+		return nil, db.WrapError(err, "db.Conn.Select()")
+	}
+
+	return t, nil
 }
