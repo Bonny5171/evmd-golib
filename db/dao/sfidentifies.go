@@ -56,9 +56,9 @@ func UpdateSFIdentifyDocObjects(conn *sqlx.DB, iden model.SFIdentity) error {
 
 	query := `UPDATE itgr.sf_identity
                  SET doc_objects = $1, updated_at = $2
-			   WHERE id = $3;`
+			   WHERE id = $3 AND tenant_id = $4;`
 
-	if _, err := conn.Exec(query, iden.DocObjects, t, iden.ID); err != nil {
+	if _, err := conn.Exec(query, iden.DocObjects, t, iden.ID, iden.TenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 

@@ -101,15 +101,34 @@ func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, objectName []string)
 //GetSchemaShareObjectsToProcess func
 func GetSchemaShareObjectsToProcess(conn *sqlx.DB, tenantID int) (o model.SFObjectToProcesses, err error) {
 	const query = `
-			SELECT DISTINCT o.id, o.sf_object_name, o.tenant_id, t."name" AS tenant_name, s."filter" 
-			  FROM itgr.sf_object o
-			 INNER JOIN public.tenant  t ON o.tenant_id = t.id
-			  LEFT JOIN itgr.schema_object s ON o.tenant_id = s.tenant_id AND o.id = s.sf_object_id
-			 WHERE o.tenant_id = $1
-			   AND o.is_active = TRUE
-			   AND o.is_deleted = FALSE
-			   AND o.get_share_data = TRUE
-			 ORDER BY o.id;`
+			SELECT DISTINCT 
+				o.id, o.sf_object_name, o.tenant_id, t."name" AS tenant_name, s."filter", sfapk.sfa_pks AS sfa_pks
+			FROM itgr.sf_object o
+			INNER JOIN public.tenant  t ON o.tenant_id = t.id
+			LEFT JOIN itgr.schema_object s ON o.tenant_id = s.tenant_id AND o.id = s.sf_object_id
+			LEFT JOIN (
+				SELECT
+					pk.tenant_id, pk.sf_object_id, jsonb_agg(sf_field_name) AS sfa_pks
+				FROM (
+					SELECT 
+						tenant_id, sf_object_id, sf_field_name, sfa_seq_pk
+					FROM
+						itgr.sf_object_field
+					WHERE
+						sf_object_field.sfa_is_pk = TRUE
+					GROUP BY
+						tenant_id, sf_field_name, sf_object_id, sfa_seq_pk
+					ORDER BY
+						tenant_id, sf_object_id, sfa_seq_pk
+				) pk
+			GROUP BY
+				pk.tenant_id, pk.sf_object_id
+			) sfapk ON o.tenant_id = sfapk.tenant_id AND o.id = sfapk.sf_object_id
+			WHERE o.tenant_id = $1
+			  AND o.is_active = TRUE
+			  AND o.is_deleted = FALSE
+			  AND o.get_share_data = TRUE
+			ORDER BY o.id;`
 
 	err = conn.Select(&o, query, tenantID)
 	if err != nil {
@@ -136,12 +155,12 @@ func UpdateSfObjectIDs(conn *sqlx.DB) error {
 }
 
 //UpdateLastModifiedDate func
-func UpdateLastModifiedDate(conn *sqlx.DB, schemaObjectID int, lastModifiedDate pq.NullTime) error {
+func UpdateLastModifiedDate(conn *sqlx.DB, schemaObjectID int, lastModifiedDate pq.NullTime, tenantID int) error {
 	const query = `UPDATE itgr.schema_object
 	                  SET sf_last_modified_date = $1 
-					WHERE id = $2;`
+					WHERE id = $2 AND tenant_id = $3;`
 
-	if _, err := conn.Exec(query, lastModifiedDate, schemaObjectID); err != nil {
+	if _, err := conn.Exec(query, lastModifiedDate, schemaObjectID, tenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 

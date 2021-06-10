@@ -23,6 +23,7 @@ type SFObjectToProcess struct {
 	TenantID   int            `db:"tenant_id"`
 	TenantName string         `db:"tenant_name"`
 	Filter     sql.NullString `db:"filter"`
+	SfaPks     m.JSONB        `db:"sfa_pks"`
 }
 
 //SFObjectToProcesses type

@@ -221,13 +221,13 @@ func DeactivateDeviceDataRows(conn *sqlx.DB, tid int, retry int) error {
 }
 
 //SetTryDeviceDataRows func
-func SetTryDeviceDataRows(conn *sqlx.DB, id string, retry int) (try int, err error) {
+func SetTryDeviceDataRows(conn *sqlx.DB, id string, retry int, tenantID int) (try int, err error) {
 	query := `UPDATE public.device_data 
 			  SET try = CASE public.fn_check_retry(try,$1) WHEN TRUE THEN try + 1 ELSE try END, updated_at = now()
-			  WHERE id = $2 
+			  WHERE id = $2 AND tenant_id = $3
 			  RETURNING try;`
 
-	if e := conn.QueryRowx(query, retry, id).Scan(&try); e != nil {
+	if e := conn.QueryRowx(query, retry, id, tenantID).Scan(&try); e != nil {
 		err = db.WrapError(e, "conn.QueryRowx(query, retry, id).Scan(&try)")
 		return
 	}
@@ -236,12 +236,12 @@ func SetTryDeviceDataRows(conn *sqlx.DB, id string, retry int) (try int, err err
 }
 
 //SetDeviceDataToDelete func
-func SetDeviceDataToDelete(conn *sqlx.DB, id string) error {
+func SetDeviceDataToDelete(conn *sqlx.DB, id string, tenantID int) error {
 	query := `UPDATE public.device_data
 			  SET is_deleted = TRUE, deleted_at = NOW()
-			  WHERE id = $1;`
+			  WHERE id = $1 AND tenant_id = $2;`
 
-	if _, err := conn.Exec(query, id); err != nil {
+	if _, err := conn.Exec(query, id, tenantID); err != nil {
 		return db.WrapError(err, "conn.Exec()")
 	}
 
@@ -299,21 +299,22 @@ func InsertDeviceDataLog(conn *sqlx.DB, obj model.DeviceData, execID int64, stat
 }
 
 //UpdateDeviceDataLog func
-func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusID int16, statusName string, try int, err error) error {
+func UpdateDeviceDataLog(conn *sqlx.DB, brewedJSON m.JSONB, logID int64, statusID int16, statusName string, try int, err error, tenantID int) error {
 	params := make([]interface{}, 0)
 	params = append(params, logID)
 	params = append(params, statusID)
 	params = append(params, statusName)
 	params = append(params, brewedJSON)
 	params = append(params, try)
+	params = append(params, tenantID)
 
 	query := strings.Builder{}
 	query.WriteString("UPDATE itgr.device_data_log SET status_id = $2, status_name = $3, brewed_json_data = $4, try = $5, ")
 	if err != nil {
-		query.WriteString("error = $6, ")
+		query.WriteString("error = $7, ")
 		params = append(params, err.Error())
 	}
-	query.WriteString("updated_at = NOW() WHERE id = $1;")
+	query.WriteString("updated_at = NOW() WHERE id = $1 AND tenant_id = $6;")
 
 	if _, err := conn.Exec(query.String(), params...); err != nil {
 		return db.WrapError(err, "conn.Exec()")
