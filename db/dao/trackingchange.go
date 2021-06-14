@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -37,7 +36,7 @@ func SelectRebuildTables(conn *sqlx.DB, tid int, excludedTables []string) ([]str
 		query.WriteString(` AND t.table_name NOT IN (`)
 		for index, table := range excludedTables {
 			query.WriteString(fmt.Sprintf("'%s'", table))
-			if index < len(excludedTables) - 1 {
+			if index < len(excludedTables)-1 {
 				query.WriteString(`,`)
 			}
 		}
