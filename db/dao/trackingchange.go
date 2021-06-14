@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"bitbucket.org/everymind/evmd-golib/db"
+	"bitbucket.org/everymind/evmd-golib/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -43,7 +44,7 @@ func SelectRebuildTables(conn *sqlx.DB, tid int, excludedTables []string) ([]str
 	}
 	query.WriteString(` ORDER BY 1`)
 
-	// logger.Debugf("QUERY: %v", query.String())
+	logger.Debugf("QUERY: %v", query.String())
 
 	if err := conn.Get(&tableName, query.String()); err != nil {
 		return nil, db.WrapError(err, "conn.Get()")
