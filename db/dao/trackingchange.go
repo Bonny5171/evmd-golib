@@ -46,7 +46,7 @@ func SelectRebuildTables(conn *sqlx.DB, tid int, excludedTables []string) ([]str
 
 	// logger.Debugf("QUERY: %v", query.String())
 
-	if err := conn.Get(&tableName, query.String()); err != nil {
+	if err := conn.Select(&tableName, query.String()); err != nil {
 		return nil, db.WrapError(err, "conn.Get()")
 	}
 
