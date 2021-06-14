@@ -31,14 +31,19 @@ func SelectRebuildTables(conn *sqlx.DB, tid int, excludedTables []string) ([]str
 							AND t.table_name like 'sfa_%'
 							AND t.table_schema = public.fn_schema_name(`)
 	query.WriteString(fmt.Sprintf("%d", tid))
-	query.WriteString(`) AND t.table_name NOT IN (`)
-	for index, table := range excludedTables {
-		query.WriteString(fmt.Sprintf("'%s'", table))
-		if index < len(excludedTables) - 1 {
-			query.WriteString(`,`)
+	if len(excludedTables) > 0 {
+		query.WriteString(`) AND t.table_name NOT IN (`)
+		for index, table := range excludedTables {
+			query.WriteString(fmt.Sprintf("'%s'", table))
+			if index < len(excludedTables) - 1 {
+				query.WriteString(`,`)
+			}
 		}
+		query.WriteString(`)`)
 	}
-	query.WriteString(`) ORDER BY 1`)
+	query.WriteString(` ORDER BY 1`)
+
+	// logger.Debugf("QUERY: %v", query.String())
 
 	if err := conn.Get(&tableName, query.String()); err != nil {
 		return nil, db.WrapError(err, "conn.Get()")
