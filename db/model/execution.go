@@ -6,10 +6,10 @@ import (
 
 	"github.com/lib/pq"
 
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "github.com/CognyHub/evmd-golib/modelbase"
 )
 
-//Execution type
+// Execution type
 type Execution struct {
 	ID               int64          `db:"id"`
 	DocMetaData      m.JSONB        `db:"doc_meta_data"` // In DB is JSONB

@@ -1,10 +1,10 @@
 package model
 
 import (
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "github.com/CognyHub/evmd-golib/modelbase"
 )
 
-//SFIdentity type
+// SFIdentity type
 type SFIdentity struct {
 	ID          int     `db:"id"`
 	TenantID    int     `db:"tenant_id"`

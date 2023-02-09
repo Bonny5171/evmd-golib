@@ -9,8 +9,8 @@ import (
 	worker "github.com/contribsys/faktory_worker_go"
 	"github.com/spf13/cast"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/logger"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/logger"
 )
 
 // ExtractDSN is a worker middleware get the DSNDB in job custom property

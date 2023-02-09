@@ -7,11 +7,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//SaveSFDataSync func
+// SaveSFDataSync func
 func SaveSFDataSync(conn *sqlx.DB, data model.SFDataSync) (id int, err error) {
 	t := time.Now()
 
@@ -32,7 +32,7 @@ func SaveSFDataSync(conn *sqlx.DB, data model.SFDataSync) (id int, err error) {
 	return id, nil
 }
 
-//PurgeAllDataSyncETLSuccess func
+// PurgeAllDataSyncETLSuccess func
 func PurgeAllDataSyncETLSuccess(conn *sqlx.DB, tid int) (err error) {
 	statuses, err := GetStatuses(conn, tid, EnumTypeStatusETL)
 	if err != nil {

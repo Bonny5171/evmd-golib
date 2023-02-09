@@ -4,16 +4,16 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//SchemaType type
+// SchemaType type
 type (
 	SchemaType int
 )
 
-//SchemaType types
+// SchemaType types
 const (
 	EnumSchemaTypeInboud SchemaType = iota
 	EnumSchemaTypeOutbound
@@ -27,7 +27,7 @@ func (t SchemaType) String() string {
 	return n[t]
 }
 
-//GetSchemaObjects func
+// GetSchemaObjects func
 func GetSchemaObjects(conn *sqlx.DB, tenantID, schemaID int) (s model.SchemaObjects, err error) {
 	const query = `SELECT id, schema_id, sf_object_id, sf_object_name, sequence, raw_command 
 				     FROM itgr.schema_object 
@@ -45,7 +45,7 @@ func GetSchemaObjects(conn *sqlx.DB, tenantID, schemaID int) (s model.SchemaObje
 	return s, nil
 }
 
-//GetAllSchemaObjectsToProcess func
+// GetAllSchemaObjectsToProcess func
 func GetAllSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, schemaObjectName string, schemaType SchemaType) (s model.SchemaObjectToProcesses, err error) {
 	const query = `
 		SELECT v.id, v.schema_id, v.schema_name, v.tenant_id, t."name" AS tenant_name, v."type", v.api_type, v.sf_object_id, v.sf_object_name, v.doc_fields, 
@@ -98,7 +98,7 @@ func GetSchemaObjectsToProcess(conn *sqlx.DB, tenantID int, objectName []string)
 	return s, nil
 }
 
-//GetSchemaShareObjectsToProcess func
+// GetSchemaShareObjectsToProcess func
 func GetSchemaShareObjectsToProcess(conn *sqlx.DB, tenantID int) (o model.SFObjectToProcesses, err error) {
 	const query = `
 			SELECT DISTINCT 
@@ -138,7 +138,7 @@ func GetSchemaShareObjectsToProcess(conn *sqlx.DB, tenantID int) (o model.SFObje
 	return o, nil
 }
 
-//UpdateSfObjectIDs func
+// UpdateSfObjectIDs func
 func UpdateSfObjectIDs(conn *sqlx.DB) error {
 	const query = `UPDATE itgr.schema_object AS so 
 	                  SET sf_object_id = o.id 
@@ -154,7 +154,7 @@ func UpdateSfObjectIDs(conn *sqlx.DB) error {
 	return nil
 }
 
-//UpdateLastModifiedDate func
+// UpdateLastModifiedDate func
 func UpdateLastModifiedDate(conn *sqlx.DB, schemaObjectID int, lastModifiedDate pq.NullTime, tenantID int) error {
 	const query = `UPDATE itgr.schema_object
 	                  SET sf_last_modified_date = $1 

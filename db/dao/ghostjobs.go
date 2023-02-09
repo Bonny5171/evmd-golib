@@ -3,10 +3,10 @@ package dao
 import (
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db"
 )
 
-//CleanGhostJobs func
+// CleanGhostJobs func
 func CleanGhostJobs(conn *sqlx.DB) (err error) {
 	query := `SELECT itgr.fn_set_jobs_time_out();`
 

@@ -1,13 +1,13 @@
 package dao
 
 import (
-	"bitbucket.org/everymind/evmd-golib/logger"
+	"github.com/CognyHub/evmd-golib/logger"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
 type (
@@ -17,7 +17,7 @@ type (
 	StatusType int
 )
 
-//EnumStatus types
+// EnumStatus types
 const (
 	EnumStatusExecProcessing Status = iota
 	EnumStatusExecError

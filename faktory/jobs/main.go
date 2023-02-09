@@ -10,10 +10,10 @@ import (
 	worker "github.com/contribsys/faktory_worker_go"
 	"github.com/gorilla/mux"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	fn "bitbucket.org/everymind/evmd-golib/faktory/functions"
-	"bitbucket.org/everymind/evmd-golib/faktory/middleware"
-	"bitbucket.org/everymind/evmd-golib/logger"
+	"github.com/CognyHub/evmd-golib/db"
+	fn "github.com/CognyHub/evmd-golib/faktory/functions"
+	"github.com/CognyHub/evmd-golib/faktory/middleware"
+	"github.com/CognyHub/evmd-golib/logger"
 )
 
 type DBVars struct {
@@ -46,7 +46,7 @@ func NewJob() *Job {
 	}
 }
 
-//Run func
+// Run func
 func (j *Job) Run() {
 	// Starting web server
 	// startWebServer()

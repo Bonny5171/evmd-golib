@@ -7,11 +7,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//SaveSFIdentifyDocOrg func
+// SaveSFIdentifyDocOrg func
 func SaveSFIdentifyDocOrg(conn *sqlx.DB, iden model.SFIdentity) (id int, err error) {
 	t := time.Now()
 
@@ -50,7 +50,7 @@ func SaveSFIdentifyDocOrg(conn *sqlx.DB, iden model.SFIdentity) (id int, err err
 	return id, nil
 }
 
-//UpdateSFIdentifyDocObjects func
+// UpdateSFIdentifyDocObjects func
 func UpdateSFIdentifyDocObjects(conn *sqlx.DB, iden model.SFIdentity) error {
 	t := time.Now()
 

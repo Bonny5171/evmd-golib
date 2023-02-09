@@ -5,14 +5,14 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//TenantType type
+// TenantType type
 type TenantType int
 
-//TenantType types
+// TenantType types
 const (
 	EnumTenentJob TenantType = iota
 	EnumTenentAPI
@@ -20,7 +20,7 @@ const (
 	EnumtenentJobK8s
 )
 
-//GetStack func
+// GetStack func
 func GetStack(conn *sqlx.DB, stack string, tenantType TenantType) (mid model.Stack, err error) {
 	query := strings.Builder{}
 	query.WriteString(`
@@ -51,7 +51,7 @@ func GetStack(conn *sqlx.DB, stack string, tenantType TenantType) (mid model.Sta
 	return mid, nil
 }
 
-//GetAllStacks func
+// GetAllStacks func
 func GetAllStacks(conn *sqlx.DB, tenantType TenantType, setup bool) (mid []model.Stack, err error) {
 	query := strings.Builder{}
 	query.WriteString(`

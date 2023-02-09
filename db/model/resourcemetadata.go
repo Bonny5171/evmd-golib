@@ -6,10 +6,10 @@ import (
 
 	"github.com/lib/pq"
 
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "github.com/CognyHub/evmd-golib/modelbase"
 )
 
-//ResourceMetadata type
+// ResourceMetadata type
 type ResourceMetadata struct {
 	ID                    string         `db:"id"`
 	TenantID              int            `db:"tenant_id"`

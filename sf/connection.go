@@ -6,14 +6,14 @@ import (
 	"log"
 	"os"
 
-	"bitbucket.org/everymind/gforce"
+	gforce "github.com/CognyHub/evmd-gforce"
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db/dao"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db/dao"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//NewForce func
+// NewForce func
 func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *gforce.Force, err error) {
 	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil, "public")
 	if err != nil {
@@ -61,7 +61,7 @@ func NewForce(conn *sqlx.DB, tid int, pType dao.ParameterType) (f *gforce.Force,
 	return f, nil
 }
 
-//NewJobForce func
+// NewJobForce func
 func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f *gforce.Force, err error) {
 	p, err := dao.GetParameters(conn, tid, dao.EnumParamNil, "public")
 	if err != nil {
@@ -128,7 +128,7 @@ func NewJobForce(conn *sqlx.DB, tid int, uid string, pType dao.ParameterType) (f
 	return f, nil
 }
 
-//NewForceByUser func
+// NewForceByUser func
 func NewForceByUser(orgID, userID, accessToken, refreshToken, instanceURL string) (f *gforce.Force, err error) {
 	creds := gforce.ForceSession{
 		AccessToken:   accessToken,
@@ -154,7 +154,7 @@ func NewForceByUser(orgID, userID, accessToken, refreshToken, instanceURL string
 	return f, nil
 }
 
-//UpdateOrgCredentials func
+// UpdateOrgCredentials func
 func UpdateOrgCredentials(conn *sqlx.DB, tid int, f *gforce.ForceSession) error {
 	params := []model.Parameter{}
 

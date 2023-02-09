@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"bitbucket.org/everymind/gforce"
+	gforce "github.com/CognyHub/evmd-gforce"
 )
 
 func GetEndpoint(e string) gforce.ForceEndpoint {

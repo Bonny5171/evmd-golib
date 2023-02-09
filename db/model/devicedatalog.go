@@ -3,10 +3,10 @@ package model
 import (
 	"time"
 
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "github.com/CognyHub/evmd-golib/modelbase"
 )
 
-//DeviceDataLogReport type
+// DeviceDataLogReport type
 type DeviceDataLogReport struct {
 	ID               int          `db:"id"`
 	TenantID         int          `db:"tenant_id"`

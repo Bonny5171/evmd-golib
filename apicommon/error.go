@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-chi/render"
 
-	"bitbucket.org/everymind/evmd-golib/logger"
+	"github.com/CognyHub/evmd-golib/logger"
 )
 
 type ErrResponse struct {
