@@ -3,10 +3,10 @@ package dao
 import (
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db"
 )
 
-//ArchiveDeviceData func
+// ArchiveDeviceData func
 func ArchiveDeviceData(conn *sqlx.DB, tid int, days int) error {
 	query := `SELECT itgr.fn_archive_device_data($1, $2);`
 

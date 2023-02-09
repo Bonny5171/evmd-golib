@@ -3,11 +3,11 @@ package dao
 import (
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//GetRecordType func
+// GetRecordType func
 func GetRecordType(conn *sqlx.DB, tid int, devRef string) (s model.RecordType, err error) {
 	const query = `
 		SELECT id, tenant_id, is_active, created_at, updated_at, is_deleted, deleted_at, "name", developer_ref, is_system_type 

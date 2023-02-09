@@ -3,11 +3,11 @@ package dao
 import (
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//GetFieldsBase64 func
+// GetFieldsBase64 func
 func GetFieldsBase64(conn *sqlx.DB, tenantID int, objID int) (f []model.SFObjectField, err error) {
 	query := `
 		SELECT id, tenant_id, sf_object_id, sf_field_name

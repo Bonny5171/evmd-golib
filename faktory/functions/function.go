@@ -12,11 +12,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cast"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/dao"
-	"bitbucket.org/everymind/evmd-golib/execlog"
-	"bitbucket.org/everymind/evmd-golib/faktory/push"
-	"bitbucket.org/everymind/evmd-golib/logger"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/dao"
+	"github.com/CognyHub/evmd-golib/execlog"
+	"github.com/CognyHub/evmd-golib/faktory/push"
+	"github.com/CognyHub/evmd-golib/logger"
 )
 
 // A map of registered matchers for searching.
@@ -141,7 +141,7 @@ func Run(fnName string, fn innerFunc, ctx worker.Context, args ...interface{}) e
 	return nil
 }
 
-//RunNoLog func
+// RunNoLog func
 func RunNoLog(fnName string, fn innerFuncNoLog, ctx worker.Context, args ...interface{}) error {
 	// Parse payload that come of Faktory
 	payload, err := ParsePayload(args...)

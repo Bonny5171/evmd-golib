@@ -3,10 +3,10 @@ package model
 import (
 	"database/sql"
 
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "github.com/CognyHub/evmd-golib/modelbase"
 )
 
-//SFObjectField type
+// SFObjectField type
 type SFObjectField struct {
 	ID          int            `db:"id"`
 	TenantID    int            `db:"tenant_id"`

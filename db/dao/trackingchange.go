@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"bitbucket.org/everymind/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -64,7 +64,7 @@ func CountTableRows(conn *sqlx.DB, tid int, tableName string) (int, error) {
 	return count, nil
 }
 
-//RebuildTrackingChange func
+// RebuildTrackingChange func
 func RebuildTrackingChange(conn *sqlx.DB, tid int, targetTable string) error {
 	query := `SELECT sync.fn_rebuild_tracking_change($1, $2);`
 

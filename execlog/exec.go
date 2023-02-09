@@ -1,15 +1,15 @@
 package execlog
 
 import (
-	"bitbucket.org/everymind/evmd-golib/logger"
 	"encoding/json"
 	"fmt"
+	"github.com/CognyHub/evmd-golib/logger"
 
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/multierr"
 
-	"bitbucket.org/everymind/evmd-golib/db/dao"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db/dao"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
 type Exec struct {

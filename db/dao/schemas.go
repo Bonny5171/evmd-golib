@@ -3,8 +3,8 @@ package dao
 import (
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
 // GetSchemas return all schemas from tenantID

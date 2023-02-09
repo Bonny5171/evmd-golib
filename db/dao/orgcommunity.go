@@ -5,10 +5,10 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db"
 )
 
-//GetCompleteOrgID func
+// GetCompleteOrgID func
 func GetCompleteOrgID(conn *sqlx.DB, orgID string) (cOrgID string, err error) {
 	log.Printf("GetCompleteOrgID: %v", orgID)
 	const query = `

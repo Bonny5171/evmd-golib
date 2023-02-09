@@ -6,14 +6,14 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//ParameterType type
+// ParameterType type
 type ParameterType int
 
-//EnumParam types
+// EnumParam types
 const (
 	EnumParamNil ParameterType = iota
 	EnumParamA

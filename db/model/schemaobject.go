@@ -5,10 +5,10 @@ import (
 
 	"github.com/lib/pq"
 
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "github.com/CognyHub/evmd-golib/modelbase"
 )
 
-//SchemaObject type
+// SchemaObject type
 type SchemaObject struct {
 	ID          int            `db:"id"`
 	TenantID    int            `db:"tenant_id"`
@@ -22,10 +22,10 @@ type SchemaObject struct {
 	DocMetaData m.JSONB        `db:"doc_meta_data"` // In DB is JSONB
 }
 
-//SchemaObjects type
+// SchemaObjects type
 type SchemaObjects []SchemaObject
 
-//SchemaObjectToProcess type
+// SchemaObjectToProcess type
 type SchemaObjectToProcess struct {
 	ID                int            `db:"id"`
 	TenantID          int            `db:"tenant_id"`
@@ -48,5 +48,5 @@ type SchemaObjectToProcess struct {
 	SfaPks            m.JSONB        `db:"sfa_pks"`
 }
 
-//SchemaObjectToProcesses type
+// SchemaObjectToProcesses type
 type SchemaObjectToProcesses []SchemaObjectToProcess

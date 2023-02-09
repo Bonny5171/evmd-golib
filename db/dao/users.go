@@ -5,11 +5,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//GetUser func
+// GetUser func
 func GetUser(conn *sqlx.DB, tid int, uid string) (u model.User, err error) {
 	const query = `
 		SELECT user_id, username, name, firstname, lastname, email, full_photo_url, access_token, refresh_token, instance_url 
@@ -27,7 +27,7 @@ func GetUser(conn *sqlx.DB, tid int, uid string) (u model.User, err error) {
 	return u, nil
 }
 
-//GetUsersToProcess func
+// GetUsersToProcess func
 func GetUsersToProcess(conn *sqlx.DB, tid int) (u model.Users, err error) {
 	const query = `
 		SELECT user_id, access_token, refresh_token, instance_url 
@@ -45,7 +45,7 @@ func GetUsersToProcess(conn *sqlx.DB, tid int) (u model.Users, err error) {
 	return u, nil
 }
 
-//UpdateUserAccessToken func
+// UpdateUserAccessToken func
 func UpdateUserAccessToken(conn *sqlx.DB, tid int, userID, accessToken string) (err error) {
 	t := time.Now()
 
@@ -63,7 +63,7 @@ func UpdateUserAccessToken(conn *sqlx.DB, tid int, userID, accessToken string) (
 	return nil
 }
 
-//SaveUser func
+// SaveUser func
 func SaveUser(conn *sqlx.DB, tid int, user model.User) (err error) {
 	const query = `
 		INSERT INTO public."user" (tenant_id, user_id, username, name, firstname, lastname, email, full_photo_url, access_token, refresh_token, instance_url) 
@@ -87,7 +87,7 @@ func SaveUser(conn *sqlx.DB, tid int, user model.User) (err error) {
 	return nil
 }
 
-//UpdateUserFrozen func
+// UpdateUserFrozen func
 func UpdateUserFrozen(conn *sqlx.DB, user *model.User, tenantID int) (err error) {
 
 	const query = `UPDATE public."user" SET sf_is_active = $1, sf_is_frozen = $2 WHERE user_id = $3 AND tenant_id = $4;`

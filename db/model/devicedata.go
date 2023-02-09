@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"time"
 
-	m "bitbucket.org/everymind/evmd-golib/modelbase"
+	m "github.com/CognyHub/evmd-golib/modelbase"
 )
 
-//Device type
+// Device type
 type Device struct {
 	ID        string       `db:"device_id"`
 	GroupID   m.NullString `db:"group_id"`
@@ -15,7 +15,7 @@ type Device struct {
 	Qty       int          `db:"qty"`
 }
 
-//DeviceTableField type
+// DeviceTableField type
 type DeviceTableField struct {
 	ObjectID   int            `db:"sf_object_id"`
 	ObjectName string         `db:"sf_object_name"`
@@ -26,7 +26,7 @@ type DeviceTableField struct {
 	SfaPks     m.JSONB        `db:"sfa_pks"`
 }
 
-//DeviceData type
+// DeviceData type
 type DeviceData struct {
 	ID              string         `db:"id"`
 	TenantID        int            `db:"tenant_id"`

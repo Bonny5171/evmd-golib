@@ -3,11 +3,11 @@ package dao
 import (
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
-//GetResourceMetadataToProcess func
+// GetResourceMetadataToProcess func
 func GetResourceMetadataToProcess(conn *sqlx.DB, tenantID int) (d []model.ResourceMetadata, err error) {
 	query := `SELECT tenant_id, sf_content_document_id, sf_content_version_id 
 	            FROM public.fn_get_resource_to_process($1);`
@@ -20,7 +20,7 @@ func GetResourceMetadataToProcess(conn *sqlx.DB, tenantID int) (d []model.Resour
 	return
 }
 
-//GetProductsWithoutResources func
+// GetProductsWithoutResources func
 func GetProductsWithoutResources(conn *sqlx.DB, tenantID int) (d []string, err error) {
 	query := `
 		WITH t AS (
@@ -49,7 +49,7 @@ func GetProductsWithoutResources(conn *sqlx.DB, tenantID int) (d []string, err e
 	return
 }
 
-//SaveResourceMetadata func
+// SaveResourceMetadata func
 func SaveResourceMetadata(conn *sqlx.DB, data *model.ResourceMetadata) (err error) {
 	query := `
 		INSERT INTO public.resource_metadata (tenant_id, original_file_name, original_file_extension, content_type, "size", preview_content_b64, full_content_b64, sf_content_document_id, sf_content_version_id, is_downloaded) 
@@ -74,7 +74,7 @@ func SaveResourceMetadata(conn *sqlx.DB, data *model.ResourceMetadata) (err erro
 	return
 }
 
-//SaveResourceMetadataWithRefs func
+// SaveResourceMetadataWithRefs func
 func SaveResourceMetadataWithRefs(conn *sqlx.DB, data *model.ResourceMetadata) (rows int64, err error) {
 	query := `
 		INSERT INTO public.resource_metadata (tenant_id, original_file_name, original_file_extension, content_type, "size", ref1, ref2, sequence, size_type, full_content_b64) 
@@ -105,7 +105,7 @@ func SaveResourceMetadataWithRefs(conn *sqlx.DB, data *model.ResourceMetadata) (
 	return
 }
 
-//SoftDeleteImages func
+// SoftDeleteImages func
 func SoftDeleteImages(conn *sqlx.DB, tenantID int) error {
 	query := `
 		UPDATE public.resource_metadata 

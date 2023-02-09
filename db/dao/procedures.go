@@ -6,11 +6,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/logger"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/logger"
 )
 
-//ExecSFEtlData func
+// ExecSFEtlData func
 func ExecSFEtlData(conn *sqlx.DB, execID int64, tenantID int, objID int64, reprocessAll bool) error {
 	query := "SELECT itgr.sf_etl_data($1, $2, $3, $4);"
 
@@ -21,7 +21,7 @@ func ExecSFEtlData(conn *sqlx.DB, execID int64, tenantID int, objID int64, repro
 	return nil
 }
 
-//ExecSfEtlJsonData func
+// ExecSfEtlJsonData func
 func ExecSfEtlJsonData(conn *sqlx.DB, execID int64, tenantID, recordTypeID int) error {
 	query := "SELECT itgr.sf_etl_data_json($1, $2, $3);"
 
@@ -32,7 +32,7 @@ func ExecSfEtlJsonData(conn *sqlx.DB, execID int64, tenantID, recordTypeID int) 
 	return nil
 }
 
-//ExecSFEtlShareData func
+// ExecSFEtlShareData func
 func ExecSFEtlShareData(conn *sqlx.DB, execID int64, tenantID int, userID string) error {
 	query := "SELECT itgr.sf_etl_data_share($1, $2, $3);"
 
@@ -43,7 +43,7 @@ func ExecSFEtlShareData(conn *sqlx.DB, execID int64, tenantID int, userID string
 	return nil
 }
 
-//ExecSFEtlSyncData func
+// ExecSFEtlSyncData func
 func ExecSFEtlSyncData(conn *sqlx.DB, execID int64, tenantID int, objID int64) error {
 	query := "SELECT itgr.sf_etl_data_sync($1, $2, $3);"
 
@@ -54,7 +54,7 @@ func ExecSFEtlSyncData(conn *sqlx.DB, execID int64, tenantID int, objID int64) e
 	return nil
 }
 
-//ExecSFCreateAllTables func
+// ExecSFCreateAllTables func
 func ExecSFCreateAllTables(conn *sqlx.DB, tenantID int) error {
 	query := "SELECT itgr.sf_create_all_tables($1);"
 
@@ -65,7 +65,7 @@ func ExecSFCreateAllTables(conn *sqlx.DB, tenantID int) error {
 	return nil
 }
 
-//ExecSFPurgePublicSFTables func
+// ExecSFPurgePublicSFTables func
 func ExecSFPurgePublicSFTables(conn *sqlx.DB, tenantID int) error {
 	query := "SELECT itgr.sf_purge_sf_tables($1);"
 
@@ -76,7 +76,7 @@ func ExecSFPurgePublicSFTables(conn *sqlx.DB, tenantID int) error {
 	return nil
 }
 
-//ExecSFPurgePublicSFShare func
+// ExecSFPurgePublicSFShare func
 func ExecSFPurgePublicSFShare(conn *sqlx.DB, tenantID int) error {
 	query := "SELECT itgr.sf_purge_sf_share($1);"
 
@@ -87,7 +87,7 @@ func ExecSFPurgePublicSFShare(conn *sqlx.DB, tenantID int) error {
 	return nil
 }
 
-//ExecSFCheckJobsExecution func
+// ExecSFCheckJobsExecution func
 func ExecSFCheckJobsExecution(conn *sqlx.DB, tenantID int, jobID int64, statusName string) (result bool, err error) {
 	query := "SELECT itgr.fn_check_jobs($1, $2, $3);"
 
@@ -100,12 +100,12 @@ func ExecSFCheckJobsExecution(conn *sqlx.DB, tenantID int, jobID int64, statusNa
 	return result, nil
 }
 
-//ExecSFAfterEtl func
+// ExecSFAfterEtl func
 func ExecSFAfterEtl(conn *sqlx.DB, tenantID int) error {
 	return ExecSFAExecEtls(conn, tenantID, "")
 }
 
-//ExecSFAfterEtlSerial func
+// ExecSFAfterEtlSerial func
 func ExecSFAfterEtlSerial(conn *sqlx.DB, tentantID int) error {
 	query := fmt.Sprintf("SELECT COALESCE(etl.output_table_name, id) FROM itgr.fn_sf_etl_config_tables(%d) etl ORDER BY etl.order_by;", tentantID)
 
@@ -151,7 +151,7 @@ func ExecSFAfterEtlSerial(conn *sqlx.DB, tentantID int) error {
 	return nil
 }
 
-//ExecSFAExecEtls func
+// ExecSFAExecEtls func
 func ExecSFAExecEtls(conn *sqlx.DB, tenantID int, tableName string) error {
 	params := make([]interface{}, 0)
 	params = append(params, tenantID)
@@ -171,7 +171,7 @@ func ExecSFAExecEtls(conn *sqlx.DB, tenantID int, tableName string) error {
 	return nil
 }
 
-//ExecSFAExecEtlsTx func
+// ExecSFAExecEtlsTx func
 func ExecSFAExecEtlsTx(conn *sqlx.Tx, tenantID int, tableName string) error {
 	params := make([]interface{}, 0)
 	params = append(params, tenantID)
@@ -191,7 +191,7 @@ func ExecSFAExecEtlsTx(conn *sqlx.Tx, tenantID int, tableName string) error {
 	return nil
 }
 
-//ExecSFCreateJobScheduler func
+// ExecSFCreateJobScheduler func
 func ExecSFCreateJobScheduler(conn *sqlx.DB, tenantID int, templateTenantID int) error {
 	if templateTenantID > 0 {
 		query := "SELECT public.fn_create_job_scheduler($1, $2);"
@@ -208,7 +208,7 @@ func ExecSFCreateJobScheduler(conn *sqlx.DB, tenantID int, templateTenantID int)
 	return nil
 }
 
-//ExecSFCreateJobSchedulerTx func
+// ExecSFCreateJobSchedulerTx func
 func ExecSFCreateJobSchedulerTx(conn *sqlx.Tx, tenantID int, templateTenantID int) error {
 	if templateTenantID > 0 {
 		query := "SELECT public.fn_create_job_scheduler($1, $2);"
@@ -225,7 +225,7 @@ func ExecSFCreateJobSchedulerTx(conn *sqlx.Tx, tenantID int, templateTenantID in
 	return nil
 }
 
-//ExecSFSchemaBuild func
+// ExecSFSchemaBuild func
 func ExecSFSchemaBuild(conn *sqlx.DB, tenantID int) error {
 	query := "SELECT public.fn_schema_build($1);"
 
@@ -236,7 +236,7 @@ func ExecSFSchemaBuild(conn *sqlx.DB, tenantID int) error {
 	return nil
 }
 
-//ExecSFSchemaBuildTx func
+// ExecSFSchemaBuildTx func
 func ExecSFSchemaBuildTx(conn *sqlx.Tx, tenantID int) error {
 	query := "SELECT public.fn_schema_build($1);"
 
@@ -247,7 +247,7 @@ func ExecSFSchemaBuildTx(conn *sqlx.Tx, tenantID int) error {
 	return nil
 }
 
-//ExecSFSchemaCreate func
+// ExecSFSchemaCreate func
 func ExecSFSchemaCreate(conn *sqlx.DB, tenantID, templateTenantID int, tenantName, orgID string) error {
 	query := "SELECT public.fn_schema_create($1, $2, $3, $4);"
 
@@ -258,7 +258,7 @@ func ExecSFSchemaCreate(conn *sqlx.DB, tenantID, templateTenantID int, tenantNam
 	return nil
 }
 
-//ExecSFSchemaCreateTx func
+// ExecSFSchemaCreateTx func
 func ExecSFSchemaCreateTx(conn *sqlx.Tx, tenantID, templateTenantID int, tenantName, orgID string) error {
 	query := "SELECT public.fn_schema_create($1, $2, $3, $4);"
 
@@ -269,7 +269,7 @@ func ExecSFSchemaCreateTx(conn *sqlx.Tx, tenantID, templateTenantID int, tenantN
 	return nil
 }
 
-//ExecSFSchemaRemove func
+// ExecSFSchemaRemove func
 func ExecSFSchemaRemove(conn *sqlx.DB, tenantID int) error {
 	query := "SELECT public.fn_schema_remove($1);"
 
@@ -280,7 +280,7 @@ func ExecSFSchemaRemove(conn *sqlx.DB, tenantID int) error {
 	return nil
 }
 
-//ExecSFSchemaRemoveTx func
+// ExecSFSchemaRemoveTx func
 func ExecSFSchemaRemoveTx(conn *sqlx.Tx, tenantID int) error {
 	query := "SELECT public.fn_schema_remove($1);"
 
@@ -291,7 +291,7 @@ func ExecSFSchemaRemoveTx(conn *sqlx.Tx, tenantID int) error {
 	return nil
 }
 
-//ExecSFDataCreateFromTemplates func
+// ExecSFDataCreateFromTemplates func
 func ExecSFDataCreateFromTemplates(conn *sqlx.DB, tenantID int) error {
 	query := "SELECT public.fn_data_create_from_templates($1);"
 
@@ -302,7 +302,7 @@ func ExecSFDataCreateFromTemplates(conn *sqlx.DB, tenantID int) error {
 	return nil
 }
 
-//ExecSFDataCreateFromTemplatesTx func
+// ExecSFDataCreateFromTemplatesTx func
 func ExecSFDataCreateFromTemplatesTx(conn *sqlx.Tx, tenantID int) error {
 	query := "SELECT public.fn_data_create_from_templates($1);"
 
@@ -313,7 +313,7 @@ func ExecSFDataCreateFromTemplatesTx(conn *sqlx.Tx, tenantID int) error {
 	return nil
 }
 
-//ExecSFSchemaCreateCloned func
+// ExecSFSchemaCreateCloned func
 func ExecSFSchemaCreateCloned(conn *sqlx.DB, tenantName, orgID string, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_schema_create_cloned($1, $2, $3, $4)"
 
@@ -324,7 +324,7 @@ func ExecSFSchemaCreateCloned(conn *sqlx.DB, tenantName, orgID string, tenantID,
 	return nil
 }
 
-//ExecSFSchemaCreateClonedTx func
+// ExecSFSchemaCreateClonedTx func
 func ExecSFSchemaCreateClonedTx(conn *sqlx.Tx, tenantName, orgID string, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_schema_create_cloned($1, $2, $3, $4)"
 
@@ -335,7 +335,7 @@ func ExecSFSchemaCreateClonedTx(conn *sqlx.Tx, tenantName, orgID string, tenantI
 	return nil
 }
 
-//ExecSFTablesCloneCreate func
+// ExecSFTablesCloneCreate func
 func ExecSFTablesCloneCreate(conn *sqlx.DB, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_sf_tables_clone_create($1, $2)"
 
@@ -346,7 +346,7 @@ func ExecSFTablesCloneCreate(conn *sqlx.DB, tenantID, templateTenantID int) erro
 	return nil
 }
 
-//ExecSFTablesCloneCreateTx func
+// ExecSFTablesCloneCreateTx func
 func ExecSFTablesCloneCreateTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_sf_tables_clone_create($1, $2)"
 
@@ -357,7 +357,7 @@ func ExecSFTablesCloneCreateTx(conn *sqlx.Tx, tenantID, templateTenantID int) er
 	return nil
 }
 
-//ExecSFTablesCloneData func
+// ExecSFTablesCloneData func
 func ExecSFTablesCloneData(conn *sqlx.DB, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_sf_tables_clone_data($1, $2)"
 
@@ -368,7 +368,7 @@ func ExecSFTablesCloneData(conn *sqlx.DB, tenantID, templateTenantID int) error 
 	return nil
 }
 
-//ExecSFTablesCloneDataTx func
+// ExecSFTablesCloneDataTx func
 func ExecSFTablesCloneDataTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_sf_tables_clone_data($1, $2)"
 
@@ -379,7 +379,7 @@ func ExecSFTablesCloneDataTx(conn *sqlx.Tx, tenantID, templateTenantID int) erro
 	return nil
 }
 
-//ExecSFForeignSchemaClone func
+// ExecSFForeignSchemaClone func
 func ExecSFForeignSchemaClone(conn *sqlx.DB, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_foreign_schema_clone($1, $2)"
 
@@ -390,7 +390,7 @@ func ExecSFForeignSchemaClone(conn *sqlx.DB, tenantID, templateTenantID int) err
 	return nil
 }
 
-//ExecSFForeignSchemaCloneTx func
+// ExecSFForeignSchemaCloneTx func
 func ExecSFForeignSchemaCloneTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_foreign_schema_clone($1, $2)"
 
@@ -401,7 +401,7 @@ func ExecSFForeignSchemaCloneTx(conn *sqlx.Tx, tenantID, templateTenantID int) e
 	return nil
 }
 
-//ExecSFCloneUsersTx func
+// ExecSFCloneUsersTx func
 func ExecSFCloneUsersTx(conn *sqlx.Tx, tenantID, templateTenantID int) error {
 	query := "SELECT public.fn_clone_users($1, $2)"
 

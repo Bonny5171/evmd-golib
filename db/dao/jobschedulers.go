@@ -5,8 +5,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"bitbucket.org/everymind/evmd-golib/db"
-	"bitbucket.org/everymind/evmd-golib/db/model"
+	"github.com/CognyHub/evmd-golib/db"
+	"github.com/CognyHub/evmd-golib/db/model"
 )
 
 // GetSchedules retorna todos os 'jobs' agendados que deverão ser executadas
@@ -118,7 +118,7 @@ func GetJobByID(conn *sqlx.DB, jobID int64) (s model.JobScheduler, err error) {
 	return s, nil
 }
 
-//SetCronJobSchedule func
+// SetCronJobSchedule func
 func SetCronJobSchedule(conn *sqlx.DB, jobID int64, cronexpr string, tenantID int) error {
 	query := `UPDATE public.job_scheduler SET cron = $1 WHERE id = $2 AND tenant_id = $3;`
 
@@ -129,7 +129,7 @@ func SetCronJobSchedule(conn *sqlx.DB, jobID int64, cronexpr string, tenantID in
 	return nil
 }
 
-//ActiveJobSchedule func
+// ActiveJobSchedule func
 func ActiveJobSchedule(conn *sqlx.DB, jobID int64, active bool, tenantID int) error {
 	query := `UPDATE public.job_scheduler SET is_active = $1 WHERE id = $2 AND tenant_id = $3;`
 
