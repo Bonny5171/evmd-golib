@@ -86,12 +86,13 @@ func GetParameterByOrgID(conn *sqlx.DB, orgID, paramName string) (p model.Parame
 // UpdateParameter atualiza o parametro de uma determinada org (tenant_id)
 func UpdateParameter(conn *sqlx.DB, param model.Parameter) error {
 	query := `
-		INSERT INTO public."parameter" (tenant_id, "name", value) 
+		INSERT INTO public."parameter" AS p (tenant_id, "name", value) 
 		VALUES ($1, $2, $3)
 		ON CONFLICT (tenant_id, "name")
 		DO UPDATE SET 
 		  value = EXCLUDED.value,
-		  updated_at = now();`
+		  updated_at = now()
+		WHERE p.tenant_id = $1;`
 
 	if _, err := conn.Exec(query, param.TenantID, param.Name, param.Value); err != nil {
 		return db.WrapError(err, "conn.Exec()")
@@ -107,12 +108,13 @@ func UpdateParameters(conn *sqlx.DB, params []model.Parameter) error {
 	}
 
 	query := `
-		INSERT INTO public."parameter" (tenant_id, "name", value) 
+		INSERT INTO public."parameter" AS p (tenant_id, "name", value) 
 		VALUES ($1, $2, $3)
 		ON CONFLICT (tenant_id, "name")
 		DO UPDATE SET 
 		  value = EXCLUDED.value,
-		  updated_at = now();`
+		  updated_at = now()
+		WHERE p.tenant_id = $1;`
 
 	stmt, err := conn.Preparex(query)
 	if err != nil {
@@ -135,12 +137,13 @@ func UpdateParametersTx(conn *sqlx.Tx, params []model.Parameter) error {
 	}
 
 	query := `
-		INSERT INTO public."parameter" (tenant_id, "name", value) 
+		INSERT INTO public."parameter" AS p (tenant_id, "name", value) 
 		VALUES ($1, $2, $3)
 		ON CONFLICT (tenant_id, "name")
 		DO UPDATE SET 
 		  value = EXCLUDED.value,
-		  updated_at = now();`
+		  updated_at = now()
+		WHERE p.tenant_id = $1;`
 
 	stmt, err := conn.Preparex(query)
 	if err != nil {
@@ -159,13 +162,14 @@ func UpdateParametersTx(conn *sqlx.Tx, params []model.Parameter) error {
 // UpdateStackParameter atualiza o parametro de uma determinada org (tenant_id)
 func UpdateStackParameter(conn *sqlx.DB, param model.Parameter) error {
 	query := `
-		INSERT INTO public."parameter" (id, tenant_id, value, "type") 
+		INSERT INTO public."parameter" AS p (id, tenant_id, value, "type") 
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (id, tenant_id, app_id, record_type_id)
 		DO UPDATE SET 
 		  value  = EXCLUDED.value,
 		  "type" = EXCLUDED."type",
-		  updated_at = now();`
+		  updated_at = now()
+		WHERE p.tenant_id = $2;`
 
 	if _, err := conn.Exec(query, param.Name, param.TenantID, param.Value, param.Type); err != nil {
 		return db.WrapError(err, "conn.Exec()")
@@ -177,13 +181,14 @@ func UpdateStackParameter(conn *sqlx.DB, param model.Parameter) error {
 // UpdateStackParameterTx atualiza o parametro de uma determinada org (tenant_id)
 func UpdateStackParameterTx(conn *sqlx.Tx, param model.Parameter) error {
 	query := `
-		INSERT INTO public."parameter" (id, tenant_id, value, "type") 
+		INSERT INTO public."parameter" AS p (id, tenant_id, value, "type") 
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (id, tenant_id, app_id, record_type_id)
 		DO UPDATE SET 
 		  value  = EXCLUDED.value,
 		  "type" = EXCLUDED."type",
-		  updated_at = now();`
+		  updated_at = now()
+		WHERE p.tenant_id = $2;`
 
 	if _, err := conn.Exec(query, param.Name, param.TenantID, param.Value, param.Type); err != nil {
 		return db.WrapError(err, "conn.Exec()")
@@ -199,13 +204,14 @@ func UpdateStackParameters(conn *sqlx.DB, params []model.Parameter) error {
 	}
 
 	query := `
-		INSERT INTO public."parameter" (id, tenant_id, value, "type") 
+		INSERT INTO public."parameter" AS p (id, tenant_id, value, "type") 
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (id, tenant_id, app_id, record_type_id)
 		DO UPDATE SET 
 		  value = EXCLUDED.value,
 		  "type" = EXCLUDED."type",
-		  updated_at = now();`
+		  updated_at = now()
+		WHERE p.tenant_id = $2;`
 
 	stmt, err := conn.Preparex(query)
 	if err != nil {
@@ -228,13 +234,14 @@ func UpdateStackParametersTx(conn *sqlx.Tx, params []model.Parameter) error {
 	}
 
 	query := `
-		INSERT INTO public."parameter" (id, tenant_id, value, "type") 
+		INSERT INTO public."parameter" AS p (id, tenant_id, value, "type") 
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (id, tenant_id, app_id, record_type_id)
 		DO UPDATE SET 
 		  value = EXCLUDED.value,
 		  "type" = EXCLUDED."type",
-		  updated_at = now();`
+		  updated_at = now()
+		WHERE p.tenant_id = $2;`
 
 	stmt, err := conn.Preparex(query)
 	if err != nil {

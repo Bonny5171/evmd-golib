@@ -49,7 +49,7 @@ func GetCommunities(conn *sqlx.DB, tid int) (c model.Communities, err error) {
 // SaveCommunity func
 func SaveCommunity(conn *sqlx.DB, community model.Community) (err error) {
 	const query = `
-		INSERT INTO public.community (id, tenant_id, "name", description, login_url, site_url, path_prefix) 
+		INSERT INTO public.community AS c (id, tenant_id, "name", description, login_url, site_url, path_prefix) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		ON CONFLICT (id, tenant_id) DO UPDATE 
 		SET "name"      = EXCLUDED."name", 
@@ -57,7 +57,8 @@ func SaveCommunity(conn *sqlx.DB, community model.Community) (err error) {
 		    login_url   = EXCLUDED.login_url, 
 			site_url    = EXCLUDED.siteurl,
 			path_prefix = EXCLUDED.path_prefix,
-		    updated_at  = now();`
+		    updated_at  = now()
+		WHERE c.tenant_id = $2;`
 
 	if _, err = conn.Exec(query, community.ID, community.TenantID, community.Name, community.Description, community.LoginURL, community.SiteURL, community.PathPrefix); err != nil {
 		err = db.WrapError(err, "conn.Exec()")

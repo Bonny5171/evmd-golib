@@ -31,7 +31,7 @@ func GetSchedules(conn *sqlx.DB, tenantID, stackID int) (s []model.JobScheduler,
 }
 
 // GetSchedulesByOrg retorna todos os 'jobs' agendados que deverão ser executadas
-func GetSchedulesByOrg(conn *sqlx.DB, orgID string, stackID int) (s []model.JobScheduler, err error) {
+func GetSchedulesByOrg(conn *sqlx.DB, orgID string, stackID, tenantID int) (s []model.JobScheduler, err error) {
 	query := `
 	  SELECT j.id, t.org_id, j.tenant_id, t."name" AS tenant_name, j.stack_id, j.job_name, j.function_name, j.queue, 
 			 j.cron, j.parameters, j.retry, j.allows_concurrency, j.allows_schedule, j.schedule_time, j.description, 
@@ -41,9 +41,10 @@ func GetSchedulesByOrg(conn *sqlx.DB, orgID string, stackID int) (s []model.JobS
 	   WHERE t.org_id = $1
 		 AND j.stack_id = $2
 		 AND t.is_deleted = FALSE
+		 AND j.tenant_id = $3		 
 	   ORDER BY j.id;`
 
-	err = conn.Select(&s, query, orgID, stackID)
+	err = conn.Select(&s, query, orgID, stackID, tenantID)
 	if err != nil {
 		return nil, db.WrapError(err, "db.Conn.Select()")
 	}
